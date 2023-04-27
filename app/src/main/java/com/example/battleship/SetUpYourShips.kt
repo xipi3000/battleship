@@ -19,7 +19,6 @@ import com.example.battleship.ui.theme.BattleshipTheme
 class SetUpYourShips : ComponentActivity() {
 
     // Calculate the desired dimensions for the image
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
