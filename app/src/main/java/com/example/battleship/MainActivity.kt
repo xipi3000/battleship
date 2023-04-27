@@ -26,9 +26,6 @@ class MainActivity : ComponentActivity() {
         var State = mapOf("Rows" to 10, "NumShips" to 3)
     }
 
-
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -39,7 +36,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
 
 @Preview(showBackground = true)
 @Composable
@@ -61,7 +57,5 @@ fun MainView() {
                 Text(text = "Quit")
             }
         }
-
-
     }
 }
