@@ -16,12 +16,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.battleship.ui.theme.BattleshipTheme
-import java.util.Dictionary
 
 class MainActivity : ComponentActivity() {
     companion object {
@@ -51,12 +49,15 @@ fun MainView() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             var context = LocalContext.current
-            Text(text = "Battlehip", fontWeight = FontWeight.Bold, color = Color.Gray)
+            Text(text = "Battleship", fontWeight = FontWeight.Bold, color = Color.Gray)
             Button(onClick = {context.startActivity(Intent(context,SetUpYourShips::class.java)) }) {
                 Text(text = "Play")
             }
             Button(onClick = { context.startActivity(Intent(context,Configuration::class.java)) }) {
                 Text(text = "Configuration")
+            }
+            Button(onClick = { context.startActivity(Intent(context,HelpActivity::class.java)) }) {
+                Text(text = "Help")
             }
         }
 
