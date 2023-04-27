@@ -48,16 +48,17 @@ fun MainView() {
         Column(Modifier.padding(4.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            var context = LocalContext.current
+            val context = LocalContext.current
+            val activity = MainActivity()
             Text(text = "Battleship", fontWeight = FontWeight.Bold, color = Color.Gray)
-            Button(onClick = {context.startActivity(Intent(context,SetUpYourShips::class.java)) }) {
-                Text(text = "Play")
-            }
             Button(onClick = { context.startActivity(Intent(context,Configuration::class.java)) }) {
                 Text(text = "Configuration")
             }
             Button(onClick = { context.startActivity(Intent(context,HelpActivity::class.java)) }) {
                 Text(text = "Help")
+            }
+            Button(onClick = {activity.finish(); System.exit(0)}) {
+                Text(text = "Quit")
             }
         }
 
