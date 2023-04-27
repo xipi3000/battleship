@@ -72,7 +72,6 @@ class SetUpYourShips : ComponentActivity() {
             index to "Item $index"
         }
         // Each cell of a column must have the same weight.
-
         // The LazyColumn will be our table. Notice the use of the weights below
         var count = 0
         LazyColumn(
