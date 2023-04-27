@@ -1,6 +1,7 @@
 package com.example.battleship
 
 import android.os.Bundle
+import android.widget.GridView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -33,12 +34,12 @@ class SetUpYourShips : ComponentActivity() {
     fun TableCell(
         text: String
     ) {
-        val width: Int = resources.displayMetrics.widthPixels / 28
-        val height: Int = resources.displayMetrics.heightPixels / 28
+        val width: Float = resources.displayMetrics.widthPixels / resources.displayMetrics.xdpi
+        val height: Float = resources.displayMetrics.heightPixels / resources.displayMetrics.ydpi
         Image(painter = painterResource(id = R.drawable.saltwater), contentDescription = "huhg",
             contentScale= ContentScale.FillBounds,
             modifier = Modifier
-                .size(if(width<height) width.dp else height.dp)
+                .size(if(width<height) (width*15).dp else (height*14).dp)
                 .clickable {
                     Toast
                         .makeText(
