@@ -14,7 +14,6 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:label="@string/app_name"
             android:theme="@style/Theme.Battleship" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -25,19 +24,21 @@
         <activity
             android:name=".SetUpYourShips"
             android:exported="true"
-            android:label="@string/app_name"
             android:theme="@style/Theme.Battleship" >
         </activity>
         <activity
             android:name=".Configuration"
             android:exported="true"
-            android:label="@string/app_name"
             android:theme="@style/Theme.Battleship" >
         </activity>
         <activity
             android:name=".HelpActivity"
             android:exported="true"
-            android:label="@string/app_name"
+            android:theme="@style/Theme.Battleship" >
+        </activity>
+        <activity
+            android:name=".ResultActivity"
+            android:exported="true"
             android:theme="@style/Theme.Battleship" >
         </activity>
     </application>

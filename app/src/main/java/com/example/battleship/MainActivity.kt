@@ -20,11 +20,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.battleship.ui.theme.BattleshipTheme
+import kotlin.system.exitProcess
 
 class MainActivity : ComponentActivity() {
     companion object {
         var State = mapOf("Rows" to 10,
-            "NumShips" to 3,
+            "NumShips" to 5, //5, 4, 3, 3, 2
             "Timed" to false,
             "Alias" to "",
             "Time" to -1)
@@ -57,7 +58,7 @@ fun MainView() {
             Button(onClick = { context.startActivity(Intent(context,HelpActivity::class.java)) }) {
                 Text(text = "Help")
             }
-            Button(onClick = {activity.finish(); System.exit(0)}) {
+            Button(onClick = {activity.finish(); exitProcess(0) }) {
                 Text(text = "Quit")
             }
         }
