@@ -60,7 +60,7 @@ class SetUpYourShips : ComponentActivity() {
     private fun calculateCoords(start:Int) {
         //Aquest if-else l'he fet desde github, aixi que no se si està be, potser s'ha de tocar una mica
         if (lastShip==null){
-            Toast.makeText(this@SetUpYourShips, "Primer has de clicar un barco", Toast.LENGTH_SHORT)
+            Toast.makeText(this@SetUpYourShips, "Primer has de clicar un barco", Toast.LENGTH_SHORT).show()
         }else{
              //implemented most basic version imaginable
             /* TODO:
