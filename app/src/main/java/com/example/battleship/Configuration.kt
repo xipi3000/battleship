@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
 import androidx.compose.material.Checkbox
 import androidx.compose.material.CheckboxDefaults
@@ -23,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.battleship.ui.theme.BattleshipTheme
@@ -50,14 +52,15 @@ class Configuration : ComponentActivity() {
         ) {
             val context = LocalContext.current
             Text(text = "Alias")
+            //Values we need to check the state of
             val alias = remember { mutableStateOf(TextFieldValue()) }
-
+            val temps = remember { mutableStateOf(TextFieldValue()) }
+            val checked = remember { mutableStateOf(false) }
             TextField(
                 value = alias.value,
                 onValueChange = { alias.value = it },
                 placeholder = { Text(text = "Enter in-game name", color = Color.Gray) },
             )
-            val checked = remember { mutableStateOf(true) }
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -71,21 +74,32 @@ class Configuration : ComponentActivity() {
                 )
                 Text(text = "Timed challenge?")
             }
+            //Only show "enter time" text if we want our game to be timed
             AnimatedVisibility(visible = checked.value) {
-                val temps = remember { mutableStateOf(TextFieldValue()) }
                 TextField(
                 value = temps.value,
                 onValueChange = { temps.value = it },
-                placeholder = { Text(text = "Enter max time", color = Color.Gray) },
+                placeholder = { Text(text = "Enter max time (seconds)", color = Color.Gray) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             )}
-            //Que més fiquem a la configuració?
             Button(onClick = {
                 val intent = Intent(context, SetUpYourShips::class.java)
+                //We need an alias
                 if (alias.value.text == "") {
                     Toast.makeText(context, "Introdueixi un alias vàlid", Toast.LENGTH_SHORT)
                         .show()
-                } else {
-                    intent.putExtra("Alias", alias.value.text)
+                } //If we want time, we need a time
+                else if(checked.value && temps.value.text == ""){
+                    Toast.makeText(context, "Introdueixi un temps", Toast.LENGTH_SHORT)
+                        .show()
+                }
+                else {
+                    //Store config values and start ship setup
+                    MainActivity.State = MainActivity.State + ("Alias" to alias.value.text)
+                    MainActivity.State = MainActivity.State + ("Timed" to checked.value)
+                    if (checked.value) MainActivity.State = MainActivity.State + ("Time" to temps.value.text)
+                    else MainActivity.State = MainActivity.State + ("Time" to -1)
+
                     context.startActivity(intent)
                 }
             }) {

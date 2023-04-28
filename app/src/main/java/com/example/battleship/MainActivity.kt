@@ -23,7 +23,11 @@ import com.example.battleship.ui.theme.BattleshipTheme
 
 class MainActivity : ComponentActivity() {
     companion object {
-        var State = mapOf("Rows" to 10, "NumShips" to 3)
+        var State = mapOf("Rows" to 10,
+            "NumShips" to 3,
+            "Timed" to false,
+            "Alias" to "",
+            "Time" to -1)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
