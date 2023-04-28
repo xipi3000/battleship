@@ -9,11 +9,15 @@ enum class ShipType(val size:Int){
     SUBMARINE(2),
 }
 
-class Ship(val type:ShipType ,val coords: ArrayList<Int>) {
+class Ship(val type:ShipType) {
+    lateinit var coords:ArrayList<Int>
     //coords: array with the positions it occupies (where it hasn't been hit)
     //type: enum stated before
     //Since every square is a different number...
 
+    fun position(newCoord: ArrayList<Int>){
+        coords = newCoord
+    }
     fun isHit(coord:Int): Boolean {
         coords.remove(coord) //Busca i elimina la primera ocurrència de "coord" (si no hi es no fa res)
         return (coord in coords)
@@ -21,5 +25,9 @@ class Ship(val type:ShipType ,val coords: ArrayList<Int>) {
 
     fun isDead(): Boolean {
         return coords.isEmpty()
+    }
+
+    fun rotate(){
+
     }
 }
