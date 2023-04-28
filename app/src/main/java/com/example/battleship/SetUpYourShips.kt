@@ -1,6 +1,7 @@
 package com.example.battleship
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.*
@@ -22,7 +23,7 @@ import androidx.compose.ui.unit.dp
 import com.example.battleship.ui.theme.BattleshipTheme
 
 class SetUpYourShips : ComponentActivity() {
-    lateinit var lastShip:Ship
+    lateinit var lastShip:Ship //tecnicament lateinit no es null
     lateinit var grid:Unit
     lateinit var isClickedState: SnapshotStateList<Boolean>
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -59,33 +60,30 @@ class SetUpYourShips : ComponentActivity() {
 
     private fun calculateCoords(start:Int) {
         //Aquest if-else l'he fet desde github, aixi que no se si està be, potser s'ha de tocar una mica
-        if (lastShip==null){
-            Toast.makeText(this@SetUpYourShips, "Primer has de clicar un barco", Toast.LENGTH_SHORT).show()
-        }else{
-             //implemented most basic version imaginable
-            /* TODO:
-                - Add ship orientation
-            *       -> [V]ertical - [H]orizontal; 90º rotations alternating state; i have ideas to implement rotations
-            *   - Check if valid position [de moment només canvia la imatge de la cela SEMPRE, encara que IndexOutOfBounds]
-            *       -> Horizontally: ship fits without changing line (ex: ship.size = 3 -> if casella%10 != casella+size%10 no cap)
-                                                                                                    [_6=ultima on si cap a cada fila]
-            *       -> Vertically: Ship fits in existing vertical lines (ex: ship.size = 3 -> if casella > (100-(size*10))+9 no cap)
-                                                                                                    [79=ultima on si cap]
-            *       -> Non Already Occupied: if(isClickedState[all_cells] = false){putamadre} else {cagaste manin}
-            *       ->Diria que ja no hi ha mes casos en que no hauria de poder
-            *   */
-            val array = arrayListOf<Int>()
-            var size = lastShip.type.size
-            while(size !=0){
-                if (size == lastShip.type.size)array.add(start)
-                else array.add(start + lastShip.type.size-size)
-                size--
-            }
-            lastShip.coords = array
-            for (item in array){
-                isClickedState[item] = !isClickedState[item]
-            }
+         //implemented most basic version imaginable
+        /* TODO:
+            - Add ship orientation
+        *       -> [V]ertical - [H]orizontal; 90º rotations alternating state; i have ideas to implement rotations
+        *   - Check if valid position [de moment només canvia la imatge de la cela SEMPRE, encara que IndexOutOfBounds]
+        *       -> Horizontally: ship fits without changing line (ex: ship.size = 3 -> if casella%10 != casella+size%10 no cap)
+                                                                                                [_6=ultima on si cap a cada fila]
+        *       -> Vertically: Ship fits in existing vertical lines (ex: ship.size = 3 -> if casella > (100-(size*10))+9 no cap)
+                                                                                                [79=ultima on si cap]
+        *       -> Non Already Occupied: if(isClickedState[all_cells] = false){putamadre} else {cagaste manin}
+        *       ->Diria que ja no hi ha mes casos en que no hauria de poder
+        *   */
+        val array = arrayListOf<Int>()
+        var size = lastShip.type.size
+        while(size !=0){
+            if (size == lastShip.type.size)array.add(start)
+            else array.add(start + lastShip.type.size-size)
+            size--
         }
+        lastShip.coords = array
+        for (item in array){
+            isClickedState[item] = !isClickedState[item]
+        }
+
        
     }
 
@@ -121,7 +119,11 @@ class SetUpYourShips : ComponentActivity() {
                                 text= it.toString(),
                                 hasShip = isClickedState[it],
                                 onCellClicked = {
-                                    calculateCoords(it)
+                                    if (!::lastShip.isInitialized){
+                                        Toast.makeText(this@SetUpYourShips, "Primer has de clicar un barco", Toast.LENGTH_SHORT).show()
+                                    }else{
+                                        calculateCoords(it)
+                                    }
                                 }
                             )
                         }

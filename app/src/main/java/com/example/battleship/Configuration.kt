@@ -86,7 +86,7 @@ class Configuration : ComponentActivity() {
                 val intent = Intent(context, SetUpYourShips::class.java)
                 //We need an alias
                 if (alias.value.text == "") {
-                    Toast.makeText(context, "Introdueixi un alias vàlid", Toast.LENGTH_SHORT)
+                    Toast.makeText(context, "Introdueixi un temps", Toast.LENGTH_SHORT)
                         .show()
                 } //If we want time, we need a time
                 else if(checked.value && temps.value.text == ""){
