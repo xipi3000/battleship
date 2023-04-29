@@ -41,6 +41,11 @@
             android:exported="true"
             android:theme="@style/Theme.Battleship" >
         </activity>
+        <activity
+            android:name=".GameInterface"
+            android:exported="true"
+            android:theme="@style/Theme.Battleship" >
+        </activity>
     </application>
 
 </manifest>
