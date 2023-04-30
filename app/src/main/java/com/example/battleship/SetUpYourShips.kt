@@ -1,5 +1,6 @@
 package com.example.battleship
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -54,7 +55,7 @@ class SetUpYourShips : ComponentActivity() {
                 .padding(1.dp)
                 .aspectRatio(1f)
                 .fillMaxWidth()
-                .clickable {onCellClicked()}
+                .clickable { onCellClicked() }
         )
     }
 
@@ -104,6 +105,9 @@ class SetUpYourShips : ComponentActivity() {
             modifier = Modifier.fillMaxHeight()
         ) {
             // Each cell of a column must have the same weight.
+            Button(onClick = { startActivity(Intent(baseContext,GameInterface :: class.java)) }) {
+
+            }
             Box(
                 modifier = Modifier
                     .padding(10.dp)
