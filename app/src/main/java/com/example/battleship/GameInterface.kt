@@ -1,7 +1,5 @@
 package com.example.battleship
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -20,11 +18,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,6 +33,8 @@ import androidx.compose.ui.unit.sp
 import com.example.battleship.ui.theme.BattleshipTheme
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.runtime.*
+import kotlinx.coroutines.delay
 
 class GameInterface : ComponentActivity() {
     lateinit var lastShip: Ship //tecnicament lateinit no es null
@@ -47,10 +42,13 @@ class GameInterface : ComponentActivity() {
     lateinit var isClickedState: SnapshotStateList<Boolean>//TODO agafar els anteriors que hem fet setup
     lateinit var enemyHasShips: SnapshotStateList<Boolean>//TODO això és la informació del tablero enemic, ens la hem de guardar
     var isInPortraitOrientation: Boolean = true
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             BattleshipTheme {
+
                 when(LocalConfiguration.current.orientation){
                     Configuration.ORIENTATION_LANDSCAPE -> {
                         isInPortraitOrientation=false
@@ -98,6 +96,14 @@ class GameInterface : ComponentActivity() {
     @Preview(showBackground = true)
     @Composable
     fun MainView() {
+        var timeRemainig by remember { mutableStateOf(60) }
+        LaunchedEffect(Unit) {
+            while(timeRemainig>0) {
+                print(timeRemainig)
+                delay(1000)
+                timeRemainig--
+            }
+        }
         //because of preview
         enemyHasShips = remember { mutableStateListOf() }
         for (i in 0 until 100) {
@@ -126,20 +132,31 @@ class GameInterface : ComponentActivity() {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(Color.Gray)
+                        .background(if (timeRemainig > 0) Color.Gray else Color.Red)
                         .height(90.dp),
-                    contentAlignment = Alignment.Center
+                    contentAlignment = Alignment.Center,
+
 
                 ) {
-                    Text(
-                        text =
-                        if (isYourTurn) "Your turn to fire"
-                        else "Enemys turn",
-                        fontSize = 27.sp,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center,
+                    Column() {
+                        Text(
+                            text =
+                            if (isYourTurn) "Your turn to fire"
+                            else "Enemys turn",
+                            fontSize = 27.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
 
-                        )
+                            )
+                        Text(
+                            text =
+                            "Time remaining: "+timeRemainig,
+                            fontSize = 27.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+                            )
+                    }
+
                 }
                 Box(
                     modifier = Modifier
