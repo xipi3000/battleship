@@ -26,7 +26,7 @@ import com.example.battleship.ui.theme.BattleshipTheme
 class SetUpYourShips : ComponentActivity() {
     lateinit var lastShip:Ship
     lateinit var grid:Unit
-    lateinit var isClickedState: SnapshotStateList<ShipType>
+    lateinit var cellContent: SnapshotStateList<ShipType>
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -106,7 +106,7 @@ class SetUpYourShips : ComponentActivity() {
         //Non occupied position check
         var nonOccupied = true
         for (pos in newPos){
-            if (isClickedState[pos] != ShipType.WATER && isClickedState[pos] != myBoat){
+            if (cellContent[pos] != ShipType.WATER && cellContent[pos] != myBoat){
                 nonOccupied = false
                 break
             }
@@ -118,17 +118,17 @@ class SetUpYourShips : ComponentActivity() {
             if (!lastShip.hasBeenSet){
                 lastShip.position(newPos)
                 for (item in newPos){
-                    isClickedState[item] = lastShip.type
+                    cellContent[item] = lastShip.type
                 }
             }
             //not first time positioning -> eraseOld, positionNew and drawNew
             else{
                 for (item in lastShip.coords){
-                    isClickedState[item] = ShipType.WATER
+                    cellContent[item] = ShipType.WATER
                 }
                 lastShip.position(newPos)
                 for (item in lastShip.coords){
-                    isClickedState[item] = lastShip.type
+                    cellContent[item] = lastShip.type
                 }
             }
         }
@@ -142,9 +142,9 @@ class SetUpYourShips : ComponentActivity() {
         val crusier=Ship(ShipType.CRUISER)
         val destroyer=Ship(ShipType.DESTROYER)
         val submarine=Ship(ShipType.SUBMARINE)
-        isClickedState = remember { mutableStateListOf() }
+        cellContent = remember { mutableStateListOf() }
         for (i in 0 until 100) {
-            isClickedState.add(ShipType.WATER)
+            cellContent.add(ShipType.WATER)
         }
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -167,7 +167,7 @@ class SetUpYourShips : ComponentActivity() {
                         items(100) {
                             TableCell(
                                 text= it.toString(),
-                                hasShip = (isClickedState[it]!=ShipType.WATER),
+                                hasShip = (cellContent[it]!=ShipType.WATER),
                                 onCellClicked = {
                                     if (!::lastShip.isInitialized){
                                         Toast.makeText(this@SetUpYourShips, "Select a ship to position", Toast.LENGTH_SHORT).show()
