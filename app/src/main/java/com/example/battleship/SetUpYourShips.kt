@@ -22,11 +22,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.battleship.ui.theme.BattleshipTheme
+import kotlin.random.Random
 
 class SetUpYourShips : ComponentActivity() {
     private lateinit var lastShip:Ship
     private lateinit var grid:Unit
     private lateinit var gridContent: SnapshotStateList<ShipType>
+    private lateinit var botGrid:SnapshotStateList<ShipType>
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -59,32 +61,33 @@ class SetUpYourShips : ComponentActivity() {
         )
     }
 
-    private fun calculateCoords(start:Int) {
+    private fun calculateCoords(start:Int, ship:Ship, mode:Int, grid: SnapshotStateList<ShipType>) {
+        //mode 0 -> player; mode 1 -> bot
         //acceptable position check
-        if (checkIfFits(start)){
-            val new:ArrayList<Int> = if(lastShip.orientation == Orientation.Horizontal){
-                newHorizontal(start)
+        if (checkIfFits(start, ship)){
+            val new:ArrayList<Int> = if(ship.orientation == Orientation.Horizontal){
+                newHorizontal(start, ship)
             }else{
-                newVertical(start)
+                newVertical(start, ship)
             }
-            if (freeSpace(new, lastShip.type))drawOnBoard(new)
-            else  Toast.makeText(this, "One or more positions are already occupied by another boat", Toast.LENGTH_SHORT).show()
+            if (freeSpace(new, ship.type, grid))drawOnBoard(new, ship, grid)
+            else {if (mode == 0) Toast.makeText(this, "One or more positions are already occupied by another boat", Toast.LENGTH_SHORT).show()}
         } else{
-            Toast.makeText(this, "I'm sorry, but this ship won't fit there", Toast.LENGTH_LONG).show()
+            if (mode == 0)Toast.makeText(this, "I'm sorry, but this ship won't fit there", Toast.LENGTH_LONG).show()
         }
     }
 
-    private fun checkIfFits(start:Int): Boolean{
-        return when (lastShip.orientation){
-            Orientation.Horizontal -> (start/10)%10 == ((start+(lastShip.type.size-1))/10)%10
-            Orientation.Vertical -> start < 100-((lastShip.type.size-1)*10)
+    private fun checkIfFits(start:Int, ship: Ship): Boolean{
+        return when (ship.orientation){
+            Orientation.Horizontal -> (start/10)%10 == ((start+(ship.type.size-1))/10)%10
+            Orientation.Vertical -> start < 100-((ship.type.size-1)*10)
         }
     }
 
-    private fun newVertical(initial: Int):ArrayList<Int> {
+    private fun newVertical(initial: Int, ship: Ship):ArrayList<Int> {
         val array = arrayListOf<Int>()
         var size = 0
-        while(size!=lastShip.type.size){
+        while(size!=ship.type.size){
             if (size==0)array.add(initial)
             else array.add(initial + 10*size)
             size++
@@ -92,41 +95,41 @@ class SetUpYourShips : ComponentActivity() {
         return array
     }
 
-    private fun newHorizontal(initial:Int):ArrayList<Int> {
+    private fun newHorizontal(initial:Int, ship: Ship):ArrayList<Int> {
         val array = arrayListOf<Int>()
-        var size = lastShip.type.size
-        while(size !=0){
-            if (size == lastShip.type.size)array.add(initial)
-            else array.add(initial + lastShip.type.size-size)
-            size--
+        var size = 0
+        while(size!=ship.type.size){
+            if (size==0)array.add(initial)
+            else array.add(initial + size)
+            size++
         }
         return array
     }
 
-    private fun drawOnBoard(newPos:ArrayList<Int>) {
+    private fun drawOnBoard(newPos:ArrayList<Int>, ship: Ship, grid: SnapshotStateList<ShipType>) {
         //first time positioning -> position and draw
-        if (!lastShip.hasBeenSet){
-            lastShip.position(newPos)
+        if (!ship.hasBeenSet){
+            ship.position(newPos)
             for (item in newPos){
-                gridContent[item] = lastShip.type
+                grid[item] = ship.type
             }
         }
         //not first time positioning -> eraseOld, positionNew and drawNew
         else{
-            for (item in lastShip.coords){
-                gridContent[item] = ShipType.WATER
+            for (item in ship.coords){
+                grid[item] = ShipType.WATER
             }
-            lastShip.position(newPos)
-            for (item in lastShip.coords){
-                gridContent[item] = lastShip.type
+            ship.position(newPos)
+            for (item in ship.coords){
+                grid[item] = ship.type
             }
         }
     }
 
-    private fun freeSpace(newPos:ArrayList<Int>, myBoat: ShipType):Boolean {
+    private fun freeSpace(newPos:ArrayList<Int>, myBoat: ShipType, grid:SnapshotStateList<ShipType>):Boolean {
         var nonOccupied = true
         for (pos in newPos){
-            if (gridContent[pos] != ShipType.WATER && gridContent[pos] != myBoat){
+            if (grid[pos] != ShipType.WATER && grid[pos] != myBoat){
                 nonOccupied = false
                 break
             }
@@ -143,6 +146,7 @@ class SetUpYourShips : ComponentActivity() {
         val destroyer=Ship(ShipType.DESTROYER)
         val submarine=Ship(ShipType.SUBMARINE)
         gridContent = remember { mutableStateListOf() }
+        botGrid = remember{mutableStateListOf()}
         for (i in 0 until 100) {
             gridContent.add(ShipType.WATER)
         }
@@ -169,7 +173,7 @@ class SetUpYourShips : ComponentActivity() {
                                     if (!::lastShip.isInitialized){
                                         Toast.makeText(this@SetUpYourShips, "Select a ship to position", Toast.LENGTH_SHORT).show()
                                     }else{
-                                        calculateCoords(it)
+                                        calculateCoords(it, lastShip, 0, gridContent) //mode 0-> player
                                     }
                                 }
                             )
@@ -233,6 +237,7 @@ class SetUpYourShips : ComponentActivity() {
                     //Store player grid content to access when playing
                     MainActivity.State = MainActivity.State + ("Player1Grid" to gridContent)
                     //Store 2nd player grid (bot or human must have different implementations)
+                    MainActivity.State = MainActivity.State + (("Player2Grid" to randomSetup()))
                     startActivity(Intent(baseContext,GameInterface :: class.java))
                 }
             }) {
@@ -246,13 +251,42 @@ class SetUpYourShips : ComponentActivity() {
         //calculate before to change orientation to new
         val newCoords = lastShip.rotate()
         //if correct draw
-        if(checkIfFits(lastShip.coords[0]) && freeSpace(newCoords, lastShip.type)){
-            drawOnBoard(newCoords)
+        if(checkIfFits(lastShip.coords[0],lastShip) && freeSpace(newCoords, lastShip.type, gridContent)){
+            drawOnBoard(newCoords, lastShip, gridContent)
         }//else revert (change orientation to old)
         else{ //podriem personalitzar el missatge d'error (segons quina de les dos condicions no es compleix)
             lastShip.rotate()
             Toast.makeText(this@SetUpYourShips, "Invalid rotation, please reposition ship", Toast.LENGTH_SHORT).show()
         }
+    }
+
+
+    private fun randomSetup(): SnapshotStateList<ShipType>{
+        val ships = arrayListOf(ShipType.CRUISER, ShipType.SUBMARINE, ShipType.DESTROYER, ShipType.BATTLESHIP, ShipType.CARRIER)
+        Toast.makeText(this, "Creating random board, please wait", Toast.LENGTH_SHORT).show()
+        for (i in 0 until 100) {
+            botGrid.add(ShipType.WATER)
+        }
+        for (i in 0..4) {
+            var set = false
+            val ship = Ship(ships[i])
+            while(!set){
+                //get random orientation and random initial position
+                val randPos = Random.nextInt(0,99)
+                when(Random.nextInt(0,1)){
+                    0-> ship.orientation=Orientation.Horizontal
+                    1-> ship.orientation=Orientation.Vertical
+                }
+                //try to place (calculateCoords has the checks inside, and the "drawing")
+                calculateCoords(randPos, ship, 1, botGrid) // mode 1 -> no toasts if it can't place
+                //if there were no problems -> nextShip; else -> try again until placed
+                if(checkIfFits(randPos, ship) && freeSpace(ship.coords, ship.type, botGrid)){
+                    set = true
+                }
+            }
+        }
+        Toast.makeText(this, "Board created, starting game", Toast.LENGTH_SHORT).show()
+        return botGrid
     }
 
 }
