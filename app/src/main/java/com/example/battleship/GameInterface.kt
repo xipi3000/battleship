@@ -48,7 +48,6 @@ class GameInterface : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             BattleshipTheme {
-
                 when(LocalConfiguration.current.orientation){
                     Configuration.ORIENTATION_LANDSCAPE -> {
                         isInPortraitOrientation=false
@@ -57,7 +56,6 @@ class GameInterface : ComponentActivity() {
                         isInPortraitOrientation=true
                     }
                 }
-
                 MainView()
             }
         }
@@ -92,7 +90,6 @@ class GameInterface : ComponentActivity() {
         )
     }
 
-
     @Preview(showBackground = true)
     @Composable
     fun MainView() {
@@ -111,7 +108,6 @@ class GameInterface : ComponentActivity() {
         }
         enemyHasShips[99] = true
 
-
         val carrier = Ship(ShipType.CARRIER)
         val battleship = Ship(ShipType.BATTLESHIP)
         val crusier = Ship(ShipType.CRUISER)
@@ -122,21 +118,17 @@ class GameInterface : ComponentActivity() {
         }
 
         if (isInPortraitOrientation) {
-
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.fillMaxHeight()
             ) {
                 // Each cell of a column must have the same weight.
-
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(if (timeRemainig > 0) Color.Gray else Color.Red)
                         .height(90.dp),
                     contentAlignment = Alignment.Center,
-
-
                 ) {
                     Column() {
                         Text(
@@ -156,7 +148,6 @@ class GameInterface : ComponentActivity() {
                             textAlign = TextAlign.Center,
                             )
                     }
-
                 }
                 Box(
                     modifier = Modifier
@@ -188,12 +179,10 @@ class GameInterface : ComponentActivity() {
                                                 )
                                                     .show()
                                                 enemyHasShipsUI[it] = 3
-
                                             }
                                             isYourTurn = false
                                         }
                                     }
-
                                 )
                             }
                         }
@@ -204,7 +193,6 @@ class GameInterface : ComponentActivity() {
                 ) {
                     Column() {
                         Text(text = "Yours table")
-
                         Box(
                             modifier = Modifier
                                 .padding(10.dp)
@@ -227,11 +215,7 @@ class GameInterface : ComponentActivity() {
                             )
                         }
                     }
-
-
                 }
-
-
             }
         }
         else{
@@ -240,7 +224,6 @@ class GameInterface : ComponentActivity() {
                 modifier = Modifier.fillMaxHeight()
             ) {
                 // Each cell of a column must have the same weight.
-
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -256,17 +239,12 @@ class GameInterface : ComponentActivity() {
                         fontSize = 27.sp,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center,
-
                         )
                 }
                 Row(verticalAlignment = Alignment.CenterVertically,
-
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
-
                     ) {
-
-
                     Box(
                         modifier = Modifier
                             .padding(10.dp)
@@ -336,12 +314,8 @@ class GameInterface : ComponentActivity() {
                                 )
                             }
                         }
-
-
                     }
                 }
-
-
             }
         }
     }

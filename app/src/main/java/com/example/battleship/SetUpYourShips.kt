@@ -24,9 +24,9 @@ import androidx.compose.ui.unit.dp
 import com.example.battleship.ui.theme.BattleshipTheme
 
 class SetUpYourShips : ComponentActivity() {
-    lateinit var lastShip:Ship //tecnicament lateinit no es null
+    lateinit var lastShip:Ship
     lateinit var grid:Unit
-    lateinit var isClickedState: SnapshotStateList<Boolean>
+    lateinit var isClickedState: SnapshotStateList<ShipType>
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -60,32 +60,78 @@ class SetUpYourShips : ComponentActivity() {
     }
 
     private fun calculateCoords(start:Int) {
-        //Aquest if-else l'he fet desde github, aixi que no se si està be, potser s'ha de tocar una mica
-         //implemented most basic version imaginable
-        /* TODO:
-            - Add ship orientation
-        *       -> [V]ertical - [H]orizontal; 90º rotations alternating state; i have ideas to implement rotations
-        *   - Check if valid position [de moment només canvia la imatge de la cela SEMPRE, encara que IndexOutOfBounds]
-        *       -> Horizontally: ship fits without changing line (ex: ship.size = 3 -> if casella%10 != casella+size%10 no cap)
-                                                                                                [_6=ultima on si cap a cada fila]
-        *       -> Vertically: Ship fits in existing vertical lines (ex: ship.size = 3 -> if casella > (100-(size*10))+9 no cap)
-                                                                                                [79=ultima on si cap]
-        *       -> Non Already Occupied: if(isClickedState[all_cells] = false){putamadre} else {cagaste manin}
-        *       ->Diria que ja no hi ha mes casos en que no hauria de poder
-        *   */
+        //acceptable position check
+        if (checkIfFits(start)){
+            val new:ArrayList<Int> = if(lastShip.orientation == Orientation.Horizontal){
+                newHorizontal(start)
+            }else{
+                newVertical(start)
+            }
+            drawOnBoard(new, lastShip.type)
+        } else{
+            Toast.makeText(this, "I'm sorry, but this ship won't fit there", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun checkIfFits(start:Int): Boolean{
+        return when (lastShip.orientation){
+            Orientation.Horizontal -> (start/10)%10 == ((start+(lastShip.type.size-1))/10)%10
+            Orientation.Vertical -> start < 100-((lastShip.type.size-1)*10)
+        }
+    }
+
+    private fun newVertical(initial: Int):ArrayList<Int> {
+        val array = arrayListOf<Int>()
+        var size = 0
+        while(size!=lastShip.type.size){
+            if (size==0)array.add(initial)
+            else array.add(initial + 10*size)
+            size++
+        }
+        return array
+    }
+
+    private fun newHorizontal(initial:Int):ArrayList<Int> {
         val array = arrayListOf<Int>()
         var size = lastShip.type.size
         while(size !=0){
-            if (size == lastShip.type.size)array.add(start)
-            else array.add(start + lastShip.type.size-size)
+            if (size == lastShip.type.size)array.add(initial)
+            else array.add(initial + lastShip.type.size-size)
             size--
         }
-        lastShip.coords = array
-        for (item in array){
-            isClickedState[item] = !isClickedState[item]
-        }
+        return array
+    }
 
-       
+    private fun drawOnBoard(newPos:ArrayList<Int>, myBoat:ShipType) {
+        //Non occupied position check
+        var nonOccupied = true
+        for (pos in newPos){
+            if (isClickedState[pos] != ShipType.WATER && isClickedState[pos] != myBoat){
+                nonOccupied = false
+                break
+            }
+        }
+        if (!nonOccupied){
+            Toast.makeText(this, "One or more positions are already occupied by another boat", Toast.LENGTH_SHORT).show()
+        }else{
+            //first time positioning -> position and draw
+            if (!lastShip.hasBeenSet){
+                lastShip.position(newPos)
+                for (item in newPos){
+                    isClickedState[item] = lastShip.type
+                }
+            }
+            //not first time positioning -> eraseOld, positionNew and drawNew
+            else{
+                for (item in lastShip.coords){
+                    isClickedState[item] = ShipType.WATER
+                }
+                lastShip.position(newPos)
+                for (item in lastShip.coords){
+                    isClickedState[item] = lastShip.type
+                }
+            }
+        }
     }
 
     @Preview(showBackground = true)
@@ -98,7 +144,7 @@ class SetUpYourShips : ComponentActivity() {
         val submarine=Ship(ShipType.SUBMARINE)
         isClickedState = remember { mutableStateListOf() }
         for (i in 0 until 100) {
-            isClickedState.add(false)
+            isClickedState.add(ShipType.WATER)
         }
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -106,7 +152,7 @@ class SetUpYourShips : ComponentActivity() {
         ) {
             // Each cell of a column must have the same weight.
             Button(onClick = { startActivity(Intent(baseContext,GameInterface :: class.java)) }) {
-
+                Text(text="Start Game")
             }
             Box(
                 modifier = Modifier
@@ -121,10 +167,10 @@ class SetUpYourShips : ComponentActivity() {
                         items(100) {
                             TableCell(
                                 text= it.toString(),
-                                hasShip = isClickedState[it],
+                                hasShip = (isClickedState[it]!=ShipType.WATER),
                                 onCellClicked = {
                                     if (!::lastShip.isInitialized){
-                                        Toast.makeText(this@SetUpYourShips, "Primer has de clicar un barco", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(this@SetUpYourShips, "Select a ship to position", Toast.LENGTH_SHORT).show()
                                     }else{
                                         calculateCoords(it)
                                     }
@@ -133,7 +179,6 @@ class SetUpYourShips : ComponentActivity() {
                         }
                     }
                 )
-
             }
             Row(
                 verticalAlignment = Alignment.Bottom,
@@ -177,12 +222,27 @@ class SetUpYourShips : ComponentActivity() {
                         .fillMaxWidth()
                         .weight(1f))
             }
-            Button(onClick = { lastShip.rotate() }) {
+            Button(onClick = {
+                if(lastShip.hasBeenSet) rotateShip()
+                else Toast.makeText(this@SetUpYourShips, "First position the ship", Toast.LENGTH_SHORT).show()
+            }) {
                 Text(text="Rotate Ship")
             }
-
         }
-
         // The LazyColumn will be our table. Notice the use of the weights below
     }
+
+    private fun rotateShip() {
+        //calculate before to change orientation to new
+        val newCoords = lastShip.rotate()
+        //if correct draw
+        if(checkIfFits(lastShip.coords[0])){
+            drawOnBoard(newCoords, lastShip.type)
+        }//else revert (change orientation to old)
+        else{
+            lastShip.rotate()
+            Toast.makeText(this@SetUpYourShips, "I'm sorry, but this ship won't fit there", Toast.LENGTH_SHORT).show()
+        }
+    }
+
 }
