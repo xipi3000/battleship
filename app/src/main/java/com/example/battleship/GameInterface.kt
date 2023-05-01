@@ -100,7 +100,7 @@ class GameInterface : ComponentActivity() {
             }
         }
         //just for testing purposes
-        player2Grid = player1Grid
+        //player2Grid = player1Grid
 
         /*
         val carrier = Ship(ShipType.CARRIER)
@@ -320,7 +320,7 @@ class GameInterface : ComponentActivity() {
                     Box(
                         modifier = Modifier.padding(40.dp)
                     ) {
-                        Column() {
+                        Column {
                             Text(text = "Yours table")
 
                             Box(
@@ -370,11 +370,12 @@ class GameInterface : ComponentActivity() {
         }
     }
 
-    fun endGame(){
+    private fun endGame(){
         var count =0
         for (item in enemyHasShipsUI){
             if (item == 3) count++
-            if (count == 5) startActivity(Intent(this, ResultActivity::class.java))
+            //(17 es el sumatori de sizes de tots els barcos, de moment esta cutre pero ja ho fem putamadre més tard)
+            if (count == 17) startActivity(Intent(this, ResultActivity::class.java))
         }
     }
 }
