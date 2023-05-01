@@ -97,7 +97,7 @@ class Configuration : ComponentActivity() {
                     //Store config values and start ship setup
                     MainActivity.State = MainActivity.State + ("Alias" to alias.value.text)
                     MainActivity.State = MainActivity.State + ("Timed" to checked.value)
-                    if (checked.value) MainActivity.State = MainActivity.State + ("Time" to temps.value.text)
+                    if (checked.value) MainActivity.State = MainActivity.State + ("InitialTime" to temps.value.text)
                     else MainActivity.State = MainActivity.State + ("Time" to -1)
 
                     context.startActivity(intent)

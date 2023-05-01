@@ -24,9 +24,9 @@ import androidx.compose.ui.unit.dp
 import com.example.battleship.ui.theme.BattleshipTheme
 
 class SetUpYourShips : ComponentActivity() {
-    lateinit var lastShip:Ship
-    lateinit var grid:Unit
-    lateinit var cellContent: SnapshotStateList<ShipType>
+    private lateinit var lastShip:Ship
+    private lateinit var grid:Unit
+    private lateinit var gridContent: SnapshotStateList<ShipType>
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -67,7 +67,8 @@ class SetUpYourShips : ComponentActivity() {
             }else{
                 newVertical(start)
             }
-            drawOnBoard(new, lastShip.type)
+            if (freeSpace(new, lastShip.type))drawOnBoard(new)
+            else  Toast.makeText(this, "One or more positions are already occupied by another boat", Toast.LENGTH_SHORT).show()
         } else{
             Toast.makeText(this, "I'm sorry, but this ship won't fit there", Toast.LENGTH_LONG).show()
         }
@@ -102,36 +103,35 @@ class SetUpYourShips : ComponentActivity() {
         return array
     }
 
-    private fun drawOnBoard(newPos:ArrayList<Int>, myBoat:ShipType) {
-        //Non occupied position check
+    private fun drawOnBoard(newPos:ArrayList<Int>) {
+        //first time positioning -> position and draw
+        if (!lastShip.hasBeenSet){
+            lastShip.position(newPos)
+            for (item in newPos){
+                gridContent[item] = lastShip.type
+            }
+        }
+        //not first time positioning -> eraseOld, positionNew and drawNew
+        else{
+            for (item in lastShip.coords){
+                gridContent[item] = ShipType.WATER
+            }
+            lastShip.position(newPos)
+            for (item in lastShip.coords){
+                gridContent[item] = lastShip.type
+            }
+        }
+    }
+
+    private fun freeSpace(newPos:ArrayList<Int>, myBoat: ShipType):Boolean {
         var nonOccupied = true
         for (pos in newPos){
-            if (cellContent[pos] != ShipType.WATER && cellContent[pos] != myBoat){
+            if (gridContent[pos] != ShipType.WATER && gridContent[pos] != myBoat){
                 nonOccupied = false
                 break
             }
         }
-        if (!nonOccupied){
-            Toast.makeText(this, "One or more positions are already occupied by another boat", Toast.LENGTH_SHORT).show()
-        }else{
-            //first time positioning -> position and draw
-            if (!lastShip.hasBeenSet){
-                lastShip.position(newPos)
-                for (item in newPos){
-                    cellContent[item] = lastShip.type
-                }
-            }
-            //not first time positioning -> eraseOld, positionNew and drawNew
-            else{
-                for (item in lastShip.coords){
-                    cellContent[item] = ShipType.WATER
-                }
-                lastShip.position(newPos)
-                for (item in lastShip.coords){
-                    cellContent[item] = lastShip.type
-                }
-            }
-        }
+        return nonOccupied
     }
 
     @Preview(showBackground = true)
@@ -139,21 +139,18 @@ class SetUpYourShips : ComponentActivity() {
     fun MainView() {
         val carrier=Ship(ShipType.CARRIER)
         val battleship=Ship(ShipType.BATTLESHIP)
-        val crusier=Ship(ShipType.CRUISER)
+        val cruiser=Ship(ShipType.CRUISER)
         val destroyer=Ship(ShipType.DESTROYER)
         val submarine=Ship(ShipType.SUBMARINE)
-        cellContent = remember { mutableStateListOf() }
+        gridContent = remember { mutableStateListOf() }
         for (i in 0 until 100) {
-            cellContent.add(ShipType.WATER)
+            gridContent.add(ShipType.WATER)
         }
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxHeight()
         ) {
             // Each cell of a column must have the same weight.
-            Button(onClick = { startActivity(Intent(baseContext,GameInterface :: class.java)) }) {
-                Text(text="Start Game")
-            }
             Box(
                 modifier = Modifier
                     .padding(10.dp)
@@ -167,7 +164,7 @@ class SetUpYourShips : ComponentActivity() {
                         items(100) {
                             TableCell(
                                 text= it.toString(),
-                                hasShip = (cellContent[it]!=ShipType.WATER),
+                                hasShip = (gridContent[it]!=ShipType.WATER),
                                 onCellClicked = {
                                     if (!::lastShip.isInitialized){
                                         Toast.makeText(this@SetUpYourShips, "Select a ship to position", Toast.LENGTH_SHORT).show()
@@ -204,7 +201,7 @@ class SetUpYourShips : ComponentActivity() {
                     contentDescription = "Cruiser",
                     contentScale= ContentScale.FillHeight,
                     modifier= Modifier
-                        .clickable { lastShip = crusier }
+                        .clickable { lastShip = cruiser }
                         .fillMaxWidth()
                         .weight(1f))
                 Image(painter = painterResource(id = R.drawable.destroyer),
@@ -228,6 +225,19 @@ class SetUpYourShips : ComponentActivity() {
             }) {
                 Text(text="Rotate Ship")
             }
+            Button(onClick = {
+                //Ships must be set
+                if (!carrier.hasBeenSet || !battleship.hasBeenSet || !cruiser.hasBeenSet || !destroyer.hasBeenSet || !submarine.hasBeenSet)
+                    Toast.makeText(this@SetUpYourShips, "Please set up all ships", Toast.LENGTH_LONG).show()
+                else {
+                    //Store player grid content to access when playing
+                    MainActivity.State = MainActivity.State + ("Player1Grid" to gridContent)
+                    //Store 2nd player grid (bot or human must have different implementations)
+                    startActivity(Intent(baseContext,GameInterface :: class.java))
+                }
+            }) {
+                Text(text="Start Game")
+            }
         }
         // The LazyColumn will be our table. Notice the use of the weights below
     }
@@ -236,12 +246,12 @@ class SetUpYourShips : ComponentActivity() {
         //calculate before to change orientation to new
         val newCoords = lastShip.rotate()
         //if correct draw
-        if(checkIfFits(lastShip.coords[0])){
-            drawOnBoard(newCoords, lastShip.type)
+        if(checkIfFits(lastShip.coords[0]) && freeSpace(newCoords, lastShip.type)){
+            drawOnBoard(newCoords)
         }//else revert (change orientation to old)
-        else{
+        else{ //podriem personalitzar el missatge d'error (segons quina de les dos condicions no es compleix)
             lastShip.rotate()
-            Toast.makeText(this@SetUpYourShips, "I'm sorry, but this ship won't fit there", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this@SetUpYourShips, "Invalid rotation, please reposition ship", Toast.LENGTH_SHORT).show()
         }
     }
 
