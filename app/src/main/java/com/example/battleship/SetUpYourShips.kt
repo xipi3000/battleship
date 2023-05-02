@@ -31,8 +31,7 @@ class SetUpYourShips : ComponentActivity() {
     private lateinit var botGrid:SnapshotStateList<ShipType>
 
     private enum class Player{
-        PLAYER1,
-        PLAYER2,
+        PLAYER,
         BOT,
     }
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -89,8 +88,9 @@ class SetUpYourShips : ComponentActivity() {
 
         //Assign player (de moment 1, si volem fer-ne mes ja mirem com ho fem)
         //->Mirar si es contra player o contra bot -> si contra player -> mirar si first time
-        var player = Player.PLAYER1
 
+        val player = Player.PLAYER
+        val player2:Boolean = MainActivity.State["Versus"] as Boolean
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxHeight()
@@ -182,9 +182,17 @@ class SetUpYourShips : ComponentActivity() {
                     //Store player grid content to access when playing
                     MainActivity.State = MainActivity.State + ("Player1Grid" to playerGrid)
                     //Store 2nd player grid (bot or human must have different implementations)
-                    val randGrid = randomSetup()
-                    MainActivity.State = MainActivity.State + (("Player2Grid" to randGrid))
-                    startActivity(Intent(baseContext,GameInterface :: class.java))
+                    if(!player2){
+                        val randGrid = randomSetup()
+                        MainActivity.State = MainActivity.State + (("Player2Grid" to randGrid))
+                        startActivity(Intent(baseContext,GameInterface :: class.java))
+                    }else{
+                        /*TODO: gestionar com ho fem
+                        *  -> Fiquem una foto que es fiqui davant de tot per deixar que es passin el movil
+                        *  -> Boolean "changing" per gestionar que es vegi o no
+                        *  -> Boolean "player1set" per gestionar quina grid montem i guardem
+                        *  -> Un cop guardad grid2 -> start activity*/
+                    }
                 }
             }) {
                 Text(text="Start Game")
