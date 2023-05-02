@@ -8,7 +8,7 @@ enum class ShipType(val size:Int){
     SUBMARINE(2),
     WATER(0),
 }
-enum class Orientation(){
+enum class Orientation{
     Horizontal,
     Vertical
 }
@@ -31,6 +31,10 @@ class Ship(val type:ShipType) {
         return coords.isEmpty()
     }
 
+    fun newOrientation(or: Orientation){
+        orientation = or
+    }
+
     fun rotate(): ArrayList<Int>{
         var count= 0
         val newCoord:ArrayList<Int> = arrayListOf()
@@ -48,5 +52,10 @@ class Ship(val type:ShipType) {
             Orientation.Horizontal
         }
         return newCoord
+    }
+
+    fun hasBeenInitialized(): Boolean {
+        return ::coords.isInitialized
+
     }
 }

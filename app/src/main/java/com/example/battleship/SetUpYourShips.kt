@@ -145,10 +145,13 @@ class SetUpYourShips : ComponentActivity() {
         val cruiser=Ship(ShipType.CRUISER)
         val destroyer=Ship(ShipType.DESTROYER)
         val submarine=Ship(ShipType.SUBMARINE)
-        gridContent = remember { mutableStateListOf() }
+        gridContent = remember {mutableStateListOf()}
         botGrid = remember{mutableStateListOf()}
         for (i in 0 until 100) {
             gridContent.add(ShipType.WATER)
+        }
+        for (i in 0 until 100) {
+            botGrid.add(ShipType.WATER)
         }
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -237,7 +240,8 @@ class SetUpYourShips : ComponentActivity() {
                     //Store player grid content to access when playing
                     MainActivity.State = MainActivity.State + ("Player1Grid" to gridContent)
                     //Store 2nd player grid (bot or human must have different implementations)
-                    MainActivity.State = MainActivity.State + (("Player2Grid" to randomSetup()))
+                    val randGrid = randomSetup()
+                    MainActivity.State = MainActivity.State + (("Player2Grid" to randGrid))
                     startActivity(Intent(baseContext,GameInterface :: class.java))
                 }
             }) {
@@ -264,23 +268,23 @@ class SetUpYourShips : ComponentActivity() {
     private fun randomSetup(): SnapshotStateList<ShipType>{
         val ships = arrayListOf(ShipType.CRUISER, ShipType.SUBMARINE, ShipType.DESTROYER, ShipType.BATTLESHIP, ShipType.CARRIER)
         Toast.makeText(this, "Creating random board, please wait", Toast.LENGTH_SHORT).show()
-        for (i in 0 until 100) {
-            botGrid.add(ShipType.WATER)
-        }
         for (i in 0..4) {
             var set = false
             val ship = Ship(ships[i])
+            var randPos: Int
+            var randOr: Int
             while(!set){
                 //get random orientation and random initial position
-                val randPos = Random.nextInt(0,99)
-                when(Random.nextInt(0,1)){
-                    0-> ship.orientation=Orientation.Horizontal
-                    1-> ship.orientation=Orientation.Vertical
+                randPos = Random.nextInt(0,99)
+                randOr = Random.nextInt(0,9)
+                when(randOr%2){
+                    0 -> ship.newOrientation(Orientation.Horizontal)
+                    1 -> ship.newOrientation(Orientation.Vertical)
                 }
                 //try to place (calculateCoords has the checks inside, and the "drawing")
                 calculateCoords(randPos, ship, 1, botGrid) // mode 1 -> no toasts if it can't place
                 //if there were no problems -> nextShip; else -> try again until placed
-                if(checkIfFits(randPos, ship) && freeSpace(ship.coords, ship.type, botGrid)){
+                if(ship.hasBeenInitialized()){
                     set = true
                 }
             }

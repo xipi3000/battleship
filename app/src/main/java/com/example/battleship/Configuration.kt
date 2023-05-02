@@ -86,7 +86,7 @@ class Configuration : ComponentActivity() {
                 val intent = Intent(context, SetUpYourShips::class.java)
                 //We need an alias
                 if (alias.value.text == "") {
-                    Toast.makeText(context, "Introdueixi un temps", Toast.LENGTH_SHORT)
+                    Toast.makeText(context, "Introdueixi un alias correcte", Toast.LENGTH_SHORT)
                         .show()
                 } //If we want time, we need a time
                 else if(checked.value && temps.value.text == ""){
@@ -99,7 +99,6 @@ class Configuration : ComponentActivity() {
                     MainActivity.State = MainActivity.State + ("Timed" to checked.value)
                     if (checked.value) MainActivity.State = MainActivity.State + ("InitialTime" to temps.value.text)
                     else MainActivity.State = MainActivity.State + ("Time" to -1)
-
                     context.startActivity(intent)
                 }
             }) {
