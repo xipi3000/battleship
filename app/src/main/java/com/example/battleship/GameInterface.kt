@@ -156,8 +156,7 @@ class GameInterface : ComponentActivity() {
                     enemyHasShipsUI= remember { mutableStateListOf() }
                     for (i in 0 until 100) enemyHasShipsUI.add(0)
 
-                    grid = when(isYourTurn) {
-                        true ->LazyVerticalGrid(
+                    grid = LazyVerticalGrid(
                             userScrollEnabled = false,
                             columns = GridCells.Fixed(10),
                             content = {
@@ -165,86 +164,50 @@ class GameInterface : ComponentActivity() {
                                     TableCell(
                                         text = it.toString(),
                                         hasShip = enemyHasShipsUI[it],
-                                        isClickable = isYourTurn,
+                                        isClickable = true,//testing = true; final = isYourTurn
                                         onCellClicked = {
-                                            if (isYourTurn) {
+                                            isYourTurn = if (isYourTurn) {
                                                 //funció "playTurn"
                                                 playTurn(it)
                                                 endGame()
-                                                isYourTurn = false
+                                                false
                                             }else{
-                                                //funció "botTurn"
+                                                true
                                             }
                                         }
                                     )
                                 }
                             }
                         )
-                        false -> LazyVerticalGrid(
-                            userScrollEnabled = false,
-                            columns = GridCells.Fixed(10),
-                            content = {
-                                items(100) {
-                                    TableCell(
-                                        text = it.toString(),
-                                        hasShip = when(player1Grid[it]){
-                                            ShipType.WATER -> 0
-                                            else -> 1},
-                                        onCellClicked = {
-                                            Toast.makeText(this@GameInterface, "changing turn", Toast.LENGTH_SHORT).show()
-                                            isYourTurn = !isYourTurn },
-                                        isClickable = true,
-                                    )
-                                }
-                            }
-                        )
-                    }
                 }
                 Box(
                     modifier = Modifier.padding(40.dp)
                 ) {
                     Column {
-                        Text(text = if (isYourTurn) "Your table"
-                        else "Enemy's table")
+                        Text(text ="Your table")
                         Box(
                             modifier = Modifier
                                 .padding(10.dp)
                                 .aspectRatio(1f)
                         )
                         {
-                            grid = when(isYourTurn) {
-                                false ->LazyVerticalGrid(
-                                    userScrollEnabled = false,
-                                    columns = GridCells.Fixed(10),
-                                    content = {
-                                        items(100) {
-                                            TableCell(
-                                                text = it.toString(),
-                                                hasShip = enemyHasShipsUI[it],
-                                                onCellClicked = {},
-                                                isClickable = false,
+                        grid =LazyVerticalGrid(
+                                userScrollEnabled = false,
+                                columns = GridCells.Fixed(10),
+                                content = {
+                                    items(100) {
+                                        TableCell(
+                                            text = it.toString(),
+                                            hasShip = when(player1Grid[it]){
+                                                ShipType.WATER -> 0
+                                                else-> 1 },
+                                            onCellClicked = {},
+                                            isClickable = false,
 
-                                            )
-                                        }
+                                        )
                                     }
-                                )
-                                true -> LazyVerticalGrid(
-                                    userScrollEnabled = false,
-                                    columns = GridCells.Fixed(10),
-                                    content = {
-                                        items(100) {
-                                            TableCell(
-                                                text = it.toString(),
-                                                hasShip = when(player1Grid[it]){
-                                                    ShipType.WATER -> 0
-                                                    else -> 1},
-                                                onCellClicked = {},
-                                                isClickable = false,
-                                            )
-                                        }
-                                    }
-                                )
-                            }
+                                }
+                            )
                         }
                     }
                 }

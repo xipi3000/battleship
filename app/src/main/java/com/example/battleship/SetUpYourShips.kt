@@ -211,18 +211,18 @@ class SetUpYourShips : ComponentActivity() {
                         .clickable { lastShip = cruiser }
                         .fillMaxWidth()
                         .weight(1f))
-                Image(painter = painterResource(id = R.drawable.destroyer),
-                    contentDescription = "Destroyer",
-                    contentScale= ContentScale.FillHeight,
-                    modifier= Modifier
-                        .clickable { lastShip = destroyer }
-                        .fillMaxWidth()
-                        .weight(1f))
                 Image(painter = painterResource(id = R.drawable.submarine),
                     contentDescription = "Submarine",
                     contentScale= ContentScale.FillHeight,
                     modifier= Modifier
                         .clickable { lastShip = submarine }
+                        .fillMaxWidth()
+                        .weight(1f))
+                Image(painter = painterResource(id = R.drawable.destroyer),
+                    contentDescription = "Destroyer",
+                    contentScale= ContentScale.FillHeight,
+                    modifier= Modifier
+                        .clickable { lastShip = destroyer }
                         .fillMaxWidth()
                         .weight(1f))
             }
