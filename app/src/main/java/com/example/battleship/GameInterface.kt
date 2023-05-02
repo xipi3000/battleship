@@ -66,9 +66,20 @@ class GameInterface : ComponentActivity() {
     fun TableCell(
         text: String,
         hasShip: Int,
+        hasBeenClicked: Boolean = false,
         onCellClicked: () -> Unit,
         isClickable: Boolean = true,
     ) {
+        /*
+        var cellClicked by remember { mutableStateOf(hasBeenClicked) }
+        val onClick= {
+            if(cellClicked) Toast.makeText(this, "This cell has already been fired", Toast.LENGTH_SHORT).show()
+            else{
+                cellClicked = true
+                onCellClicked()
+            }
+        }
+        * */
         Image(
             painter = painterResource(
                 id = when (hasShip){
@@ -83,7 +94,7 @@ class GameInterface : ComponentActivity() {
                 .padding(1.dp)
                 .aspectRatio(1f)
                 .fillMaxWidth()
-                .clickable(enabled = isClickable) { onCellClicked() }
+                .clickable(enabled = isClickable) {onCellClicked()/*onClick()*/}
         )
     }
 
