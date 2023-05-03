@@ -1,7 +1,9 @@
 package com.example.battleship
 
+import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import kotlin.math.log
 import kotlin.random.Random
 
 enum class EnemyState {
@@ -23,12 +25,13 @@ class Enemy() {
     var lastCell: Pair<Int, Int> = Pair(0, 0)
     var centerCell: Pair<Int, Int> = Pair(0, 0)
     var isCheckingButt: Boolean = false
-
+    lateinit var checkedCells: Set<Int>
 
 
     fun play(): Pair<Int, Int> {
 
         if (state == EnemyState.TARGETTING) { //Estem fent la creu
+            checkedCells= setOf()
             var nextCell = nextCell()
             while (getCellState(nextCell) != CellState.UNKNOWN) {
                 nextCell = nextCell()
@@ -48,7 +51,7 @@ class Enemy() {
             }
             else{
                 nextCell =
-                    Pair(lastCell.first + orientation.first, lastCell.second + orientation.second)
+                    Pair(centerCell.first + orientation.first, centerCell.second + orientation.second)
             }
 
             if (getCellState(nextCell) != CellState.UNKNOWN) {
@@ -74,11 +77,11 @@ class Enemy() {
         return randomCell()
     }
     fun randomCell(): Pair<Int, Int> {
-        var i = Random.nextInt(0, 10)
-        var j = Random.nextInt(0, 10)
+        var i = Random.nextInt(0, 9)
+        var j = Random.nextInt(0, 9)
         while (taulell[i][j] != CellState.UNKNOWN) {
-            i = Random.nextInt(0, 10)
-            j = Random.nextInt(0, 10)
+            i = Random.nextInt(0, 9)
+            j = Random.nextInt(0, 9)
         }
         return Pair(i, j)
     }
@@ -87,7 +90,18 @@ class Enemy() {
     }
 
     fun nextCell(): Pair<Int, Int> {
-        val orientation = Random.nextInt(0, 3)
+        var orientation = Random.nextInt(0, 4)
+        while(orientation in checkedCells && checkedCells.size!=4){
+            orientation = Random.nextInt(0, 4)
+            println("Orientation->"+orientation)
+        }
+        println("nextt one->"+orientation)
+        if(checkedCells.size==4){
+            state=EnemyState.SEARCHING
+            return randomCell()
+        }
+        checkedCells += orientation
+
         if (orientation == 0) return Pair(centerCell.first - 1, centerCell.second) //Amunt
         else if (orientation == 1) return Pair(centerCell.first, centerCell.second + 1) //Dreta
         else if (orientation == 2) return Pair(centerCell.first + 1, centerCell.second) //Devall
@@ -100,14 +114,19 @@ class Enemy() {
         lastCell = coords
         taulell[coords.first][coords.second] = result
         if (state == EnemyState.SEARCHING && result == CellState.SHIP) {
+            isCheckingButt = false
             centerCell = coords
             state = EnemyState.TARGETTING
         } else if (state == EnemyState.TARGETTING && result == CellState.SHIP) {
             state = EnemyState.SHOOTOUT
 
         } else if (state == EnemyState.SHOOTOUT && result == CellState.WATER) {
-            if(!isCheckingButt) isCheckingButt = true
-            else state == EnemyState.SEARCHING
+            if(!isCheckingButt){ isCheckingButt = true
+            print("NNIIIIIIGGGGGG")}
+            else {
+                state == EnemyState.SEARCHING
+                isCheckingButt = false
+            }
         }
 
     }
