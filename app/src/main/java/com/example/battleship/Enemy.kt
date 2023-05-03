@@ -1,8 +1,8 @@
 package com.example.battleship
 
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import java.lang.Math.random
+import kotlin.random.Random
 
 enum class EnemyState{
     SEARCHING,
@@ -17,17 +17,28 @@ class Enemy(){
             CellState.UNKNOWN
         }
     }
+
     val state: EnemyState = EnemyState.SEARCHING
 
-    fun play(){
+    fun play() : Pair<Int,Int>{
         if(state==EnemyState.SEARCHING){
-            random()
+            var i = Random.nextInt(0,10)
+            var j = Random.nextInt(0,10)
+            while(taulell[i][j]!=CellState.UNKNOWN){
+                i = Random.nextInt(0,10)
+                j = Random.nextInt(0,10)
+            }
+            return Pair(i,j)
         }
         else if (state==EnemyState.TARGETTING){
+
 
         }
         else{
 
         }
+    }
+    fun checkCell(coords){
+
     }
 }
