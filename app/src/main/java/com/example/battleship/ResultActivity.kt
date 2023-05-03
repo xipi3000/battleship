@@ -78,7 +78,11 @@ class ResultActivity : ComponentActivity(){
                 }
             }) {
                 Text(text = "Enviar resultados") }
-            Button(onClick = { context.startActivity(Intent(context,Configuration::class.java)) }) {
+            Button(onClick = {
+                val intent = Intent(context,Configuration::class.java)
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                context.startActivity(intent)
+            }) {
                 Text(text = "Nueva partida")
             }
             Button(onClick = { moveTaskToBack(true);activity.finish(); exitProcess(1) }) {
