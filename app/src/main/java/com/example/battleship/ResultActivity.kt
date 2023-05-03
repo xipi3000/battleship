@@ -94,18 +94,16 @@ class ResultActivity : ComponentActivity(){
     private fun parseGameResult(): String {
         val player1ships = GameConfiguration.State["Player1Ships"] as ArrayList<Int>
         val player2ships = GameConfiguration.State["Player2Ships"] as ArrayList<Int>
-        var message= ""
         /* Possible endStates:
         * -> player1 wins -> player2 has no ships
         * -> player2 wins -> player1 has no ships (either bot or player)
         * -> both lose -> no time left*/
-        if (player2ships.isEmpty()){
-            message = "Enhorabona!"
+        return if (player2ships.isEmpty()){
+            "Tremendo, has aconseguit guanyar a un bot. Vols un pin o una xapa?"
         }else if(player1ships.isEmpty()){
-            message = "Malooo, que malo lol!"
+            "Malooo, que malo lol, git gud bitch"
         }else{
-            message = "Puto lento, a veure si penses més rapid💀"
+            "Puto lento, a veure si penses més rapid"
         }
-        return message
     }
 }
