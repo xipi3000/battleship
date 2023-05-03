@@ -194,7 +194,7 @@ class SetUpYourShips : ComponentActivity() {
                     }
                     MainActivity.State = MainActivity.State + ("Player1Ships" to playerGridShips)
                     //put into another companion object
-                    //MainActivity.State = MainActivity.State + ("Player1Grid" to playerGrid)
+                    MainActivity.State = MainActivity.State + ("Player1Grid" to playerGrid)
                     //Store 2nd player grid (bot or human must have different implementations)
                     if(player2){
                         randomSetup()
@@ -205,7 +205,7 @@ class SetUpYourShips : ComponentActivity() {
                         }
                         MainActivity.State = MainActivity.State + ("Player2Ships" to botGridShips)
                         //put into another companion object
-                        //MainActivity.State = MainActivity.State + ("Player2Grid" to botGrid)
+                        MainActivity.State = MainActivity.State + ("Player2Grid" to botGrid)
                         startActivity(Intent(baseContext,GameInterface :: class.java))
                     }else{
                         /*TODO: gestionar com ho fem

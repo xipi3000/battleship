@@ -31,8 +31,8 @@ class MainActivity : ComponentActivity() {
             "InitialTime" to Int.MAX_VALUE,
             "Alias" to "Player",
             //aquests dos que vagin a un altre objecte, que son molt densos
-            //"Player1Grid" to SnapshotStateList<GridType>(), //player
-            //"Player2Grid" to SnapshotStateList<GridType>(), //bot or 2nd player
+            "Player1Grid" to SnapshotStateList<GridType>(), //player
+            "Player2Grid" to SnapshotStateList<GridType>(), //bot or 2nd player
             "Player1Ships" to arrayListOf<Int>(), //bot or 2nd player
             "Player2Ships" to arrayListOf<Int>(), //bot or 2nd player
         )

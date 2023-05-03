@@ -111,8 +111,6 @@ class GameInterface : ComponentActivity() {
                 timeRemaining--
             }
         }
-        //just for testing purposes
-        //player2Grid = player1Grid
 
         /*
         val carrier = Ship(ShipType.CARRIER)
