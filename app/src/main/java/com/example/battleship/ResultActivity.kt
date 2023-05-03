@@ -22,9 +22,6 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.battleship.ui.theme.BattleshipTheme
 import kotlin.system.exitProcess
-/*TODO: no només carrega lento sino que,
-    a més, a vegades simplement es mor perque jaja too much cpu usage
-    -> fer un altre companion que tingui les grids que només l'utilizin game i setup*/
 
 class ResultActivity : ComponentActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,7 +49,7 @@ class ResultActivity : ComponentActivity(){
             val activity = ResultActivity()
             Text(text = "Dia y Hora")
             TextField(
-                value = MainActivity.State.get("Time").toString(),
+                value = GameConfiguration.State.get("Time").toString(),
                 onValueChange = {},
                 enabled = false,
             )
@@ -82,7 +79,7 @@ class ResultActivity : ComponentActivity(){
             }) {
                 Text(text = "Enviar resultados") }
             Button(onClick = {
-                val intent = Intent(context,Configuration::class.java)
+                val intent = Intent(context,GameConfiguration::class.java)
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                 context.startActivity(intent)
             }) {
@@ -95,14 +92,19 @@ class ResultActivity : ComponentActivity(){
     }
 
     private fun parseGameResult(): String {
-        val player2 = MainActivity.State["Player2Ships"] as ArrayList<Int>
+        val player1ships = GameConfiguration.State["Player1Ships"] as ArrayList<Int>
+        val player2ships = GameConfiguration.State["Player2Ships"] as ArrayList<Int>
         var message= ""
         /* Possible endStates:
         * -> player1 wins -> player2 has no ships
-        * -> player2 wins (bot) -> player2 has no ships
+        * -> player2 wins -> player1 has no ships (either bot or player)
         * -> both lose -> no time left*/
-        if (player2.isEmpty()){
+        if (player2ships.isEmpty()){
             message = "Enhorabona!"
+        }else if(player1ships.isEmpty()){
+            message = "Malooo, que malo lol!"
+        }else{
+            message = "Puto lento, a veure si penses més rapid💀"
         }
         return message
     }

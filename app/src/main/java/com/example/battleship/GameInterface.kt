@@ -38,16 +38,13 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.runtime.*
 import kotlinx.coroutines.delay
-import java.lang.Thread.sleep
-
 class GameInterface : ComponentActivity() {
     //lateinit var lastShip: Ship //tecnicament lateinit no es null
     lateinit var grid: Unit
     lateinit var enemyHasShipsUI: SnapshotStateList<CellState>
-    var player1Grid:SnapshotStateList<GridType> =
-        MainActivity.State["Player1Grid"] as SnapshotStateList<GridType> //Player's ship setup
-    var player2Grid:SnapshotStateList<GridType> =
-        MainActivity.State["Player2Grid"] as SnapshotStateList<GridType> //Bot/2nd player ship setup
+    lateinit var playerHasShipsUI: SnapshotStateList<CellState>
+    var player1ships = GameConfiguration.State["Player1Ships"] as ArrayList<Int> //Player's ship setup
+    var player2ships = GameConfiguration.State["Player2Ships"] as ArrayList<Int> //Bot/2nd Player's ship setup
     var isInPortraitOrientation: Boolean = true
     val enemy = Enemy()
 
@@ -72,22 +69,21 @@ class GameInterface : ComponentActivity() {
         onCellClicked: () -> Unit,
         isClickable: Boolean = true,
     ) {
-        /*
-        var cellClicked by remember { mutableStateOf(hasBeenClicked) }
+
+        var cellShot by remember { mutableStateOf(hasBeenClicked) }
         val onClick= {
-            if(cellClicked) Toast.makeText(this, "This cell has already been fired", Toast.LENGTH_SHORT).show()
+            if(cellShot) Toast.makeText(this, "This cell has already been fired", Toast.LENGTH_SHORT).show()
             else{
-                cellClicked = true
+                cellShot = true
                 onCellClicked()
             }
         }
-        * */
         Image(
             painter = painterResource(
                 id = when (hasShip){
                     CellState.WATER -> R.drawable.water
                     CellState.UNKNOWN -> R.drawable.undiscovered
-                    else -> R.drawable.explosion
+                    CellState.SHIP -> R.drawable.explosion
                 }
             ),
             contentDescription = text,
@@ -103,8 +99,8 @@ class GameInterface : ComponentActivity() {
     @Preview(showBackground = true)
     @Composable
     fun MainView() {
-        var timeRemaining by remember { mutableStateOf(MainActivity.State["InitialTime"].toString().toInt()) }
-        val timed = MainActivity.State["Timed"]
+        var timeRemaining by remember { mutableStateOf(GameConfiguration.State["InitialTime"].toString().toInt()) }
+        val timed = GameConfiguration.State["Timed"]
         LaunchedEffect(Unit) {
             while(timeRemaining>0) {
                 print(timeRemaining)
@@ -167,6 +163,8 @@ class GameInterface : ComponentActivity() {
                     //TODO: implement with rememberSaveable
                     enemyHasShipsUI= remember { mutableStateListOf() }
                     for (i in 0 until 100) enemyHasShipsUI.add(CellState.UNKNOWN)
+                    playerHasShipsUI= remember { mutableStateListOf() }
+                    for (i in 0 until 100) playerHasShipsUI.add(if(i in player1ships)CellState.UNKNOWN else CellState.WATER)
 
                     grid = LazyVerticalGrid(
                             userScrollEnabled = false,
@@ -178,26 +176,19 @@ class GameInterface : ComponentActivity() {
                                         hasShip = enemyHasShipsUI[it],
                                         isClickable = true,//testing = true; final = isYourTurn
                                         onCellClicked = {
-                                            isYourTurn = if (isYourTurn) {
-                                                //funció "playTurn"
-                                                playTurn(it)
+                                            //player's shot
+                                            playTurn(it)
 
-                                                val cell = enemy.play()
-                                                val infoCell = player1Grid[cell.first*10+cell.second]
-                                                enemy.checkCell(cell,if(infoCell==GridType.WATER)CellState.WATER else CellState.SHIP)
+                                            //bot's shot
+                                            val cell = enemy.play()
+                                            val parsedCell = cell.first*10+cell.second
+                                            Log.i("BotCell", "Shooting $parsedCell")
+                                            val infoCell = if(parsedCell in player1ships){CellState.SHIP} else {CellState.WATER}
+                                            Log.i("BotCell", "It had $infoCell")
+                                            enemy.checkCell(cell,infoCell)
 
-                                                if(infoCell!=GridType.WATER) player1Grid[cell.first*10+cell.second]=GridType.UNDISCOVERED
-
-                                                endGame()
-
-                                                true
-                                                }else{
-                                                    val cell = enemy.play()
-                                                    val infoCell = player1Grid[cell.first*10+cell.second]
-                                                    if(infoCell!=GridType.WATER) player1Grid[cell.first*10+cell.second]=GridType.UNDISCOVERED
-                                                    enemy.checkCell(cell,if(infoCell==GridType.WATER)CellState.WATER else CellState.SHIP)
-                                                    true
-                                                 }
+                                            if(infoCell==CellState.SHIP) {playerHasShipsUI[parsedCell]=CellState.SHIP}
+                                            endGame()
                                             }
                                     )
                                 }
@@ -222,13 +213,10 @@ class GameInterface : ComponentActivity() {
                                     items(100) {
                                         TableCell(
                                             text = it.toString(),
-                                            hasShip = when(player1Grid[it]){
-                                                GridType.WATER -> CellState.WATER
-                                                GridType.UNDISCOVERED -> CellState.SHIP
-                                                else-> CellState.UNKNOWN },
+                                            hasBeenClicked = false,
+                                            hasShip = playerHasShipsUI[it], //unknown enlloc de ship per el sprite
                                             onCellClicked = {},
                                             isClickable = false,
-
                                         )
                                     }
                                 }
@@ -286,16 +274,8 @@ class GameInterface : ComponentActivity() {
                                         onCellClicked = {
                                             if (isYourTurn) {
                                                 isYourTurn = false
-                                                if (player2Grid[it] != GridType.WATER) {
-                                                    /*
-                                                    Toast.makeText(
-                                                        baseContext,
-                                                        "tocat",
-                                                        Toast.LENGTH_SHORT
-                                                    )
-                                                        .show()*/
+                                                if (it in player2ships) {
                                                     enemyHasShipsUI[it] = CellState.SHIP
-
                                                 }
                                                 isYourTurn = false
                                             }
@@ -341,26 +321,16 @@ class GameInterface : ComponentActivity() {
     }
 
     private fun playTurn(cell:Int) {
-        if (player2Grid[cell] != GridType.WATER) {/*
-            Toast.makeText(
-                baseContext,
-                "Tocat",
-                Toast.LENGTH_SHORT
-            )
-                .show()*/
+        if (cell in player2ships) {
+            Toast.makeText(baseContext, "Tocat", Toast.LENGTH_SHORT).show()
             enemyHasShipsUI[cell] = CellState.SHIP
             //Remove shipcell from state
-            val ships = MainActivity.State["Player2Ships"] as ArrayList<Int>
-            ships.remove(cell)
-            MainActivity.State = MainActivity.State + ("Player2Ships" to ships)
+            player2ships.remove(cell)
+            GameConfiguration.State = GameConfiguration.State + ("Player2Ships" to player2ships)
             Log.i("ShipChange", "Erased $cell from player2")
-            Log.i("ShipChange", "Cells left: "+ MainActivity.State["Player2Ships"])
-        }else{/*
-            Toast.makeText(
-                baseContext,
-                "Aigua",
-                Toast.LENGTH_SHORT
-            ).show()*/
+            Log.i("ShipChange", "Cells left: "+ GameConfiguration.State["Player2Ships"])
+        }else{
+            Toast.makeText(baseContext, "Aigua", Toast.LENGTH_SHORT).show()
             enemyHasShipsUI[cell] = CellState.WATER
         }
     }

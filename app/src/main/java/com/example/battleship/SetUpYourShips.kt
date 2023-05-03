@@ -90,7 +90,7 @@ class SetUpYourShips : ComponentActivity() {
         //->Mirar si es contra player o contra bot -> si contra player -> mirar si first time
 
         val player = Player.PLAYER
-        val player2:Boolean = MainActivity.State["VersusBot"] as Boolean
+        //val player2:Boolean = GameConfiguration.State["VersusBot"] as Boolean
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxHeight()
@@ -192,23 +192,19 @@ class SetUpYourShips : ComponentActivity() {
                         if (cellType!=GridType.WATER)
                             playerGridShips.add(cell)
                     }
-                    MainActivity.State = MainActivity.State + ("Player1Ships" to playerGridShips)
-                    //put into another companion object
-                    MainActivity.State = MainActivity.State + ("Player1Grid" to playerGrid)
+                    GameConfiguration.State = GameConfiguration.State + ("Player1Ships" to playerGridShips)
                     //Store 2nd player grid (bot or human must have different implementations)
-                    if(player2){
+                    if(true){ //bot
                         randomSetup()
                         val botGridShips:ArrayList<Int> = arrayListOf()
                         for((cell, cellType) in botGrid.withIndex()){
                             if (cellType!=GridType.WATER)
                                 botGridShips.add(cell)
                         }
-                        MainActivity.State = MainActivity.State + ("Player2Ships" to botGridShips)
-                        //put into another companion object
-                        MainActivity.State = MainActivity.State + ("Player2Grid" to botGrid)
+                        GameConfiguration.State = GameConfiguration.State + ("Player2Ships" to botGridShips)
                         startActivity(Intent(baseContext,GameInterface :: class.java))
-                    }else{
-                        /*TODO: gestionar com ho fem
+                    }else{ //second player
+                        /* TODO: gestionar com ho fem
                         *  -> Fiquem una foto que es fiqui davant de tot per deixar que es passin el movil
                         *  -> Boolean "changing" per gestionar que es vegi o no
                         *  -> Boolean "player1set" per gestionar quina grid montem i guardem
