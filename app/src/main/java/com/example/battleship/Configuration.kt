@@ -122,8 +122,11 @@ class Configuration : ComponentActivity() {
                     //Store config values and start ship setup
                     MainActivity.State = MainActivity.State + ("Alias" to alias.value.text)
                     MainActivity.State = MainActivity.State + ("Timed" to checked.value)
-                    MainActivity.State = MainActivity.State + ("InitialTime" to temps.value.text)//if not specified, not used
-                    MainActivity.State = MainActivity.State + ("VersusPlayer" to versus.value)
+                    MainActivity.State = MainActivity.State + ("InitialTime" to when(temps.value.text){
+                        ""-> Int.MAX_VALUE
+                        else -> temps.value.text
+                    })//if not specified, not used
+                    MainActivity.State = MainActivity.State + ("VersusBot" to versus.value)
                     val intent = Intent(context, SetUpYourShips::class.java)
                     context.startActivity(intent)
                 }

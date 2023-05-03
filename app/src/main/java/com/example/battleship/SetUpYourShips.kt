@@ -27,8 +27,8 @@ import kotlin.random.Random
 class SetUpYourShips : ComponentActivity() {
     private lateinit var lastShip:Ship
     private lateinit var grid:Unit
-    private lateinit var playerGrid: SnapshotStateList<ShipType>
-    private lateinit var botGrid:SnapshotStateList<ShipType>
+    private lateinit var playerGrid: SnapshotStateList<GridType>
+    private lateinit var botGrid:SnapshotStateList<GridType>
 
     private enum class Player{
         PLAYER,
@@ -52,7 +52,7 @@ class SetUpYourShips : ComponentActivity() {
         Image(
             painter = painterResource(
                 id = if(hasShip){
-                    R.drawable.saltwater
+                    R.drawable.undiscovered
                 }else{
                     R.drawable.water
                 }),
@@ -70,27 +70,27 @@ class SetUpYourShips : ComponentActivity() {
     @Composable
     fun MainView() {
         //initialize ships, one of each kind
-        val carrier=Ship(ShipType.CARRIER)
-        val battleship=Ship(ShipType.BATTLESHIP)
-        val cruiser=Ship(ShipType.CRUISER)
-        val destroyer=Ship(ShipType.DESTROYER)
-        val submarine=Ship(ShipType.SUBMARINE)
+        val carrier=Ship(GridType.CARRIER)
+        val battleship=Ship(GridType.BATTLESHIP)
+        val cruiser=Ship(GridType.CRUISER)
+        val destroyer=Ship(GridType.DESTROYER)
+        val submarine=Ship(GridType.SUBMARINE)
 
         //initialize both grids (for now) and make them all water
         playerGrid = remember {mutableStateListOf()}
         botGrid = remember{mutableStateListOf()}
         for (i in 0 until 100) {
-            playerGrid.add(ShipType.WATER)
+            playerGrid.add(GridType.WATER)
         }
         for (i in 0 until 100) {
-            botGrid.add(ShipType.WATER)
+            botGrid.add(GridType.WATER)
         }
 
         //Assign player (de moment 1, si volem fer-ne mes ja mirem com ho fem)
         //->Mirar si es contra player o contra bot -> si contra player -> mirar si first time
 
         val player = Player.PLAYER
-        val player2:Boolean = MainActivity.State["Versus"] as Boolean
+        val player2:Boolean = MainActivity.State["VersusBot"] as Boolean
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxHeight()
@@ -109,7 +109,7 @@ class SetUpYourShips : ComponentActivity() {
                         items(100) {
                             TableCell(
                                 text= it.toString(),
-                                hasShip = (playerGrid[it]!=ShipType.WATER),
+                                hasShip = (playerGrid[it]!=GridType.WATER),
                                 onCellClicked = {
                                     if (!::lastShip.isInitialized){
                                         Toast.makeText(this@SetUpYourShips, "Select a ship to position", Toast.LENGTH_SHORT).show()
@@ -170,7 +170,10 @@ class SetUpYourShips : ComponentActivity() {
             //Functionality buttons
             Button(onClick = {
                 if(lastShip.hasBeenSet) rotateShip()
-                else Toast.makeText(this@SetUpYourShips, "First position the ship", Toast.LENGTH_SHORT).show()
+                else lastShip.newOrientation(when(lastShip.orientation){
+                    Orientation.Horizontal -> Orientation.Vertical
+                    Orientation.Vertical -> Orientation.Horizontal
+                })
             }) {
                 Text(text="Rotate Ship")
             }
@@ -180,11 +183,23 @@ class SetUpYourShips : ComponentActivity() {
                     Toast.makeText(this@SetUpYourShips, "Please set up all ships", Toast.LENGTH_LONG).show()
                 else {
                     //Store player grid content to access when playing
+                    val playerGridShips:ArrayList<Int> = arrayListOf()
+                    for((cell, cellType) in playerGrid.withIndex()){
+                        if (cellType!=GridType.WATER)
+                            playerGridShips.add(cell)
+                    }
+                    MainActivity.State = MainActivity.State + ("Player1Ships" to playerGridShips)
                     MainActivity.State = MainActivity.State + ("Player1Grid" to playerGrid)
                     //Store 2nd player grid (bot or human must have different implementations)
-                    if(!player2){
+                    if(player2){
                         val randGrid = randomSetup()
-                        MainActivity.State = MainActivity.State + (("Player2Grid" to randGrid))
+                        val botGridShips:ArrayList<Int> = arrayListOf()
+                        for((cell, cellType) in botGrid.withIndex()){
+                            if (cellType!=GridType.WATER)
+                                botGridShips.add(cell)
+                        }
+                        MainActivity.State = MainActivity.State + ("Player2Ships" to botGridShips)
+                        MainActivity.State = MainActivity.State + ("Player2Grid" to botGrid)
                         startActivity(Intent(baseContext,GameInterface :: class.java))
                     }else{
                         /*TODO: gestionar com ho fem
@@ -203,7 +218,7 @@ class SetUpYourShips : ComponentActivity() {
 /* CALCULATE AND STORE VALUES FOR THE NEW POSSIBLE POSITION OF A SHIP */
     /*Method used to calculate the new position of the ship, check if it's correct and not already
     * occupied, and in case all of this happens, store the new values*/
-    private fun calculateCoords(start:Int, ship:Ship, player:Player, grid: SnapshotStateList<ShipType>) {
+    private fun calculateCoords(start:Int, ship:Ship, player:Player, grid: SnapshotStateList<GridType>) {
         if (checkIfFits(start, ship)){
             val new:ArrayList<Int> = newPosition(start, ship)
             if (!freeSpace(new, ship.type, grid) && (player != Player.BOT))
@@ -232,7 +247,7 @@ class SetUpYourShips : ComponentActivity() {
 
     /*We use this function when all checks have been cleared to store the new coordinates both on
     * the ship and the grid*/
-    private fun placeOnBoard(newPos:ArrayList<Int>, ship: Ship, grid: SnapshotStateList<ShipType>) {
+    private fun placeOnBoard(newPos:ArrayList<Int>, ship: Ship, grid: SnapshotStateList<GridType>) {
         if (!ship.hasBeenSet){ //first time positioning -> storeCoords and positionOnGrid
             ship.position(newPos)
             for (item in newPos){
@@ -240,7 +255,7 @@ class SetUpYourShips : ComponentActivity() {
             }
         }else{//not first time -> removeOldPositioning, storeCoords and positionNewOnGrid
             for (item in ship.coords){
-                grid[item] = ShipType.WATER
+                grid[item] = GridType.WATER
             }
             ship.position(newPos)
             for (item in ship.coords){
@@ -262,10 +277,10 @@ class SetUpYourShips : ComponentActivity() {
 
     /*We use this function to check if, from the new coordinates of a ship, any of them is already
     * occupied by another ship*/
-    private fun freeSpace(newPos:ArrayList<Int>, myBoat: ShipType, grid:SnapshotStateList<ShipType>):Boolean {
+    private fun freeSpace(newPos:ArrayList<Int>, myBoat: GridType, grid:SnapshotStateList<GridType>):Boolean {
         var nonOccupied = true
         for (pos in newPos){
-            if (grid[pos] != ShipType.WATER && grid[pos] != myBoat){
+            if (grid[pos] != GridType.WATER && grid[pos] != myBoat){
                 nonOccupied = false
                 break
             }
@@ -292,9 +307,9 @@ class SetUpYourShips : ComponentActivity() {
     }
 
     /*We use this function to generate a random ship setup for the bot*/
-    private fun randomSetup(): SnapshotStateList<ShipType>{
+    private fun randomSetup(): SnapshotStateList<GridType>{
         Toast.makeText(this, "Generating random board, please wait", Toast.LENGTH_LONG).show()
-        val ships = arrayListOf(ShipType.CRUISER, ShipType.SUBMARINE, ShipType.DESTROYER, ShipType.BATTLESHIP, ShipType.CARRIER)
+        val ships = arrayListOf(GridType.CRUISER, GridType.SUBMARINE, GridType.DESTROYER, GridType.BATTLESHIP, GridType.CARRIER)
         var set:Boolean
         var ship:Ship
         var randPos:Int

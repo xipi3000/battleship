@@ -31,8 +31,8 @@ class MainActivity : ComponentActivity() {
             "InitialTime" to Int.MAX_VALUE,
             "Alias" to "Player",
             //potser amb arrays de les celes que tinguin barco ja val tho
-            "Player1Grid" to SnapshotStateList<ShipType>(), //player
-            "Player2Grid" to SnapshotStateList<ShipType>(), //bot or 2nd player
+            "Player1Grid" to SnapshotStateList<GridType>(), //player
+            "Player2Grid" to SnapshotStateList<GridType>(), //bot or 2nd player
         )
     }
 

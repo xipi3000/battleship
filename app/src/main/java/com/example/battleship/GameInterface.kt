@@ -42,10 +42,10 @@ class GameInterface : ComponentActivity() {
     //lateinit var lastShip: Ship //tecnicament lateinit no es null
     lateinit var grid: Unit
     lateinit var enemyHasShipsUI: SnapshotStateList<Int>
-    var player1Grid:SnapshotStateList<ShipType> =
-        MainActivity.State["Player1Grid"] as SnapshotStateList<ShipType> //Player's ship setup
-    var player2Grid:SnapshotStateList<ShipType> =
-        MainActivity.State["Player2Grid"] as SnapshotStateList<ShipType> //Bot/2nd player ship setup
+    var player1Grid:SnapshotStateList<GridType> =
+        MainActivity.State["Player1Grid"] as SnapshotStateList<GridType> //Player's ship setup
+    var player2Grid:SnapshotStateList<GridType> =
+        MainActivity.State["Player2Grid"] as SnapshotStateList<GridType> //Bot/2nd player ship setup
     var isInPortraitOrientation: Boolean = true
 
 
@@ -83,8 +83,8 @@ class GameInterface : ComponentActivity() {
         Image(
             painter = painterResource(
                 id = when (hasShip){
-                    1 -> R.drawable.saltwater
-                    0 -> R.drawable.water
+                    1 -> R.drawable.water
+                    0 -> R.drawable.undiscovered
                     else -> R.drawable.explosion
                 }
             ),
@@ -210,8 +210,8 @@ class GameInterface : ComponentActivity() {
                                         TableCell(
                                             text = it.toString(),
                                             hasShip = when(player1Grid[it]){
-                                                ShipType.WATER -> 0
-                                                else-> 1 },
+                                                GridType.WATER -> 1
+                                                else-> 0 },
                                             onCellClicked = {},
                                             isClickable = false,
 
@@ -272,7 +272,7 @@ class GameInterface : ComponentActivity() {
                                         onCellClicked = {
                                             if (isYourTurn) {
                                                 isYourTurn = false
-                                                if (player2Grid[it] != ShipType.WATER) {
+                                                if (player2Grid[it] != GridType.WATER) {
                                                     Toast.makeText(
                                                         baseContext,
                                                         "tocat",
@@ -326,7 +326,7 @@ class GameInterface : ComponentActivity() {
     }
 
     private fun playTurn(cell:Int) {
-        if (player2Grid[cell] != ShipType.WATER) {
+        if (player2Grid[cell] != GridType.WATER) {
             Toast.makeText(
                 baseContext,
                 "Tocat",
@@ -349,7 +349,7 @@ class GameInterface : ComponentActivity() {
         for (item in enemyHasShipsUI){
             if (item == 3) count++
             //(17 es el sumatori de sizes de tots els barcos, de moment esta cutre pero ja ho fem putamadre més tard)
-            if (count == 17) startActivity(Intent(this, ResultActivity::class.java))
+            if (count == 1) startActivity(Intent(this, ResultActivity::class.java))
         }
     }
 }

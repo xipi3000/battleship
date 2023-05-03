@@ -1,19 +1,20 @@
 package com.example.battleship
 
-enum class ShipType(val size:Int){
-    CARRIER(5),
-    BATTLESHIP(4),
-    CRUISER(3),
-    SUBMARINE(3),
-    DESTROYER(2),
-    WATER(0),
+enum class GridType(val size:Int, val resource:Int){
+    CARRIER(5, R.drawable.carrier),
+    BATTLESHIP(4, R.drawable.battleship),
+    CRUISER(3, R.drawable.cruiser),
+    SUBMARINE(3, R.drawable.submarine),
+    DESTROYER(2, R.drawable.destroyer),
+    WATER(0, R.drawable.water),
+    UNDISCOVERED(0, R.drawable.undiscovered),
 }
 enum class Orientation{
     Horizontal,
     Vertical
 }
 
-class Ship(val type:ShipType) {
+class Ship(val type:GridType) {
     lateinit var coords:ArrayList<Int>
     var orientation:Orientation = Orientation.Horizontal
     var hasBeenSet:Boolean = false

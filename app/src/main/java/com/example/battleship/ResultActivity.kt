@@ -53,9 +53,10 @@ class ResultActivity : ComponentActivity(){
                 onValueChange = {},
                 enabled = false,
             )
+            //S'haurà de fer un parser per ficar un missatge, que encara amb els arrays li costa
             Text(text = "Log values")
             TextField(
-                value = MainActivity.State.toString(),
+                value = MainActivity.State["Player1Ships"].toString() + MainActivity.State["Player2Ships"].toString(),
                 onValueChange = {},
                 enabled = false,
             )
