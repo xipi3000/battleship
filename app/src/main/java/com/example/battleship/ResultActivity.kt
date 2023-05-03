@@ -22,6 +22,9 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.battleship.ui.theme.BattleshipTheme
 import kotlin.system.exitProcess
+/*TODO: no només carrega lento sino que,
+    a més, a vegades simplement es mor perque jaja too much cpu usage
+    -> fer un altre companion que tingui les grids que només l'utilizin game i setup*/
 
 class ResultActivity : ComponentActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -56,7 +59,7 @@ class ResultActivity : ComponentActivity(){
             //S'haurà de fer un parser per ficar un missatge, que encara amb els arrays li costa
             Text(text = "Log values")
             TextField(
-                value = MainActivity.State["Player1Ships"].toString() + MainActivity.State["Player2Ships"].toString(),
+                value = parseGameResult(),
                 onValueChange = {},
                 enabled = false,
             )
@@ -89,5 +92,18 @@ class ResultActivity : ComponentActivity(){
                 Text(text = "Salir")
             }
         }
+    }
+
+    private fun parseGameResult(): String {
+        val player2 = MainActivity.State["Player2Ships"] as ArrayList<Int>
+        var message= ""
+        /* Possible endStates:
+        * -> player1 wins -> player2 has no ships
+        * -> player2 wins (bot) -> player2 has no ships
+        * -> both lose -> no time left*/
+        if (player2.isEmpty()){
+            message = "Enhorabona!"
+        }
+        return message
     }
 }

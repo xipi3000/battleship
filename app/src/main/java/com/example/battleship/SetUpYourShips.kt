@@ -193,7 +193,8 @@ class SetUpYourShips : ComponentActivity() {
                             playerGridShips.add(cell)
                     }
                     MainActivity.State = MainActivity.State + ("Player1Ships" to playerGridShips)
-                    MainActivity.State = MainActivity.State + ("Player1Grid" to playerGrid)
+                    //put into another companion object
+                    //MainActivity.State = MainActivity.State + ("Player1Grid" to playerGrid)
                     //Store 2nd player grid (bot or human must have different implementations)
                     if(player2){
                         randomSetup()
@@ -203,7 +204,8 @@ class SetUpYourShips : ComponentActivity() {
                                 botGridShips.add(cell)
                         }
                         MainActivity.State = MainActivity.State + ("Player2Ships" to botGridShips)
-                        MainActivity.State = MainActivity.State + ("Player2Grid" to botGrid)
+                        //put into another companion object
+                        //MainActivity.State = MainActivity.State + ("Player2Grid" to botGrid)
                         startActivity(Intent(baseContext,GameInterface :: class.java))
                     }else{
                         /*TODO: gestionar com ho fem
@@ -225,8 +227,10 @@ class SetUpYourShips : ComponentActivity() {
     private fun calculateCoords(start:Int, ship:Ship, player:Player, grid: SnapshotStateList<GridType>) {
         if (checkIfFits(start, ship)){
             val new:ArrayList<Int> = newPosition(start, ship)
-            if (!freeSpace(new, ship.type, grid) && (player != Player.BOT))
-                Toast.makeText(this, "One or more positions are already occupied by another boat", Toast.LENGTH_SHORT).show()
+            if (!freeSpace(new, ship.type, grid)){
+                //cant put in the previous if because then it wouldn't check for the bot
+                if(player != Player.BOT)Toast.makeText(this, "One or more positions are already occupied by another boat", Toast.LENGTH_SHORT).show()
+            }
             else placeOnBoard(new, ship, grid)
         } else{
             if (player != Player.BOT)Toast.makeText(this, "I'm sorry, but this ship won't fit there", Toast.LENGTH_SHORT).show()
@@ -329,7 +333,7 @@ class SetUpYourShips : ComponentActivity() {
                     0 -> ship.newOrientation(Orientation.Horizontal)
                     1 -> ship.newOrientation(Orientation.Vertical)
                 }
-                //try to place (calculateCoords already checks for us)
+                //try to place
                 calculateCoords(randPos, ship, Player.BOT, botGrid)
                 //if there were no problems -> nextShip; else -> try again
                 if(ship.hasBeenInitialized()){

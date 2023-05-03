@@ -30,9 +30,11 @@ class MainActivity : ComponentActivity() {
             "Timed" to false,
             "InitialTime" to Int.MAX_VALUE,
             "Alias" to "Player",
-            //potser amb arrays de les celes que tinguin barco ja val tho
-            "Player1Grid" to SnapshotStateList<GridType>(), //player
-            "Player2Grid" to SnapshotStateList<GridType>(), //bot or 2nd player
+            //aquests dos que vagin a un altre objecte, que son molt densos
+            //"Player1Grid" to SnapshotStateList<GridType>(), //player
+            //"Player2Grid" to SnapshotStateList<GridType>(), //bot or 2nd player
+            "Player1Ships" to arrayListOf<Int>(), //bot or 2nd player
+            "Player2Ships" to arrayListOf<Int>(), //bot or 2nd player
         )
     }
 

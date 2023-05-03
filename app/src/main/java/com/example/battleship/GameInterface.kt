@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.battleship.ui.theme.BattleshipTheme
 import android.content.res.Configuration
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.runtime.*
@@ -94,7 +95,7 @@ class GameInterface : ComponentActivity() {
                 .padding(1.dp)
                 .aspectRatio(1f)
                 .fillMaxWidth()
-                .clickable(enabled = isClickable) {onCellClicked()/*onClick()*/}
+                .clickable(enabled = isClickable) { onCellClicked()/*onClick()*/ }
         )
     }
 
@@ -335,6 +336,12 @@ class GameInterface : ComponentActivity() {
             )
                 .show()
             enemyHasShipsUI[cell] = CellState.SHIP
+            //Remove shipcell from state
+            val ships = MainActivity.State["Player2Ships"] as ArrayList<Int>
+            ships.remove(cell)
+            MainActivity.State = MainActivity.State + ("Player2Ships" to ships)
+            Log.i("ShipChange", "Erased $cell from player2")
+            Log.i("ShipChange", "Cells left: "+ MainActivity.State["Player2Ships"])
         }else{
             Toast.makeText(
                 baseContext,
