@@ -41,7 +41,7 @@ import kotlinx.coroutines.delay
 class GameInterface : ComponentActivity() {
     //lateinit var lastShip: Ship //tecnicament lateinit no es null
     lateinit var grid: Unit
-    lateinit var enemyHasShipsUI: SnapshotStateList<Int>
+    lateinit var enemyHasShipsUI: SnapshotStateList<CellState>
     var player1Grid:SnapshotStateList<GridType> =
         MainActivity.State["Player1Grid"] as SnapshotStateList<GridType> //Player's ship setup
     var player2Grid:SnapshotStateList<GridType> =
@@ -65,7 +65,7 @@ class GameInterface : ComponentActivity() {
     @Composable
     fun TableCell(
         text: String,
-        hasShip: Int,
+        hasShip: CellState,
         hasBeenClicked: Boolean = false,
         onCellClicked: () -> Unit,
         isClickable: Boolean = true,
@@ -83,8 +83,8 @@ class GameInterface : ComponentActivity() {
         Image(
             painter = painterResource(
                 id = when (hasShip){
-                    1 -> R.drawable.water
-                    0 -> R.drawable.undiscovered
+                    CellState.WATER -> R.drawable.water
+                    CellState.UNKNOWN -> R.drawable.undiscovered
                     else -> R.drawable.explosion
                 }
             ),
@@ -164,8 +164,9 @@ class GameInterface : ComponentActivity() {
                         .aspectRatio(1f)
                 )
                 {
+                    //TODO: implement with rememberSaveable
                     enemyHasShipsUI= remember { mutableStateListOf() }
-                    for (i in 0 until 100) enemyHasShipsUI.add(0)
+                    for (i in 0 until 100) enemyHasShipsUI.add(CellState.UNKNOWN)
 
                     grid = LazyVerticalGrid(
                             userScrollEnabled = false,
@@ -210,8 +211,8 @@ class GameInterface : ComponentActivity() {
                                         TableCell(
                                             text = it.toString(),
                                             hasShip = when(player1Grid[it]){
-                                                GridType.WATER -> 1
-                                                else-> 0 },
+                                                GridType.WATER -> CellState.WATER
+                                                else-> CellState.UNKNOWN },
                                             onCellClicked = {},
                                             isClickable = false,
 
@@ -257,8 +258,8 @@ class GameInterface : ComponentActivity() {
                             .aspectRatio(1f)
                     )
                     {
-                        val enemyHasShipsUI: SnapshotStateList<Int> = remember { mutableStateListOf() }
-                        for (i in 0 until 100) enemyHasShipsUI.add(0)
+                        val enemyHasShipsUI: SnapshotStateList<CellState> = remember { mutableStateListOf() }
+                        for (i in 0 until 100) enemyHasShipsUI.add(CellState.UNKNOWN)
 
                         grid = LazyVerticalGrid(
                             userScrollEnabled = false,
@@ -279,7 +280,7 @@ class GameInterface : ComponentActivity() {
                                                         Toast.LENGTH_SHORT
                                                     )
                                                         .show()
-                                                    enemyHasShipsUI[it] = 3
+                                                    enemyHasShipsUI[it] = CellState.SHIP
 
                                                 }
                                                 isYourTurn = false
@@ -310,7 +311,7 @@ class GameInterface : ComponentActivity() {
                                         items(100) {
                                             TableCell(
                                                 text = it.toString(),
-                                                hasShip = 1, //isClickedState[it],
+                                                hasShip = CellState.WATER, //isClickedState[it],
                                                 onCellClicked = {},
                                                 isClickable = false,
                                             )
@@ -333,23 +334,23 @@ class GameInterface : ComponentActivity() {
                 Toast.LENGTH_SHORT
             )
                 .show()
-            enemyHasShipsUI[cell] = 3
+            enemyHasShipsUI[cell] = CellState.SHIP
         }else{
             Toast.makeText(
                 baseContext,
                 "Aigua",
                 Toast.LENGTH_SHORT
             ).show()
-            enemyHasShipsUI[cell] = 1
+            enemyHasShipsUI[cell] = CellState.WATER
         }
     }
 
     private fun endGame(){
         var count =0
         for (item in enemyHasShipsUI){
-            if (item == 3) count++
+            if (item == CellState.SHIP) count++
             //(17 es el sumatori de sizes de tots els barcos, de moment esta cutre pero ja ho fem putamadre més tard)
-            if (count == 1) startActivity(Intent(this, ResultActivity::class.java))
+            if (count == 17) startActivity(Intent(this, ResultActivity::class.java))
         }
     }
 }

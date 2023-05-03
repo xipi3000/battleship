@@ -46,12 +46,12 @@ class SetUpYourShips : ComponentActivity() {
     @Composable
     fun TableCell(
         text: String,
-        hasShip:Boolean,
+        hasShip:CellState,
         onCellClicked: () -> Unit,
     ) {
         Image(
             painter = painterResource(
-                id = if(hasShip){
+                id = if(hasShip == CellState.UNKNOWN){
                     R.drawable.undiscovered
                 }else{
                     R.drawable.water
@@ -109,7 +109,11 @@ class SetUpYourShips : ComponentActivity() {
                         items(100) {
                             TableCell(
                                 text= it.toString(),
-                                hasShip = (playerGrid[it]!=GridType.WATER),
+                                //playerGrid[it]!=GridType.WATER
+                                hasShip = (when(playerGrid[it]){
+                                    GridType.WATER -> CellState.WATER
+                                    else-> CellState.UNKNOWN
+                                }),
                                 onCellClicked = {
                                     if (!::lastShip.isInitialized){
                                         Toast.makeText(this@SetUpYourShips, "Select a ship to position", Toast.LENGTH_SHORT).show()
