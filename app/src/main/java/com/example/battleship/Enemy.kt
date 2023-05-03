@@ -22,17 +22,9 @@ class Enemy() {
     var lastResult: CellState = CellState.UNKNOWN
     var lastCell: Pair<Int, Int> = Pair(0, 0)
     var centerCell: Pair<Int, Int> = Pair(0, 0)
-    var hasCheckedButt: Boolean = false
+    var isCheckingButt: Boolean = false
 
-    fun randomCell(): Pair<Int, Int> {
-        var i = Random.nextInt(0, 10)
-        var j = Random.nextInt(0, 10)
-        while (taulell[i][j] != CellState.UNKNOWN) {
-            i = Random.nextInt(0, 10)
-            j = Random.nextInt(0, 10)
-        }
-        return Pair(i, j)
-    }
+
 
     fun play(): Pair<Int, Int> {
 
@@ -49,29 +41,46 @@ class Enemy() {
                 centerCell.first - lastCell.first,
                 centerCell.second - lastCell.second
             )
-            var nextCell =
-                Pair(lastCell.first - orientation.first, lastCell.second - orientation.second)
-            if (getCellState(nextCell) != CellState.UNKNOWN) {
-                //S'acaba el proces o mirem el darrere
-                if (hasCheckedButt) return randomCell()
-                hasCheckedButt = true
+            var nextCell : Pair<Int,Int>
+            if(!isCheckingButt) {
+                nextCell =
+                    Pair(lastCell.first - orientation.first, lastCell.second - orientation.second)
+            }
+            else{
                 nextCell =
                     Pair(lastCell.first + orientation.first, lastCell.second + orientation.second)
-                if (getCellState(nextCell) != CellState.UNKNOWN) {
-                     return randomCell()
-                    while (getCellState(nextCell) == CellState.SHIP) {
-                        nextCell = Pair(
-                            nextCell.first + orientation.first,
-                            nextCell.second + nextCell.second
-                        )
-                    }
-                    return nextCell
+            }
+
+            if (getCellState(nextCell) != CellState.UNKNOWN) {
+                //S'acaba el proces o mirem el darrere
+                if (isCheckingButt) {
+                    state = EnemyState.SEARCHING
+                    return randomCell()
                 }
+                isCheckingButt = true
+                nextCell =
+                    Pair(centerCell.first + orientation.first, centerCell.second + orientation.second)
+
+                if (getCellState(nextCell) != CellState.UNKNOWN) {
+                    state = EnemyState.SEARCHING
+                    return randomCell()
+                }
+
                 return nextCell
+
             }
             return nextCell
         }
         return randomCell()
+    }
+    fun randomCell(): Pair<Int, Int> {
+        var i = Random.nextInt(0, 10)
+        var j = Random.nextInt(0, 10)
+        while (taulell[i][j] != CellState.UNKNOWN) {
+            i = Random.nextInt(0, 10)
+            j = Random.nextInt(0, 10)
+        }
+        return Pair(i, j)
     }
     fun getCellState(cell: Pair<Int,Int>) : CellState{
         return taulell[cell.first][cell.second]
@@ -91,13 +100,14 @@ class Enemy() {
         lastCell = coords
         taulell[coords.first][coords.second] = result
         if (state == EnemyState.SEARCHING && result == CellState.SHIP) {
-            centerCell == coords
+            centerCell = coords
             state = EnemyState.TARGETTING
         } else if (state == EnemyState.TARGETTING && result == CellState.SHIP) {
             state = EnemyState.SHOOTOUT
 
-        } else {
-            state = EnemyState.SEARCHING
+        } else if (state == EnemyState.SHOOTOUT && result == CellState.WATER) {
+            if(!isCheckingButt) isCheckingButt = true
+            else state == EnemyState.SEARCHING
         }
 
     }
