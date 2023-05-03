@@ -196,7 +196,7 @@ class SetUpYourShips : ComponentActivity() {
                     MainActivity.State = MainActivity.State + ("Player1Grid" to playerGrid)
                     //Store 2nd player grid (bot or human must have different implementations)
                     if(player2){
-                        val randGrid = randomSetup()
+                        randomSetup()
                         val botGridShips:ArrayList<Int> = arrayListOf()
                         for((cell, cellType) in botGrid.withIndex()){
                             if (cellType!=GridType.WATER)
