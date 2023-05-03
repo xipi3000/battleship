@@ -39,7 +39,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.runtime.*
 import kotlinx.coroutines.delay
 class GameInterface : ComponentActivity() {
-    //lateinit var lastShip: Ship //tecnicament lateinit no es null
     lateinit var grid: Unit
     lateinit var enemyHasShipsUI: SnapshotStateList<CellState>
     lateinit var playerHasShipsUI: SnapshotStateList<CellState>
@@ -69,7 +68,7 @@ class GameInterface : ComponentActivity() {
         onCellClicked: () -> Unit,
         isClickable: Boolean = true,
     ) {
-
+        /*
         var cellShot by remember { mutableStateOf(hasBeenClicked) }
         val onClick= {
             if(cellShot) Toast.makeText(this, "This cell has already been fired", Toast.LENGTH_SHORT).show()
@@ -77,7 +76,9 @@ class GameInterface : ComponentActivity() {
                 cellShot = true
                 onCellClicked()
             }
+
         }
+        */
         Image(
             painter = painterResource(
                 id = when (hasShip){
@@ -107,15 +108,10 @@ class GameInterface : ComponentActivity() {
                 delay(1000)
                 timeRemaining--
             }
+            //if time=0 -> finish game
+            startActivity(Intent(this@GameInterface, ResultActivity::class.java))
         }
 
-        /*
-        val carrier = Ship(ShipType.CARRIER)
-        val battleship = Ship(ShipType.BATTLESHIP)
-        val crusier = Ship(ShipType.CRUISER)
-        val destroyer = Ship(ShipType.DESTROYER)
-        val submarine = Ship(ShipType.SUBMARINE)
-        */
         var isYourTurn by remember {
             mutableStateOf(true)
         }
@@ -180,14 +176,9 @@ class GameInterface : ComponentActivity() {
                                             playTurn(it)
 
                                             //bot's shot
-                                            val cell = enemy.play()
-                                            val parsedCell = cell.first*10+cell.second
-                                            Log.i("BotCell", "Shooting $parsedCell")
-                                            val infoCell = if(parsedCell in player1ships){CellState.SHIP} else {CellState.WATER}
-                                            Log.i("BotCell", "It had $infoCell")
-                                            enemy.checkCell(cell,infoCell)
+                                            botTurn()
 
-                                            if(infoCell==CellState.SHIP) {playerHasShipsUI[parsedCell]=CellState.SHIP}
+                                            //check if someone won
                                             endGame()
                                             }
                                     )
@@ -320,6 +311,17 @@ class GameInterface : ComponentActivity() {
         }
     }
 
+    private fun botTurn() {
+        val cell = enemy.play()
+        val parsedCell = cell.first*10+cell.second
+        Log.i("BotCell", "Shooting $parsedCell")
+        val infoCell = if(parsedCell in player1ships){CellState.SHIP} else {CellState.WATER}
+        Log.i("BotCell", "It had $infoCell")
+        enemy.checkCell(cell,infoCell)
+
+        if(infoCell==CellState.SHIP) {playerHasShipsUI[parsedCell]=CellState.SHIP}
+    }
+
     private fun playTurn(cell:Int) {
         if (cell in player2ships) {
             Toast.makeText(baseContext, "Tocat", Toast.LENGTH_SHORT).show()
@@ -336,11 +338,7 @@ class GameInterface : ComponentActivity() {
     }
 
     private fun endGame(){
-        var count =0
-        for (item in enemyHasShipsUI){
-            if (item == CellState.SHIP) count++
-            //(17 es el sumatori de sizes de tots els barcos, de moment esta cutre pero ja ho fem putamadre més tard)
-            if (count == 17) startActivity(Intent(this, ResultActivity::class.java))
-        }
+        if (player1ships.isEmpty() || player2ships.isEmpty())
+            startActivity(Intent(this, ResultActivity::class.java))
     }
 }
