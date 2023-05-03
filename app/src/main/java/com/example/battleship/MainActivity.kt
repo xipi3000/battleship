@@ -12,6 +12,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,11 +25,17 @@ import kotlin.system.exitProcess
 
 class MainActivity : ComponentActivity() {
     companion object {
-        var State = mapOf("Rows" to 10,
-            "NumShips" to 5, //5, 4, 3, 3, 2
+        var State = mapOf(
+            //If timed -> time; Alias, both grids... anything else?
             "Timed" to false,
-            "Alias" to "",
-            "Time" to -1)
+            "InitialTime" to Int.MAX_VALUE,
+            "Alias" to "Player",
+            //aquests dos que vagin a un altre objecte, que son molt densos
+            "Player1Grid" to SnapshotStateList<GridType>(), //player
+            "Player2Grid" to SnapshotStateList<GridType>(), //bot or 2nd player
+            "Player1Ships" to arrayListOf<Int>(), //bot or 2nd player
+            "Player2Ships" to arrayListOf<Int>(), //bot or 2nd player
+        )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

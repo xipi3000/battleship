@@ -51,22 +51,25 @@ class Configuration : ComponentActivity() {
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             val context = LocalContext.current
-            Text(text = "Alias")
             //Values we need to check the state of
             val alias = remember { mutableStateOf(TextFieldValue()) }
             val temps = remember { mutableStateOf(TextFieldValue()) }
             val checked = remember { mutableStateOf(false) }
+            val versus = remember { mutableStateOf(true) }
+            //Player name (needed)
+            Text(text = "Alias")
             TextField(
                 value = alias.value,
                 onValueChange = { alias.value = it },
                 placeholder = { Text(text = "Enter in-game name", color = Color.Gray) },
             )
+            //Timing (available)
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Checkbox(
                     checked = checked.value,
-                    onCheckedChange = { checked.value = it},
+                    onCheckedChange = {checked.value = it},
                     colors = CheckboxDefaults.colors(
                         checkedColor = Color.Green,
                         uncheckedColor = Color.Gray
@@ -74,7 +77,7 @@ class Configuration : ComponentActivity() {
                 )
                 Text(text = "Timed challenge?")
             }
-            //Only show "enter time" text if we want our game to be timed
+                //Only show "enter time" text if we want our game to be timed
             AnimatedVisibility(visible = checked.value) {
                 TextField(
                 value = temps.value,
@@ -82,24 +85,49 @@ class Configuration : ComponentActivity() {
                 placeholder = { Text(text = "Enter max time (seconds)", color = Color.Gray) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             )}
+            //Game mode
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Checkbox(
+                    checked = versus.value,
+                    onCheckedChange = {versus.value = !versus.value},
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = Color.Green,
+                        uncheckedColor = Color.Gray
+                    )
+                )
+                Text(text = "Against bot")
+                Checkbox(
+                    checked = !versus.value,
+                    onCheckedChange = {versus.value = !versus.value},
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = Color.Green,
+                        uncheckedColor = Color.Gray
+                    )
+                )
+                Text(text = "Against friend")
+            }
             Button(onClick = {
-                val intent = Intent(context, SetUpYourShips::class.java)
                 //We need an alias
                 if (alias.value.text == "") {
-                    Toast.makeText(context, "Introdueixi un temps", Toast.LENGTH_SHORT)
+                    Toast.makeText(context, "Provide an alias", Toast.LENGTH_SHORT)
                         .show()
                 } //If we want time, we need a time
                 else if(checked.value && temps.value.text == ""){
-                    Toast.makeText(context, "Introdueixi un temps", Toast.LENGTH_SHORT)
+                    Toast.makeText(context, "Provide a time", Toast.LENGTH_SHORT)
                         .show()
                 }
                 else {
                     //Store config values and start ship setup
                     MainActivity.State = MainActivity.State + ("Alias" to alias.value.text)
                     MainActivity.State = MainActivity.State + ("Timed" to checked.value)
-                    if (checked.value) MainActivity.State = MainActivity.State + ("Time" to temps.value.text)
-                    else MainActivity.State = MainActivity.State + ("Time" to -1)
-
+                    MainActivity.State = MainActivity.State + ("InitialTime" to when(temps.value.text){
+                        ""-> Int.MAX_VALUE
+                        else -> temps.value.text
+                    })//if not specified, not used
+                    MainActivity.State = MainActivity.State + ("VersusBot" to versus.value)
+                    val intent = Intent(context, SetUpYourShips::class.java)
                     context.startActivity(intent)
                 }
             }) {

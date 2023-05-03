@@ -22,6 +22,9 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.battleship.ui.theme.BattleshipTheme
 import kotlin.system.exitProcess
+/*TODO: no només carrega lento sino que,
+    a més, a vegades simplement es mor perque jaja too much cpu usage
+    -> fer un altre companion que tingui les grids que només l'utilizin game i setup*/
 
 class ResultActivity : ComponentActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,9 +56,10 @@ class ResultActivity : ComponentActivity(){
                 onValueChange = {},
                 enabled = false,
             )
+            //S'haurà de fer un parser per ficar un missatge, que encara amb els arrays li costa
             Text(text = "Log values")
             TextField(
-                value = MainActivity.State.toString(),
+                value = parseGameResult(),
                 onValueChange = {},
                 enabled = false,
             )
@@ -77,12 +81,29 @@ class ResultActivity : ComponentActivity(){
                 }
             }) {
                 Text(text = "Enviar resultados") }
-            Button(onClick = { context.startActivity(Intent(context,Configuration::class.java)) }) {
+            Button(onClick = {
+                val intent = Intent(context,Configuration::class.java)
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                context.startActivity(intent)
+            }) {
                 Text(text = "Nueva partida")
             }
             Button(onClick = { moveTaskToBack(true);activity.finish(); exitProcess(1) }) {
                 Text(text = "Salir")
             }
         }
+    }
+
+    private fun parseGameResult(): String {
+        val player2 = MainActivity.State["Player2Ships"] as ArrayList<Int>
+        var message= ""
+        /* Possible endStates:
+        * -> player1 wins -> player2 has no ships
+        * -> player2 wins (bot) -> player2 has no ships
+        * -> both lose -> no time left*/
+        if (player2.isEmpty()){
+            message = "Enhorabona!"
+        }
+        return message
     }
 }
