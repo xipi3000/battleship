@@ -28,13 +28,16 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.battleship.ui.theme.BattleshipTheme
+import java.util.Calendar
 
 class GameConfiguration : ComponentActivity() {
     companion object {
         var State = mapOf(
             //If timed -> time; Alias, both grids... anything else?
             "Timed" to false,
-            "InitialTime" to Int.MAX_VALUE,
+            "StartTime" to 0,
+            "MaxTime" to 0,
+            "FinalTime" to 0,
             "Alias" to "Player",
             "Player1Ships" to arrayListOf<Int>(), //bot or 2nd player
             "Player2Ships" to arrayListOf<Int>(), //bot or 2nd player
@@ -136,10 +139,11 @@ class GameConfiguration : ComponentActivity() {
                     //Store config values and start ship setup
                     State = State + ("Alias" to alias.value.text)
                     State = State + ("Timed" to checked.value)
-                    State = State + ("InitialTime" to when(temps.value.text){
+                    State = State + ("MaxTime" to when(temps.value.text){
                         ""-> Int.MAX_VALUE
                         else -> temps.value.text
                     })//if not specified, not used
+                    State = State + ("StartTime" to Calendar.getInstance().time)
                     State = State + ("VersusBot" to versus.value)
                     val intent = Intent(context, SetUpYourShips::class.java)
                     context.startActivity(intent)

@@ -100,7 +100,7 @@ class GameInterface : ComponentActivity() {
     @Preview(showBackground = true)
     @Composable
     fun MainView() {
-        var timeRemaining by remember { mutableStateOf(GameConfiguration.State["InitialTime"].toString().toInt()) }
+        var timeRemaining by remember { mutableStateOf(GameConfiguration.State["MaxTime"].toString().toInt()) }
         val timed = GameConfiguration.State["Timed"]
         LaunchedEffect(Unit) {
             while(timeRemaining>0) {
@@ -109,6 +109,7 @@ class GameInterface : ComponentActivity() {
                 timeRemaining--
             }
             //if time=0 -> finish game
+            GameConfiguration.State = GameConfiguration.State + ("FinalTime" to timeRemaining)
             startActivity(Intent(this@GameInterface, ResultActivity::class.java))
         }
 
@@ -179,7 +180,7 @@ class GameInterface : ComponentActivity() {
                                             botTurn()
 
                                             //check if someone won
-                                            endGame()
+                                            endGame(timeRemaining)
                                             }
                                     )
                                 }
@@ -337,8 +338,10 @@ class GameInterface : ComponentActivity() {
         }
     }
 
-    private fun endGame(){
-        if (player1ships.isEmpty() || player2ships.isEmpty())
+    private fun endGame(timeRemaining:Int){
+        if (player1ships.isEmpty() || player2ships.isEmpty()){
+            GameConfiguration.State = GameConfiguration.State + ("FinalTime" to timeRemaining)
             startActivity(Intent(this, ResultActivity::class.java))
+        }
     }
 }

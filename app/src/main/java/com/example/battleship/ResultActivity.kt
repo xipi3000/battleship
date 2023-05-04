@@ -47,16 +47,19 @@ class ResultActivity : ComponentActivity(){
             //Values we need to check the state of
             val correu = remember { mutableStateOf(TextFieldValue()) }
             val activity = ResultActivity()
+            val LogMessage = "Player: " + GameConfiguration.State["Alias"] + "" +
+                    parseGameResult() + "" +
+                    "La partida ha durat: " + ((GameConfiguration.State["MaxTime"] as Int) - (GameConfiguration.State["FinalTime"] as Int))
             Text(text = "Dia y Hora")
             TextField(
-                value = GameConfiguration.State.get("Time").toString(),
+                value = GameConfiguration.State["StartTime"].toString(),
                 onValueChange = {},
                 enabled = false,
             )
             //S'haurà de fer un parser per ficar un missatge, que encara amb els arrays li costa
             Text(text = "Log values")
             TextField(
-                value = parseGameResult(),
+                value = LogMessage,
                 onValueChange = {},
                 enabled = false,
             )
