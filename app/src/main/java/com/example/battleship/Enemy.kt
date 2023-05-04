@@ -1,6 +1,7 @@
 package com.example.battleship
 
 import android.util.Log
+import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import kotlin.math.log
@@ -20,13 +21,27 @@ class Enemy() {
         }
     }
 
+
     var state: EnemyState = EnemyState.SEARCHING
     var lastResult: CellState = CellState.UNKNOWN
     var lastCell: Pair<Int, Int> = Pair(0, 0)
     var centerCell: Pair<Int, Int> = Pair(0, 0)
     var isCheckingButt: Boolean = false
     lateinit var checkedCells: Set<Int>
+    lateinit var orientation : Pair<Int,Int>
+    val cellsList : MutableList<Int> =
+        MutableList(100){
+                i -> i + 1
+        }
 
+    fun getRandom():Pair<Int,Int>{
+        val cell : Int = cellsList.random()
+        cellsList.remove(cell)
+
+        println(cellsList)
+        return Pair(cell/10,cell%10)
+
+    }
 
     fun play(): Pair<Int, Int> {
 
@@ -40,10 +55,7 @@ class Enemy() {
 
 
         } else if (state == EnemyState.SHOOTOUT) {
-            val orientation = Pair(
-                centerCell.first - lastCell.first,
-                centerCell.second - lastCell.second
-            )
+
             var nextCell : Pair<Int,Int>
             if(!isCheckingButt) {
                 nextCell =
@@ -51,14 +63,14 @@ class Enemy() {
             }
             else{
                 nextCell =
-                    Pair(centerCell.first + orientation.first, centerCell.second + orientation.second)
+                    Pair(lastCell.first + orientation.first, lastCell.second + orientation.second)
             }
 
             if (getCellState(nextCell) != CellState.UNKNOWN) {
                 //S'acaba el proces o mirem el darrere
                 if (isCheckingButt) {
                     state = EnemyState.SEARCHING
-                    return randomCell()
+                    return getRandom()
                 }
                 isCheckingButt = true
                 nextCell =
@@ -66,7 +78,7 @@ class Enemy() {
 
                 if (getCellState(nextCell) != CellState.UNKNOWN) {
                     state = EnemyState.SEARCHING
-                    return randomCell()
+                    return getRandom()
                 }
 
                 return nextCell
@@ -74,7 +86,7 @@ class Enemy() {
             }
             return nextCell
         }
-        return randomCell()
+        return getRandom()
     }
     fun randomCell(): Pair<Int, Int> {
         var i = Random.nextInt(0, 9)
@@ -118,16 +130,24 @@ class Enemy() {
             centerCell = coords
             state = EnemyState.TARGETTING
         } else if (state == EnemyState.TARGETTING && result == CellState.SHIP) {
+            orientation = Pair(
+                centerCell.first - lastCell.first,
+                centerCell.second - lastCell.second
+            )
+
             state = EnemyState.SHOOTOUT
-
         } else if (state == EnemyState.SHOOTOUT && result == CellState.WATER) {
-            if(!isCheckingButt){ isCheckingButt = true
-            print("NNIIIIIIGGGGGG")}
-            else {
-                state == EnemyState.SEARCHING
-                isCheckingButt = false
-            }
-        }
+            if (!isCheckingButt) {
+                Log.i("goofy","mirem cul")
+                Log.i("goofy",state.toString())
+                lastCell=centerCell
+                isCheckingButt = true
 
+            }
+            else{
+                state=EnemyState.SEARCHING
+            }
+
+        }
     }
 }
