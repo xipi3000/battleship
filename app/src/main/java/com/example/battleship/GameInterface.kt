@@ -38,14 +38,16 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.runtime.*
 import kotlinx.coroutines.delay
+
 class GameInterface : ComponentActivity() {
-    lateinit var grid: Unit
-    lateinit var enemyHasShipsUI: SnapshotStateList<CellState>
+    private lateinit var enemyHasShipsUI: SnapshotStateList<CellState>
     lateinit var playerHasShipsUI: SnapshotStateList<CellState>
     var player1ships = GameConfiguration.State["Player1Ships"] as ArrayList<Int> //Player's ship setup
     var player2ships = GameConfiguration.State["Player2Ships"] as ArrayList<Int> //Bot/2nd Player's ship setup
     var isInPortraitOrientation: Boolean = true
-    val enemy = Enemy()
+    private val enemy = Enemy()
+   var isYourTurn:Boolean = true
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,7 +70,6 @@ class GameInterface : ComponentActivity() {
         onCellClicked: () -> Unit,
         isClickable: Boolean = true,
     ) {
-
         var cellShot by remember { mutableStateOf(hasBeenClicked) }
         val onClick= {
             if(cellShot) Toast.makeText(this, "This cell has already been fired", Toast.LENGTH_SHORT).show()
@@ -76,7 +77,6 @@ class GameInterface : ComponentActivity() {
                 cellShot = true
                 onCellClicked()
             }
-
         }
 
         Image(
@@ -113,203 +113,147 @@ class GameInterface : ComponentActivity() {
             startActivity(Intent(this@GameInterface, ResultActivity::class.java))
         }
 
-        var isYourTurn by remember {
-            mutableStateOf(true)
+        //TODO: implement with rememberSaveable
+        enemyHasShipsUI= remember { mutableStateListOf() }
+        for (i in 0 until 100) enemyHasShipsUI.add(CellState.UNKNOWN)
+        playerHasShipsUI= remember { mutableStateListOf() }
+        for (i in 0 until 100) playerHasShipsUI.add(if(i in player1ships)CellState.UNKNOWN else CellState.WATER)
+
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxHeight()
+        ) {
+            ShowScreenContent(timeRemaining, timed as Boolean)
         }
+    }
 
-        if (isInPortraitOrientation) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxHeight()
-            ) {
-                // Each cell of a column must have the same weight.
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(if (timeRemaining > 0) Color.Gray else Color.Red)
-                        .height(90.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Column {
-                        Text(
-                            text =
-                            if (isYourTurn) "Your turn to fire"
-                            else "Enemy's turn",
-                            fontSize = 27.sp,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center,
-
-                            )
-                        AnimatedVisibility(visible = timed as Boolean) {
-                            Text(
-                                text =
-                                "Time remaining: $timeRemaining",
-                                fontSize = 27.sp,
-                                fontWeight = FontWeight.Bold,
-                                textAlign = TextAlign.Center,
-                            )
-                        }
-                    }
-                }
-                Box(
-                    modifier = Modifier
-                        .padding(10.dp)
-                        .aspectRatio(1f)
-                )
-                {
-                    //TODO: implement with rememberSaveable
-                    enemyHasShipsUI= remember { mutableStateListOf() }
-                    for (i in 0 until 100) enemyHasShipsUI.add(CellState.UNKNOWN)
-                    playerHasShipsUI= remember { mutableStateListOf() }
-                    for (i in 0 until 100) playerHasShipsUI.add(if(i in player1ships)CellState.UNKNOWN else CellState.WATER)
-
-                    grid = LazyVerticalGrid(
-                            userScrollEnabled = false,
-                            columns = GridCells.Fixed(10),
-                            content = {
-                                items(100) {
-                                    TableCell(
-                                        text = it.toString(),
-                                        hasShip = enemyHasShipsUI[it],
-                                        isClickable = true,//testing = true; final = isYourTurn
-                                        onCellClicked = {
-                                            //player's shot
-                                            playTurn(it)
-
-                                            //bot's shot
-                                            botTurn()
-
-                                            //check if someone won
-                                            endGame(timeRemaining)
-                                            }
-                                    )
-                                }
-                            }
-                        )
-                }
-                Box(
-                    modifier = Modifier.padding(40.dp)
-                ) {
-                    Column {
-                        Text(text ="Your table")
-                        Box(
-                            modifier = Modifier
-                                .padding(10.dp)
-                                .aspectRatio(1f)
-                        )
-                        {
-                        grid =LazyVerticalGrid(
-                                userScrollEnabled = false,
-                                columns = GridCells.Fixed(10),
-                                content = {
-                                    items(100) {
-                                        TableCell(
-                                            text = it.toString(),
-                                            hasBeenClicked = false,
-                                            hasShip = playerHasShipsUI[it], //unknown enlloc de ship per el sprite
-                                            onCellClicked = {},
-                                            isClickable = false,
-                                        )
-                                    }
-                                }
-                            )
-                        }
-                    }
-                }
-            }
-        }
-        else{
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxHeight()
-            ) {
-                // Each cell of a column must have the same weight.
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color.Gray)
-                        .height(70.dp),
-                    contentAlignment = Alignment.Center
-
-                ) {
+    @Composable
+    private fun ShowScreenContent(timeRemaining: Int, timed:Boolean) {
+        return Column{
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(if (timeRemaining > 0) Color.Gray else Color.Red)
+                    .height(90.dp),
+                contentAlignment = Alignment.Center,
+            )
+            {
+                Column {
                     Text(
                         text =
                         if (isYourTurn) "Your turn to fire"
-                        else "Enemys turn",
+                        else "Enemy's turn",
                         fontSize = 27.sp,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center,
+                    )
+                    AnimatedVisibility(visible = timed) {
+                        Text(
+                            text =
+                            "Time remaining: $timeRemaining",
+                            fontSize = 27.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
                         )
+                    }
                 }
-                Row(verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                    ) {
+            }
+            when (isInPortraitOrientation){
+                true ->
+                Column{
                     Box(
                         modifier = Modifier
                             .padding(10.dp)
-                            .aspectRatio(1f)
-                    )
-                    {
-                        val enemyHasShipsUI: SnapshotStateList<CellState> = remember { mutableStateListOf() }
-                        for (i in 0 until 100) enemyHasShipsUI.add(CellState.UNKNOWN)
-
-                        grid = LazyVerticalGrid(
-                            userScrollEnabled = false,
-                            columns = GridCells.Fixed(10),
-                            content = {
-                                items(100) {
-                                    TableCell(
-                                        text = it.toString(),
-                                        hasShip = enemyHasShipsUI[it],
-                                        isClickable = isYourTurn,
-                                        onCellClicked = {
-                                            if (isYourTurn) {
-                                                isYourTurn = false
-                                                if (it in player2ships) {
-                                                    enemyHasShipsUI[it] = CellState.SHIP
-                                                }
-                                                isYourTurn = false
-                                            }
-                                        }
-
-                                    )
-                                }
-                            }
-                        )
-                    }
+                            .aspectRatio(1f),
+                    ) {ShowBigGrid(timeRemaining)}
                     Box(
                         modifier = Modifier.padding(40.dp)
                     ) {
                         Column {
-                            Text(text = "Yours table")
-
+                            Text(text ="Your table")
                             Box(
                                 modifier = Modifier
                                     .padding(10.dp)
                                     .aspectRatio(1f)
-                            )
-                            {
-                                grid = LazyVerticalGrid(
-                                    userScrollEnabled = false,
-                                    columns = GridCells.Fixed(10),
-                                    content = {
-                                        items(100) {
-                                            TableCell(
-                                                text = it.toString(),
-                                                hasShip = CellState.WATER, //isClickedState[it],
-                                                onCellClicked = {},
-                                                isClickable = false,
-                                            )
-                                        }
-                                    }
-                                )
-                            }
+                            ){ShowSmallGrid()}
+                        }
+                    }
+                }
+                false ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ){
+                    Box(
+                        modifier = Modifier
+                            .padding(10.dp)
+                            .aspectRatio(1f),
+                    ) {ShowBigGrid(timeRemaining)}
+                    Box(
+                        modifier = Modifier.padding(40.dp)
+                    ) {
+                        Column {
+                            Text(text ="Your table")
+                            Box(
+                                modifier = Modifier
+                                    .padding(10.dp)
+                                    .aspectRatio(1f)
+                            ){ShowSmallGrid()}
                         }
                     }
                 }
             }
         }
+    }
+
+    @Composable
+    private fun ShowSmallGrid() {
+        return LazyVerticalGrid(
+            userScrollEnabled = false,
+            columns = GridCells.Fixed(10),
+            content = {
+                items(100) {
+                    TableCell(
+                        text = it.toString(),
+                        hasShip = playerHasShipsUI[it], //unknown enlloc de ship per el sprite
+                        onCellClicked = {},
+                        isClickable = false,
+                    )
+                }
+            }
+        )
+    }
+
+    @Composable
+    private fun ShowBigGrid(timeRemaining:Int) {
+        return LazyVerticalGrid(
+            userScrollEnabled = false,
+            columns = GridCells.Fixed(10),
+            content = {
+                items(100) {
+                    TableCell(
+                        text = it.toString(),
+                        hasShip = enemyHasShipsUI[it],
+                        isClickable = true,//testing = true; final = isYourTurn
+                        onCellClicked = {
+                            //player's shot
+                            playTurn(it)
+                            isYourTurn = !isYourTurn
+                            //hauriem de mirar de fer que, d'alguna manera, s'actualitzés la grid
+                            //abans del bot shot
+
+                            //bot's shot
+                            botTurn()
+                            isYourTurn = !isYourTurn
+
+                            //check if someone won
+                            endGame(timeRemaining)
+                        }
+                    )
+                }
+            }
+        )
     }
 
     private fun botTurn() {
@@ -328,15 +272,11 @@ class GameInterface : ComponentActivity() {
 
     private fun playTurn(cell:Int) {
         if (cell in player2ships) {
-            //Toast.makeText(baseContext, "Tocat", Toast.LENGTH_SHORT).show()
             enemyHasShipsUI[cell] = CellState.SHIP
             //Remove shipcell from state
             player2ships.remove(cell)
             GameConfiguration.State = GameConfiguration.State + ("Player2Ships" to player2ships)
-            Log.i("ShipChange", "Erased $cell from player2")
-            Log.i("ShipChange", "Cells left: "+ GameConfiguration.State["Player2Ships"])
         }else{
-            //Toast.makeText(baseContext, "Aigua", Toast.LENGTH_SHORT).show()
             enemyHasShipsUI[cell] = CellState.WATER
         }
     }
