@@ -47,9 +47,9 @@ class ResultActivity : ComponentActivity(){
             //Values we need to check the state of
             val correu = remember { mutableStateOf(TextFieldValue()) }
             val activity = ResultActivity()
-            val LogMessage = "Player: " + GameConfiguration.State["Alias"] + "" +
-                    parseGameResult() + "" +
-                    "La partida ha durat: " + ((GameConfiguration.State["MaxTime"] as Int) - (GameConfiguration.State["FinalTime"] as Int))
+            val logMessage = "Player: "+GameConfiguration.State["Alias"]+"."+System.getProperty("line.separator")+
+                    "La partida ha durat: "+((GameConfiguration.State["MaxTime"] as Int)-(GameConfiguration.State["FinalTime"] as Int))+
+                    " segons."+System.getProperty("line.separator")+ parseGameResult()+"."
             Text(text = "Dia y Hora")
             TextField(
                 value = GameConfiguration.State["StartTime"].toString(),
@@ -59,7 +59,7 @@ class ResultActivity : ComponentActivity(){
             //S'haurà de fer un parser per ficar un missatge, que encara amb els arrays li costa
             Text(text = "Log values")
             TextField(
-                value = LogMessage,
+                value = logMessage,
                 onValueChange = {},
                 enabled = false,
             )
@@ -97,16 +97,13 @@ class ResultActivity : ComponentActivity(){
     private fun parseGameResult(): String {
         val player1ships = GameConfiguration.State["Player1Ships"] as ArrayList<Int>
         val player2ships = GameConfiguration.State["Player2Ships"] as ArrayList<Int>
-        /* Possible endStates:
-        * -> player1 wins -> player2 has no ships
-        * -> player2 wins -> player1 has no ships (either bot or player)
-        * -> both lose -> no time left*/
+        /* CANVIAR MISSATGES DE RESULT */
         return if (player2ships.isEmpty()){
             "Tremendo, has aconseguit guanyar a un bot. Vols un pin o una xapa?"
         }else if(player1ships.isEmpty()){
-            "Malooo, que malo lol, git gud bitch"
+            "Malooo, que malo lol, git gud bitch."
         }else{
-            "Puto lento, a veure si penses més rapid"
+            "Puto lento, a veure si penses més ràpid."
         }
     }
 }

@@ -28,7 +28,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.battleship.ui.theme.BattleshipTheme
-import java.util.Calendar
 
 class GameConfiguration : ComponentActivity() {
     companion object {
@@ -141,9 +140,8 @@ class GameConfiguration : ComponentActivity() {
                     State = State + ("Timed" to checked.value)
                     State = State + ("MaxTime" to when(temps.value.text){
                         ""-> Int.MAX_VALUE
-                        else -> temps.value.text
+                        else -> temps.value.text.toInt()
                     })//if not specified, not used
-                    State = State + ("StartTime" to Calendar.getInstance().time)
                     State = State + ("VersusBot" to versus.value)
                     val intent = Intent(context, SetUpYourShips::class.java)
                     context.startActivity(intent)

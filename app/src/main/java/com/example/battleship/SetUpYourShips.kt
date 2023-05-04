@@ -22,6 +22,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.battleship.ui.theme.BattleshipTheme
+import java.text.SimpleDateFormat
+import java.util.Calendar
 import kotlin.random.Random
 
 class SetUpYourShips : ComponentActivity() {
@@ -202,6 +204,8 @@ class SetUpYourShips : ComponentActivity() {
                                 botGridShips.add(cell)
                         }
                         GameConfiguration.State = GameConfiguration.State + ("Player2Ships" to botGridShips)
+                        val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm")
+                        GameConfiguration.State = GameConfiguration.State + ("StartTime" to formatter.format(Calendar.getInstance().time))
                         startActivity(Intent(baseContext,GameInterface :: class.java))
                     }else{ //second player
                         /* TODO: gestionar com ho fem
