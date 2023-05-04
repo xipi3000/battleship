@@ -39,6 +39,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.runtime.*
 import kotlinx.coroutines.delay
 
+@Suppress("UNCHECKED_CAST")
 class GameInterface : ComponentActivity() {
     private lateinit var enemyHasShipsUI: SnapshotStateList<CellState>
     lateinit var playerHasShipsUI: SnapshotStateList<CellState>
