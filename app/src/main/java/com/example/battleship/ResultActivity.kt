@@ -49,7 +49,7 @@ class ResultActivity : ComponentActivity(){
             val activity = ResultActivity()
             val logMessage = "Player: "+GameConfiguration.State["Alias"]+"."+System.getProperty("line.separator")+
                     "La partida ha durat: "+((GameConfiguration.State["MaxTime"] as Int)-(GameConfiguration.State["FinalTime"] as Int))+
-                    " segons."+System.getProperty("line.separator")+ parseGameResult()+"."
+                    " segons."+System.getProperty("line.separator")+ parseGameResult()
             Text(text = "Dia y Hora")
             TextField(
                 value = GameConfiguration.State["StartTime"].toString(),
@@ -74,8 +74,8 @@ class ResultActivity : ComponentActivity(){
                     val intent = Intent(Intent.ACTION_SEND).apply {
                         type = "message/rfc822"
                         putExtra(Intent.EXTRA_EMAIL, arrayOf(correu.value.text))
-                        //putExtra(Intent.EXTRA_SUBJECT, ??) -> valors de dia i hora
-                        //putExtra(Intent.EXTRA_TEXT, MainActivity.State.toString()) -> fem un toString a State
+                        putExtra(Intent.EXTRA_SUBJECT, GameConfiguration.State["StartTime"].toString())
+                        putExtra(Intent.EXTRA_TEXT, logMessage)
                     }
                     context.startActivity(Intent.createChooser(intent,"Choose an Email client : "))
                 }

@@ -1,5 +1,6 @@
 package com.example.battleship
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
@@ -68,6 +69,7 @@ class SetUpYourShips : ComponentActivity() {
         )
     }
 
+    @SuppressLint("SimpleDateFormat")
     @Preview(showBackground = true)
     @Composable
     fun MainView() {
@@ -92,7 +94,7 @@ class SetUpYourShips : ComponentActivity() {
         //->Mirar si es contra player o contra bot -> si contra player -> mirar si first time
 
         val player = Player.PLAYER
-        //val player2:Boolean = GameConfiguration.State["VersusBot"] as Boolean
+        val versusBot:Boolean = GameConfiguration.State["VersusBot"] as Boolean
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxHeight()
@@ -196,7 +198,7 @@ class SetUpYourShips : ComponentActivity() {
                     }
                     GameConfiguration.State = GameConfiguration.State + ("Player1Ships" to playerGridShips)
                     //Store 2nd player grid (bot or human must have different implementations)
-                    if(true){ //bot
+                    if(versusBot){ //bot
                         randomSetup()
                         val botGridShips:ArrayList<Int> = arrayListOf()
                         for((cell, cellType) in botGrid.withIndex()){
@@ -204,7 +206,7 @@ class SetUpYourShips : ComponentActivity() {
                                 botGridShips.add(cell)
                         }
                         GameConfiguration.State = GameConfiguration.State + ("Player2Ships" to botGridShips)
-                        val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm")
+                        val formatter = SimpleDateFormat("HH:mm yyyy-MM-dd")
                         GameConfiguration.State = GameConfiguration.State + ("StartTime" to formatter.format(Calendar.getInstance().time))
                         startActivity(Intent(baseContext,GameInterface :: class.java))
                     }else{ //second player

@@ -316,16 +316,19 @@ class GameInterface : ComponentActivity() {
         val cell = enemy.play()
         val parsedCell = cell.first*10+cell.second
         Log.i("BotCell", "Shooting $parsedCell")
-        val infoCell = if(parsedCell in player1ships){CellState.SHIP} else {CellState.WATER}
+        val infoCell = if(parsedCell in player1ships){CellState.SHIP }else{CellState.WATER}
         Log.i("BotCell", "It had $infoCell")
         enemy.checkCell(cell,infoCell)
 
-        if(infoCell==CellState.SHIP) {playerHasShipsUI[parsedCell]=CellState.SHIP}
+        if(infoCell==CellState.SHIP) {
+            playerHasShipsUI[parsedCell]=CellState.SHIP
+            player1ships.remove(parsedCell)
+        }
     }
 
     private fun playTurn(cell:Int) {
         if (cell in player2ships) {
-            Toast.makeText(baseContext, "Tocat", Toast.LENGTH_SHORT).show()
+            //Toast.makeText(baseContext, "Tocat", Toast.LENGTH_SHORT).show()
             enemyHasShipsUI[cell] = CellState.SHIP
             //Remove shipcell from state
             player2ships.remove(cell)
@@ -333,7 +336,7 @@ class GameInterface : ComponentActivity() {
             Log.i("ShipChange", "Erased $cell from player2")
             Log.i("ShipChange", "Cells left: "+ GameConfiguration.State["Player2Ships"])
         }else{
-            Toast.makeText(baseContext, "Aigua", Toast.LENGTH_SHORT).show()
+            //Toast.makeText(baseContext, "Aigua", Toast.LENGTH_SHORT).show()
             enemyHasShipsUI[cell] = CellState.WATER
         }
     }
