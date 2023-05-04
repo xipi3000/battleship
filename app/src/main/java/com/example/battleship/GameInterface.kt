@@ -184,6 +184,8 @@ class GameInterface : ComponentActivity() {
 
                                                 val cell = enemy.play()
                                                 Log.i("goofy",(cell.first*10+cell.second).toString())
+                                                Log.i("goofy","first-> " +cell.first )
+                                                Log.i("goofy","first-> " +cell.second )
                                                 val infoCell = player1Grid[cell.first*10+cell.second]
                                                 enemy.checkCell(cell,if(infoCell==GridType.WATER)CellState.WATER else CellState.SHIP)
 
