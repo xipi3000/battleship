@@ -22,9 +22,6 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.battleship.ui.theme.BattleshipTheme
 import kotlin.system.exitProcess
-/*TODO: no només carrega lento sino que,
-    a més, a vegades simplement es mor perque jaja too much cpu usage
-    -> fer un altre companion que tingui les grids que només l'utilizin game i setup*/
 
 class ResultActivity : ComponentActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,16 +47,19 @@ class ResultActivity : ComponentActivity(){
             //Values we need to check the state of
             val correu = remember { mutableStateOf(TextFieldValue()) }
             val activity = ResultActivity()
+            val logMessage = "Player: "+GameConfiguration.State["Alias"]+"."+System.getProperty("line.separator")+
+                    "La partida ha durat: "+((GameConfiguration.State["MaxTime"] as Int)-(GameConfiguration.State["FinalTime"] as Int))+
+                    " segons."+System.getProperty("line.separator")+ parseGameResult()
             Text(text = "Dia y Hora")
             TextField(
-                value = MainActivity.State.get("Time").toString(),
+                value = GameConfiguration.State["StartTime"].toString(),
                 onValueChange = {},
                 enabled = false,
             )
             //S'haurà de fer un parser per ficar un missatge, que encara amb els arrays li costa
             Text(text = "Log values")
             TextField(
-                value = parseGameResult(),
+                value = logMessage,
                 onValueChange = {},
                 enabled = false,
             )
@@ -74,15 +74,15 @@ class ResultActivity : ComponentActivity(){
                     val intent = Intent(Intent.ACTION_SEND).apply {
                         type = "message/rfc822"
                         putExtra(Intent.EXTRA_EMAIL, arrayOf(correu.value.text))
-                        //putExtra(Intent.EXTRA_SUBJECT, ??) -> valors de dia i hora
-                        //putExtra(Intent.EXTRA_TEXT, MainActivity.State.toString()) -> fem un toString a State
+                        putExtra(Intent.EXTRA_SUBJECT, GameConfiguration.State["StartTime"].toString())
+                        putExtra(Intent.EXTRA_TEXT, logMessage)
                     }
                     context.startActivity(Intent.createChooser(intent,"Choose an Email client : "))
                 }
             }) {
                 Text(text = "Enviar resultados") }
             Button(onClick = {
-                val intent = Intent(context,Configuration::class.java)
+                val intent = Intent(context,GameConfiguration::class.java)
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                 context.startActivity(intent)
             }) {
@@ -95,15 +95,15 @@ class ResultActivity : ComponentActivity(){
     }
 
     private fun parseGameResult(): String {
-        val player2 = MainActivity.State["Player2Ships"] as ArrayList<Int>
-        var message= ""
-        /* Possible endStates:
-        * -> player1 wins -> player2 has no ships
-        * -> player2 wins (bot) -> player2 has no ships
-        * -> both lose -> no time left*/
-        if (player2.isEmpty()){
-            message = "Enhorabona!"
+        val player1ships = GameConfiguration.State["Player1Ships"] as ArrayList<Int>
+        val player2ships = GameConfiguration.State["Player2Ships"] as ArrayList<Int>
+        /* CANVIAR MISSATGES DE RESULT */
+        return if (player2ships.isEmpty()){
+            "Tremendo, has aconseguit guanyar a un bot. Vols un pin o una xapa?"
+        }else if(player1ships.isEmpty()){
+            "Malooo, que malo lol, git gud bitch."
+        }else{
+            "Puto lento, a veure si penses més ràpid."
         }
-        return message
     }
 }

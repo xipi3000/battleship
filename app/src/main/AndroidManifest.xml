@@ -26,7 +26,7 @@
             android:theme="@style/Theme.Battleship" >
         </activity>
         <activity
-            android:name=".Configuration"
+            android:name=".GameConfiguration"
             android:exported="true"
             android:theme="@style/Theme.Battleship" >
         </activity>

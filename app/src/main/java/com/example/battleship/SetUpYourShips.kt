@@ -1,5 +1,6 @@
 package com.example.battleship
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
@@ -22,6 +23,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.battleship.ui.theme.BattleshipTheme
+import java.text.SimpleDateFormat
+import java.util.Calendar
 import kotlin.random.Random
 
 class SetUpYourShips : ComponentActivity() {
@@ -66,6 +69,7 @@ class SetUpYourShips : ComponentActivity() {
         )
     }
 
+    @SuppressLint("SimpleDateFormat")
     @Preview(showBackground = true)
     @Composable
     fun MainView() {
@@ -90,7 +94,7 @@ class SetUpYourShips : ComponentActivity() {
         //->Mirar si es contra player o contra bot -> si contra player -> mirar si first time
 
         val player = Player.PLAYER
-        val player2:Boolean = MainActivity.State["VersusBot"] as Boolean
+        val versusBot:Boolean = GameConfiguration.State["VersusBot"] as Boolean
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxHeight()
@@ -192,23 +196,21 @@ class SetUpYourShips : ComponentActivity() {
                         if (cellType!=GridType.WATER)
                             playerGridShips.add(cell)
                     }
-                    MainActivity.State = MainActivity.State + ("Player1Ships" to playerGridShips)
-                    //put into another companion object
-                    MainActivity.State = MainActivity.State + ("Player1Grid" to playerGrid)
+                    GameConfiguration.State = GameConfiguration.State + ("Player1Ships" to playerGridShips)
                     //Store 2nd player grid (bot or human must have different implementations)
-                    if(player2){
+                    if(versusBot){ //bot
                         randomSetup()
                         val botGridShips:ArrayList<Int> = arrayListOf()
                         for((cell, cellType) in botGrid.withIndex()){
                             if (cellType!=GridType.WATER)
                                 botGridShips.add(cell)
                         }
-                        MainActivity.State = MainActivity.State + ("Player2Ships" to botGridShips)
-                        //put into another companion object
-                        MainActivity.State = MainActivity.State + ("Player2Grid" to botGrid)
+                        GameConfiguration.State = GameConfiguration.State + ("Player2Ships" to botGridShips)
+                        val formatter = SimpleDateFormat("HH:mm yyyy-MM-dd")
+                        GameConfiguration.State = GameConfiguration.State + ("StartTime" to formatter.format(Calendar.getInstance().time))
                         startActivity(Intent(baseContext,GameInterface :: class.java))
-                    }else{
-                        /*TODO: gestionar com ho fem
+                    }else{ //second player
+                        /* TODO: gestionar com ho fem
                         *  -> Fiquem una foto que es fiqui davant de tot per deixar que es passin el movil
                         *  -> Boolean "changing" per gestionar que es vegi o no
                         *  -> Boolean "player1set" per gestionar quina grid montem i guardem
