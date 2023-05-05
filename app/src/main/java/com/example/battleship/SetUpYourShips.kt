@@ -35,8 +35,8 @@ class SetUpYourShips : ComponentActivity() {
 
     companion object {
         var Grids = mapOf(
-            "player1Grid" to SnapshotStateList<GridType>(),
-            "player2Grid" to SnapshotStateList<GridType>()
+            "player1Grid" to ArrayList<CellState>(),
+            "player2Grid" to ArrayList<CellState>()
         )
     }
 
@@ -215,8 +215,7 @@ class SetUpYourShips : ComponentActivity() {
                         GameConfiguration.State = GameConfiguration.State + ("Player2Ships" to botGridShips)
                         val formatter = SimpleDateFormat("HH:mm yyyy-MM-dd")
                         GameConfiguration.State = GameConfiguration.State + ("StartTime" to formatter.format(Calendar.getInstance().time))
-                        Grids = Grids + ("player1Grid" to playerGrid)
-                        Grids = Grids + ("player2Grid" to botGrid)
+                        saveGrids()
                         startActivity(Intent(baseContext,GameInterface :: class.java))
                     }else{ //second player
                         /* TODO: gestionar com ho fem
@@ -232,7 +231,22 @@ class SetUpYourShips : ComponentActivity() {
         }
     }
 
-/* CALCULATE AND STORE VALUES FOR THE NEW POSSIBLE POSITION OF A SHIP */
+    private fun saveGrids() {
+        val player1Grid:ArrayList<CellState> = arrayListOf()
+        val player2Grid:ArrayList<CellState> = arrayListOf()
+        for (item in playerGrid){
+            if (item != GridType.WATER){
+                player1Grid.add(CellState.UNKNOWN)
+            }else{
+                player1Grid.add(CellState.WATER)
+            }
+            player2Grid.add(CellState.UNKNOWN)
+        }
+        Grids = Grids + ("player1Grid" to player1Grid)
+        Grids = Grids + ("player2Grid" to player2Grid)
+    }
+
+    /* CALCULATE AND STORE VALUES FOR THE NEW POSSIBLE POSITION OF A SHIP */
     /*Method used to calculate the new position of the ship, check if it's correct and not already
     * occupied, and in case all of this happens, store the new values*/
     private fun calculateCoords(start:Int, ship:Ship, player:Player, grid: SnapshotStateList<GridType>) {

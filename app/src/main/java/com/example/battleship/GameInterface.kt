@@ -45,8 +45,8 @@ class GameInterface : ComponentActivity() {
     lateinit var playerHasShipsUI: SnapshotStateList<CellState>
     private var player1ships = GameConfiguration.State["Player1Ships"] as ArrayList<Int> //Player's ship setup
     private var player2ships = GameConfiguration.State["Player2Ships"] as ArrayList<Int> //Bot/2nd Player's ship setup
-    private var player1Grid = SetUpYourShips.Grids["player1Grid"] as SnapshotStateList<GridType>
-    private var player2Grid = SetUpYourShips.Grids["player2Grid"] as SnapshotStateList<GridType>
+    private var player1Grid = SetUpYourShips.Grids["player1Grid"] as ArrayList<CellState>
+    private var player2Grid = SetUpYourShips.Grids["player2Grid"] as ArrayList<CellState>
     private var isInPortraitOrientation: Boolean = true
     private val enemy = Enemy()
     private var isYourTurn:Boolean = true
@@ -115,11 +115,12 @@ class GameInterface : ComponentActivity() {
             GameConfiguration.State = GameConfiguration.State + ("FinalTime" to timeRemaining)
             startActivity(Intent(this@GameInterface, ResultActivity::class.java))
         }
-        //val saveUI = UISaver()
-        enemyHasShipsUI = remember{ mutableStateListOf() }
-        playerHasShipsUI = remember{ mutableStateListOf() }
-        for (i in 0 until 100) enemyHasShipsUI.add(CellState.UNKNOWN)
-        for (i in 0 until 100) playerHasShipsUI.add(if(player1Grid[i] == GridType.WATER)CellState.WATER else CellState.UNKNOWN)
+        if(!::enemyHasShipsUI.isInitialized || !::playerHasShipsUI.isInitialized){
+            enemyHasShipsUI = remember{ mutableStateListOf() }
+            playerHasShipsUI = remember{ mutableStateListOf() }
+        }
+        for (i in 0 until 100) enemyHasShipsUI.add(player2Grid[i])
+        for (i in 0 until 100) playerHasShipsUI.add(player1Grid[i])
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -270,10 +271,7 @@ class GameInterface : ComponentActivity() {
             playerHasShipsUI[parsedCell]=CellState.SHIP
             player1ships.remove(parsedCell)
         }
-        player1Grid[parsedCell] = when(enemyHasShipsUI[parsedCell]){
-            CellState.WATER->GridType.WATER
-            else->GridType.SHOT
-        }
+        player1Grid[parsedCell] = playerHasShipsUI[parsedCell]
     }
 
     private fun playTurn(cell:Int) {
@@ -285,10 +283,7 @@ class GameInterface : ComponentActivity() {
         }else{
             enemyHasShipsUI[cell] = CellState.WATER
         }
-        player2Grid[cell] = when(enemyHasShipsUI[cell]){
-            CellState.WATER->GridType.WATER
-            else->GridType.SHOT
-        }
+        player2Grid[cell] = enemyHasShipsUI[cell]
     }
 
     private fun endGame(timeRemaining:Int){

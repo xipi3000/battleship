@@ -24,15 +24,6 @@ class Ship(val type:GridType) {
         coords = newCoord
         hasBeenSet=true
     }
-    fun isHit(coord:Int): Boolean {
-        coords.remove(coord) //Busca i elimina la primera ocurrència de "coord" (si no hi es no fa res)
-        return (coord in coords)
-    }
-
-    fun isDead(): Boolean {
-        return coords.isEmpty()
-    }
-
     fun newOrientation(or: Orientation){
         orientation = or
     }
