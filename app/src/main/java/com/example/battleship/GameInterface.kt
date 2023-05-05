@@ -88,6 +88,7 @@ class GameInterface : ComponentActivity() {
                     CellState.WATER -> R.drawable.water
                     CellState.UNKNOWN -> R.drawable.undiscovered
                     CellState.SHIP -> R.drawable.explosion
+                    else -> R.drawable.water //no s'utilitza pero es necessita per el when
                 }
             ),
             contentDescription = text,
