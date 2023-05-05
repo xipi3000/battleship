@@ -43,11 +43,13 @@ import kotlinx.coroutines.delay
 class GameInterface : ComponentActivity() {
     private lateinit var enemyHasShipsUI: SnapshotStateList<CellState>
     lateinit var playerHasShipsUI: SnapshotStateList<CellState>
-    var player1ships = GameConfiguration.State["Player1Ships"] as ArrayList<Int> //Player's ship setup
-    var player2ships = GameConfiguration.State["Player2Ships"] as ArrayList<Int> //Bot/2nd Player's ship setup
-    var isInPortraitOrientation: Boolean = true
+    private var player1ships = GameConfiguration.State["Player1Ships"] as ArrayList<Int> //Player's ship setup
+    private var player2ships = GameConfiguration.State["Player2Ships"] as ArrayList<Int> //Bot/2nd Player's ship setup
+    private var player1Grid = SetUpYourShips.Grids["player1Grid"] as SnapshotStateList<GridType>
+    private var player2Grid = SetUpYourShips.Grids["player2Grid"] as SnapshotStateList<GridType>
+    private var isInPortraitOrientation: Boolean = true
     private val enemy = Enemy()
-   var isYourTurn:Boolean = true
+    private var isYourTurn:Boolean = true
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -113,12 +115,7 @@ class GameInterface : ComponentActivity() {
             GameConfiguration.State = GameConfiguration.State + ("FinalTime" to timeRemaining)
             startActivity(Intent(this@GameInterface, ResultActivity::class.java))
         }
-
-        //TODO: implement with rememberSaveable
-        enemyHasShipsUI= remember { mutableStateListOf() }
-        for (i in 0 until 100) enemyHasShipsUI.add(CellState.UNKNOWN)
-        playerHasShipsUI= remember { mutableStateListOf() }
-        for (i in 0 until 100) playerHasShipsUI.add(if(i in player1ships)CellState.UNKNOWN else CellState.WATER)
+        SetUpGrids()
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -126,6 +123,18 @@ class GameInterface : ComponentActivity() {
         ) {
             ShowScreenContent(timeRemaining, timed as Boolean)
         }
+    }
+
+    @Composable
+    private fun SetUpGrids() {
+        if(/*player1Grid && player2Grid*/false){
+        }else{
+            enemyHasShipsUI = remember { mutableStateListOf() }
+            playerHasShipsUI = remember { mutableStateListOf() }
+            for (i in 0 until 100) enemyHasShipsUI.add(CellState.UNKNOWN)
+            for (i in 0 until 100) playerHasShipsUI.add(if(player1Grid[i] == GridType.WATER)CellState.WATER else CellState.UNKNOWN)
+        }
+
     }
 
     @Composable

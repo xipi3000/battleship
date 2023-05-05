@@ -33,6 +33,13 @@ class SetUpYourShips : ComponentActivity() {
     private lateinit var playerGrid: SnapshotStateList<GridType>
     private lateinit var botGrid:SnapshotStateList<GridType>
 
+    companion object {
+        var Grids = mapOf(
+            "player1Grid" to SnapshotStateList<GridType>(),
+            "player2Grid" to SnapshotStateList<GridType>()
+        )
+    }
+
     private enum class Player{
         PLAYER,
         BOT,
@@ -54,8 +61,8 @@ class SetUpYourShips : ComponentActivity() {
     ) {
         Image(
             painter = painterResource(
-                id = if(hasShip == CellState.UNKNOWN){
-                    R.drawable.undiscovered
+                id = if(hasShip == CellState.SHIP){
+                    R.drawable.isship
                 }else{
                     R.drawable.water
                 }),
@@ -116,7 +123,7 @@ class SetUpYourShips : ComponentActivity() {
                                 //playerGrid[it]!=GridType.WATER
                                 hasShip = (when(playerGrid[it]){
                                     GridType.WATER -> CellState.WATER
-                                    else-> CellState.UNKNOWN
+                                    else-> CellState.SHIP
                                 }),
                                 onCellClicked = {
                                     if (!::lastShip.isInitialized){
@@ -208,6 +215,8 @@ class SetUpYourShips : ComponentActivity() {
                         GameConfiguration.State = GameConfiguration.State + ("Player2Ships" to botGridShips)
                         val formatter = SimpleDateFormat("HH:mm yyyy-MM-dd")
                         GameConfiguration.State = GameConfiguration.State + ("StartTime" to formatter.format(Calendar.getInstance().time))
+                        Grids = Grids + ("player1Grid" to playerGrid)
+                        Grids = Grids + ("player2Grid" to botGrid)
                         startActivity(Intent(baseContext,GameInterface :: class.java))
                     }else{ //second player
                         /* TODO: gestionar com ho fem

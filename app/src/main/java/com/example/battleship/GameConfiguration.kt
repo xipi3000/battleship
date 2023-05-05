@@ -32,7 +32,6 @@ import com.example.battleship.ui.theme.BattleshipTheme
 class GameConfiguration : ComponentActivity() {
     companion object {
         var State = mapOf(
-            //If timed -> time; Alias, both grids... anything else?
             "Timed" to false,
             "StartTime" to 0,
             "MaxTime" to 0,
