@@ -36,7 +36,8 @@ class SetUpYourShips : ComponentActivity() {
     companion object {
         var Grids = mapOf(
             "player1Grid" to ArrayList<CellState>(),
-            "player2Grid" to ArrayList<CellState>()
+            "player2Grid" to ArrayList<CellState>(),
+            "cellsShot" to ArrayList<Boolean>()
         )
     }
 
@@ -234,6 +235,7 @@ class SetUpYourShips : ComponentActivity() {
     private fun saveGrids() {
         val player1Grid:ArrayList<CellState> = arrayListOf()
         val player2Grid:ArrayList<CellState> = arrayListOf()
+        val cellsShot = arrayListOf<Boolean>()
         for (item in playerGrid){
             if (item != GridType.WATER){
                 player1Grid.add(CellState.UNKNOWN)
@@ -241,9 +243,11 @@ class SetUpYourShips : ComponentActivity() {
                 player1Grid.add(CellState.WATER)
             }
             player2Grid.add(CellState.UNKNOWN)
+            cellsShot.add(false)
         }
         Grids = Grids + ("player1Grid" to player1Grid)
         Grids = Grids + ("player2Grid" to player2Grid)
+        Grids = Grids + ("cellsShot" to cellsShot)
     }
 
     /* CALCULATE AND STORE VALUES FOR THE NEW POSSIBLE POSITION OF A SHIP */

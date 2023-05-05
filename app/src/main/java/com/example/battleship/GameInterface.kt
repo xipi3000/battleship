@@ -42,11 +42,13 @@ import kotlinx.coroutines.delay
 @Suppress("UNCHECKED_CAST")
 class GameInterface : ComponentActivity() {
     private lateinit var enemyHasShipsUI: SnapshotStateList<CellState>
-    lateinit var playerHasShipsUI: SnapshotStateList<CellState>
+    private lateinit var playerHasShipsUI: SnapshotStateList<CellState>
+    private lateinit var cellsShot:SnapshotStateList<Boolean>
     private var player1ships = GameConfiguration.State["Player1Ships"] as ArrayList<Int> //Player's ship setup
     private var player2ships = GameConfiguration.State["Player2Ships"] as ArrayList<Int> //Bot/2nd Player's ship setup
     private var player1Grid = SetUpYourShips.Grids["player1Grid"] as ArrayList<CellState>
     private var player2Grid = SetUpYourShips.Grids["player2Grid"] as ArrayList<CellState>
+    private var cellsShotSave = SetUpYourShips.Grids["cellsShot"] as ArrayList<Boolean>
     private var isInPortraitOrientation: Boolean = true
     private val enemy = Enemy()
     private var isYourTurn:Boolean = true
@@ -69,15 +71,15 @@ class GameInterface : ComponentActivity() {
     fun TableCell(
         text: String,
         hasShip: CellState,
-        hasBeenClicked: Boolean = false,
         onCellClicked: () -> Unit,
         isClickable: Boolean = true,
     ) {
-        var cellShot by remember { mutableStateOf(hasBeenClicked) }
         val onClick= {
-            if(cellShot) Toast.makeText(this, "This cell has already been fired", Toast.LENGTH_SHORT).show()
+            if(cellsShot[text.toInt()]) Toast.makeText(this, "This cell has already been fired", Toast.LENGTH_SHORT).show()
             else{
-                cellShot = true
+                cellsShot[text.toInt()] = true
+                cellsShotSave[text.toInt()] = true
+                SetUpYourShips.Grids = SetUpYourShips.Grids + ("cellsShot" to cellsShotSave)
                 onCellClicked()
             }
         }
@@ -119,9 +121,12 @@ class GameInterface : ComponentActivity() {
         if(!::enemyHasShipsUI.isInitialized || !::playerHasShipsUI.isInitialized){
             enemyHasShipsUI = remember{ mutableStateListOf() }
             playerHasShipsUI = remember{ mutableStateListOf() }
+            cellsShot = remember{ mutableStateListOf() }
         }
         for (i in 0 until 100) enemyHasShipsUI.add(player2Grid[i])
         for (i in 0 until 100) playerHasShipsUI.add(player1Grid[i])
+        for (i in 0 until 100) cellsShot.add(cellsShotSave[i])
+
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -239,7 +244,6 @@ class GameInterface : ComponentActivity() {
                     TableCell(
                         text = it.toString(),
                         hasShip = enemyHasShipsUI[it],
-                        isClickable = true,//testing = true; final = isYourTurn
                         onCellClicked = {
                             //player's shot
                             playTurn(it)
@@ -253,7 +257,8 @@ class GameInterface : ComponentActivity() {
 
                             //check if someone won
                             endGame(timeRemaining)
-                        }
+                        },//testing = true; final = isYourTurn
+                        isClickable = true
                     )
                 }
             }
