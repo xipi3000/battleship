@@ -118,7 +118,10 @@ class Enemy() {
     }
 
     fun getCellState(cell: Pair<Int,Int>) : CellState{
-        return taulell[cell.first][cell.second]
+        if(!isOutOfBounds(cell)) {
+            return taulell[cell.first][cell.second]
+        }
+        return CellState.OUTOFBOUNDS
     }
 
     fun nextCell(orientation: Int): Pair<Int, Int> {
