@@ -39,6 +39,7 @@ class GameConfiguration : ComponentActivity() {
             "Alias" to "Player",
             "Player1Ships" to arrayListOf<Int>(), //bot or 2nd player
             "Player2Ships" to arrayListOf<Int>(), //bot or 2nd player
+            "VersusBot" to true,
         )
     }
 
@@ -137,9 +138,9 @@ class GameConfiguration : ComponentActivity() {
                     //Store config values and start ship setup
                     State = State + ("Alias" to alias.value.text)
                     State = State + ("Timed" to checked.value)
-                    State = State + ("MaxTime" to when(temps.value.text){
-                        ""-> Int.MAX_VALUE
-                        else -> temps.value.text.toInt()
+                    State = State + ("MaxTime" to when(checked.value){
+                        false-> Int.MAX_VALUE
+                        true -> temps.value.text.toInt()
                     })//if not specified, not used
                     State = State + ("VersusBot" to versus.value)
                     val intent = Intent(context, SetUpYourShips::class.java)

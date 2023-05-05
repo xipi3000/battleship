@@ -7,6 +7,7 @@ enum class GridType(val size:Int, val resource:Int){
     SUBMARINE(3, R.drawable.submarine),
     DESTROYER(2, R.drawable.destroyer),
     WATER(0, R.drawable.water),
+    SHOT(0, R.drawable.isship),
     UNDISCOVERED(0, R.drawable.undiscovered),
 }
 enum class Orientation{

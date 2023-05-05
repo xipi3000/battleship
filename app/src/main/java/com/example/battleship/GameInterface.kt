@@ -96,14 +96,14 @@ class GameInterface : ComponentActivity() {
                 .padding(1.dp)
                 .aspectRatio(1f)
                 .fillMaxWidth()
-                .clickable(enabled = isClickable) {onClick()}
+                .clickable(enabled = isClickable) { onClick() }
         )
     }
 
     @Preview(showBackground = true)
     @Composable
     fun MainView() {
-        var timeRemaining by remember { mutableStateOf(GameConfiguration.State["MaxTime"].toString().toInt()) }
+        var timeRemaining by remember { mutableStateOf(GameConfiguration.State["MaxTime"] as Int) }
         val timed = GameConfiguration.State["Timed"]
         LaunchedEffect(Unit) {
             while(timeRemaining>0) {
@@ -115,7 +115,11 @@ class GameInterface : ComponentActivity() {
             GameConfiguration.State = GameConfiguration.State + ("FinalTime" to timeRemaining)
             startActivity(Intent(this@GameInterface, ResultActivity::class.java))
         }
-        SetUpGrids()
+        //val saveUI = UISaver()
+        enemyHasShipsUI = remember{ mutableStateListOf() }
+        playerHasShipsUI = remember{ mutableStateListOf() }
+        for (i in 0 until 100) enemyHasShipsUI.add(CellState.UNKNOWN)
+        for (i in 0 until 100) playerHasShipsUI.add(if(player1Grid[i] == GridType.WATER)CellState.WATER else CellState.UNKNOWN)
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -123,18 +127,6 @@ class GameInterface : ComponentActivity() {
         ) {
             ShowScreenContent(timeRemaining, timed as Boolean)
         }
-    }
-
-    @Composable
-    private fun SetUpGrids() {
-        if(/*player1Grid && player2Grid*/false){
-        }else{
-            enemyHasShipsUI = remember { mutableStateListOf() }
-            playerHasShipsUI = remember { mutableStateListOf() }
-            for (i in 0 until 100) enemyHasShipsUI.add(CellState.UNKNOWN)
-            for (i in 0 until 100) playerHasShipsUI.add(if(player1Grid[i] == GridType.WATER)CellState.WATER else CellState.UNKNOWN)
-        }
-
     }
 
     @Composable
@@ -278,6 +270,10 @@ class GameInterface : ComponentActivity() {
             playerHasShipsUI[parsedCell]=CellState.SHIP
             player1ships.remove(parsedCell)
         }
+        player1Grid[parsedCell] = when(enemyHasShipsUI[parsedCell]){
+            CellState.WATER->GridType.WATER
+            else->GridType.SHOT
+        }
     }
 
     private fun playTurn(cell:Int) {
@@ -288,6 +284,10 @@ class GameInterface : ComponentActivity() {
             GameConfiguration.State = GameConfiguration.State + ("Player2Ships" to player2ships)
         }else{
             enemyHasShipsUI[cell] = CellState.WATER
+        }
+        player2Grid[cell] = when(enemyHasShipsUI[cell]){
+            CellState.WATER->GridType.WATER
+            else->GridType.SHOT
         }
     }
 
