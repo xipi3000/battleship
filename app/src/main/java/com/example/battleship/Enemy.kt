@@ -55,9 +55,17 @@ class Enemy() {
 
         if (state == EnemyState.TARGETTING) { //Estem fent la creu
             checkedCells= setOf()
-            var nextCell = nextCell()
-            while (getCellState(nextCell) != CellState.UNKNOWN) {
-                nextCell = nextCell()
+            var i = 0
+            var nextCell = nextCell(i)
+
+            while (getCellState(nextCell) != CellState.UNKNOWN && i<4 || isOutOfBounds(nextCell ) && i<4  ) {
+                i++
+                nextCell = nextCell(i)
+
+            }
+            if( isOutOfBounds(nextCell) && i ==3){
+                state=EnemyState.SEARCHING
+                return getRandom()
             }
             return nextCell
 
@@ -113,53 +121,28 @@ class Enemy() {
         return taulell[cell.first][cell.second]
     }
 
-    fun nextCell(): Pair<Int, Int> {
-        var outOfBounds = true
+    fun nextCell(orientation: Int): Pair<Int, Int> {
+
         var newCoord = Pair(0,0)
-        while(outOfBounds) {
-            var orientation = orientations.random()
+        println(orientations)
+        if (orientation == 0) {
+            return Pair(centerCell.first - 1, centerCell.second)
 
-            if (orientations.size == 0) {
-                state = EnemyState.SEARCHING
-                return getRandom()
-            }
-            checkedCells += orientation
+        } //Amunt
+        else if (orientation == 1) {
+            return Pair(centerCell.first, centerCell.second + 1)
 
-            println(orientations)
+        } //Dreta
+        else if (orientation == 2) {
 
-
-            if (orientation == 0) {
-                orientations.remove(0)
-                newCoord = Pair(centerCell.first - 1, centerCell.second)
-                if (!isOutOfBounds(newCoord)) {
-                    outOfBounds = false
-                }
-                newCoord = Pair(centerCell.first - 1, centerCell.second)
-            } //Amunt
-            else if (orientation == 1) {
-                orientations.remove(1)
-                newCoord = Pair(centerCell.first, centerCell.second + 1)
-                if (!isOutOfBounds(newCoord)) {
-                    outOfBounds = false
-                    newCoord = Pair(0, 0)
-                }
-
-            } //Dreta
-            else if (orientation == 2) {
-                orientations.remove(2)
-                newCoord = Pair(centerCell.first + 1, centerCell.second)
-                if (!isOutOfBounds(newCoord)) {
-                    outOfBounds = false
-                }
-            } //Devall
-            else if (orientation == 3) {
-                orientations.remove(3)
-                newCoord = Pair(centerCell.first, centerCell.second - 1) //Esquerra
-                if (!isOutOfBounds(newCoord)) {
-                    outOfBounds = false
-                }
-            }
+            return  Pair(centerCell.first + 1, centerCell.second)
+        } //Devall
+        else if (orientation == 3) {
+            return  Pair(centerCell.first, centerCell.second - 1) //Esquerra
         }
+
+
+
         return newCoord
 
 
@@ -176,10 +159,10 @@ class Enemy() {
             isCheckingButt = false
             centerCell = coords
             state = EnemyState.TARGETTING
-            orientations.clear()
-            orientations= MutableList(4){
-                it
-            }
+            //orientations.clear()
+            //orientations= MutableList(4){
+            //    it
+            //}
 
         } else if (state == EnemyState.TARGETTING && result == CellState.SHIP) {
             orientation = Pair(
