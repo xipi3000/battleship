@@ -26,6 +26,7 @@ import kotlin.system.exitProcess
 class ResultActivity : ComponentActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        GameConfiguration.State = GameConfiguration.State + ("Enemy" to Enemy())
         setContent {
             BattleshipTheme {
                 MainView()
