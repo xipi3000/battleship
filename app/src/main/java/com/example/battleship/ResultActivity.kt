@@ -44,7 +44,6 @@ class ResultActivity : ComponentActivity(){
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             val context = LocalContext.current
-            //Values we need to check the state of
             val correu = remember { mutableStateOf(TextFieldValue()) }
             val activity = ResultActivity()
             val logMessage = "Player: "+GameConfiguration.State["Alias"]+"."+System.getProperty("line.separator")+
@@ -56,7 +55,6 @@ class ResultActivity : ComponentActivity(){
                 onValueChange = {},
                 enabled = false,
             )
-            //S'haurà de fer un parser per ficar un missatge, que encara amb els arrays li costa
             Text(text = "Log values")
             TextField(
                 value = logMessage,
@@ -98,7 +96,6 @@ class ResultActivity : ComponentActivity(){
     private fun parseGameResult(): String {
         val player1ships = GameConfiguration.State["Player1Ships"] as ArrayList<Int>
         val player2ships = GameConfiguration.State["Player2Ships"] as ArrayList<Int>
-        /* CANVIAR MISSATGES DE RESULT */
         return if (player2ships.isEmpty()){
             "Enhorabona! Has guanyat la partida :D"
         }else if(player1ships.isEmpty()){
