@@ -94,16 +94,17 @@ class ResultActivity : ComponentActivity(){
         }
     }
 
+    @Suppress("UNCHECKED_CAST")
     private fun parseGameResult(): String {
         val player1ships = GameConfiguration.State["Player1Ships"] as ArrayList<Int>
         val player2ships = GameConfiguration.State["Player2Ships"] as ArrayList<Int>
         /* CANVIAR MISSATGES DE RESULT */
         return if (player2ships.isEmpty()){
-            "Tremendo, has aconseguit guanyar a un bot. Vols un pin o una xapa?"
+            "Enhorabona! Has guanyat la partida :D"
         }else if(player1ships.isEmpty()){
-            "Malooo, que malo lol, git gud bitch."
+            "Una llàstima, sembla que has perdut :("
         }else{
-            "Puto lento, a veure si penses més ràpid."
+            "Ep! Sembla que necessitaves més temps..."
         }
     }
 }
