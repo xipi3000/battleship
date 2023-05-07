@@ -62,7 +62,7 @@ class SetUpYourShips : ComponentActivity() {
     ) {
         Image(
             painter = painterResource(
-                id = if(hasShip == CellState.SHIP){
+                id = if(hasShip == CellState.SHIPFOUND){
                     R.drawable.isship
                 }else{
                     R.drawable.water
@@ -124,7 +124,7 @@ class SetUpYourShips : ComponentActivity() {
                                 //playerGrid[it]!=GridType.WATER
                                 hasShip = (when(playerGrid[it]){
                                     GridType.WATER -> CellState.WATER
-                                    else-> CellState.SHIP
+                                    else-> CellState.SHIPFOUND
                                 }),
                                 onCellClicked = {
                                     if (!::lastShip.isInitialized){
@@ -238,9 +238,9 @@ class SetUpYourShips : ComponentActivity() {
         val cellsShot = arrayListOf<Boolean>()
         for (item in playerGrid){
             if (item != GridType.WATER){
-                player1Grid.add(CellState.UNKNOWN)
+                player1Grid.add(CellState.SHIPHIDDEN)
             }else{
-                player1Grid.add(CellState.WATER)
+                player1Grid.add(CellState.UNKNOWN)
             }
             player2Grid.add(CellState.UNKNOWN)
             cellsShot.add(false)

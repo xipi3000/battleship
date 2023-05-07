@@ -1,11 +1,6 @@
 package com.example.battleship
 
 import android.util.Log
-import androidx.compose.foundation.gestures.rememberTransformableState
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.snapshots.SnapshotStateList
-import kotlin.math.log
-import kotlin.random.Random
 
 enum class EnemyState {
     SEARCHING,
@@ -20,8 +15,6 @@ class Enemy() {
             CellState.UNKNOWN
         }
     }
-
-
     var state: EnemyState = EnemyState.SEARCHING
     var lastResult: CellState = CellState.UNKNOWN
     var lastCell: Pair<Int, Int> = Pair(0, 0)
@@ -52,7 +45,6 @@ class Enemy() {
     }
 
     fun play(): Pair<Int, Int> {
-
         if (state == EnemyState.TARGETTING) { //Estem fent la creu
             checkedCells= setOf()
             var i = 0
@@ -68,10 +60,7 @@ class Enemy() {
                 return getRandom()
             }
             return nextCell
-
-
         } else if (state == EnemyState.SHOOTOUT) {
-
             var nextCell : Pair<Int,Int>
             if(!isCheckingButt) {
                 nextCell =
@@ -89,7 +78,6 @@ class Enemy() {
                     return getRandom()
                 }
             }
-
             if (getCellState(nextCell) != CellState.UNKNOWN) {
                 //S'acaba el proces o mirem el darrere
                 if (isCheckingButt) {
@@ -103,14 +91,11 @@ class Enemy() {
                     state = EnemyState.SEARCHING
                     return getRandom()
                 }
-
                 if (getCellState(nextCell) != CellState.UNKNOWN) {
                     state = EnemyState.SEARCHING
                     return getRandom()
                 }
-
                 return nextCell
-
             }
             return nextCell
         }
@@ -125,12 +110,10 @@ class Enemy() {
     }
 
     fun nextCell(orientation: Int): Pair<Int, Int> {
-
         var newCoord = Pair(0,0)
         println(orientations)
         if (orientation == 0) {
             return Pair(centerCell.first - 1, centerCell.second)
-
         } //Amunt
         else if (orientation == 1) {
             return Pair(centerCell.first, centerCell.second + 1)
@@ -139,16 +122,11 @@ class Enemy() {
         else if (orientation == 2) {
 
             return  Pair(centerCell.first + 1, centerCell.second)
-        } //Devall
+        } //Davall
         else if (orientation == 3) {
             return  Pair(centerCell.first, centerCell.second - 1) //Esquerra
         }
-
-
-
         return newCoord
-
-
     }
 
     fun checkCell(coords: Pair<Int, Int>, result: CellState) {
@@ -158,7 +136,7 @@ class Enemy() {
         taulell[coords.first][coords.second]=result
         println(centerCell)
         println(lastCell)
-        if (state == EnemyState.SEARCHING && result == CellState.SHIP) {
+        if (state == EnemyState.SEARCHING && result == CellState.SHIPFOUND) {
             isCheckingButt = false
             centerCell = coords
             state = EnemyState.TARGETTING
@@ -166,8 +144,7 @@ class Enemy() {
             //orientations= MutableList(4){
             //    it
             //}
-
-        } else if (state == EnemyState.TARGETTING && result == CellState.SHIP) {
+        } else if (state == EnemyState.TARGETTING && result == CellState.SHIPFOUND) {
             orientation = Pair(
                 centerCell.first - lastCell.first,
                 centerCell.second - lastCell.second
@@ -176,7 +153,6 @@ class Enemy() {
             orientations= MutableList(4){
                     it
             }
-
             state = EnemyState.SHOOTOUT
         } else if (state == EnemyState.SHOOTOUT && result == CellState.WATER) {
             if (!isCheckingButt) {
@@ -189,7 +165,6 @@ class Enemy() {
             else{
                 state=EnemyState.SEARCHING
             }
-
         }
     }
 }

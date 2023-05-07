@@ -34,12 +34,14 @@ class GameConfiguration : ComponentActivity() {
         var State = mapOf(
             "Timed" to false,
             "StartTime" to 0,
-            "MaxTime" to 0,
             "FinalTime" to 0,
+            "MaxTime" to 0,
+            "ActualTime" to 0,
             "Alias" to "Player",
             "Player1Ships" to arrayListOf<Int>(), //bot or 2nd player
             "Player2Ships" to arrayListOf<Int>(), //bot or 2nd player
             "VersusBot" to true,
+            "Enemy" to Enemy(),
         )
     }
 
@@ -142,6 +144,10 @@ class GameConfiguration : ComponentActivity() {
                         false-> Int.MAX_VALUE
                         true -> temps.value.text.toInt()
                     })//if not specified, not used
+                    State = State + ("ActualTime" to when(checked.value){
+                        false-> Int.MAX_VALUE
+                        true -> temps.value.text.toInt()
+                    })
                     State = State + ("VersusBot" to versus.value)
                     val intent = Intent(context, SetUpYourShips::class.java)
                     context.startActivity(intent)

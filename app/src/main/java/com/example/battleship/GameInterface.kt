@@ -50,7 +50,7 @@ class GameInterface : ComponentActivity() {
     private var player2Grid = SetUpYourShips.Grids["player2Grid"] as ArrayList<CellState>
     private var cellsShotSave = SetUpYourShips.Grids["cellsShot"] as ArrayList<Boolean>
     private var isInPortraitOrientation: Boolean = true
-    private val enemy = Enemy()
+    private lateinit var enemy: Enemy
     private var isYourTurn:Boolean = true
 
 
@@ -78,8 +78,7 @@ class GameInterface : ComponentActivity() {
             if(cellsShot[text.toInt()]) Toast.makeText(this, "This cell has already been fired", Toast.LENGTH_SHORT).show()
             else{
                 cellsShot[text.toInt()] = true
-                cellsShotSave[text.toInt()] = true
-                SetUpYourShips.Grids = SetUpYourShips.Grids + ("cellsShot" to cellsShotSave)
+
                 onCellClicked()
             }
         }
@@ -89,8 +88,9 @@ class GameInterface : ComponentActivity() {
                 id = when (hasShip){
                     CellState.WATER -> R.drawable.water
                     CellState.UNKNOWN -> R.drawable.undiscovered
-                    CellState.SHIP -> R.drawable.explosion
-                    else -> R.drawable.water //no s'utilitza pero es necessita per el when
+                    CellState.SHIPFOUND -> R.drawable.explosion
+                    CellState.SHIPHIDDEN -> R.drawable.isship
+                    CellState.OUTOFBOUNDS -> R.drawable.water //no s'utilitza pero es necessita per el when
                 }
             ),
             contentDescription = text,
@@ -106,7 +106,7 @@ class GameInterface : ComponentActivity() {
     @Preview(showBackground = true)
     @Composable
     fun MainView() {
-        var timeRemaining by remember { mutableStateOf(GameConfiguration.State["MaxTime"] as Int) }
+        var timeRemaining by remember { mutableStateOf(GameConfiguration.State["ActualTime"] as Int) }
         val timed = GameConfiguration.State["Timed"]
         LaunchedEffect(Unit) {
             while(timeRemaining>0) {
@@ -123,9 +123,12 @@ class GameInterface : ComponentActivity() {
             playerHasShipsUI = remember{ mutableStateListOf() }
             cellsShot = remember{ mutableStateListOf() }
         }
-        for (i in 0 until 100) enemyHasShipsUI.add(player2Grid[i])
-        for (i in 0 until 100) playerHasShipsUI.add(player1Grid[i])
-        for (i in 0 until 100) cellsShot.add(cellsShotSave[i])
+        for (i in 0 until 100){
+            enemyHasShipsUI.add(player2Grid[i])
+            playerHasShipsUI.add(player1Grid[i])
+            cellsShot.add(cellsShotSave[i])
+        }
+        enemy = GameConfiguration.State["Enemy"] as Enemy
 
 
         Column(
@@ -269,27 +272,29 @@ class GameInterface : ComponentActivity() {
         val cell = enemy.play()
         val parsedCell = cell.first*10+cell.second
         Log.i("BotCell", "Shooting $parsedCell")
-        val infoCell = if(parsedCell in player1ships){CellState.SHIP }else{CellState.WATER}
+        val infoCell = if(parsedCell in player1ships){CellState.SHIPFOUND }else{CellState.WATER}
         Log.i("BotCell", "It had $infoCell")
         enemy.checkCell(cell,infoCell)
 
-        if(infoCell==CellState.SHIP) {
-            playerHasShipsUI[parsedCell]=CellState.SHIP
+        if(infoCell==CellState.SHIPFOUND) {
+            playerHasShipsUI[parsedCell]=CellState.SHIPFOUND
             player1ships.remove(parsedCell)
+        }else{
+            playerHasShipsUI[parsedCell] = CellState.WATER
         }
-        player1Grid[parsedCell] = playerHasShipsUI[parsedCell]
+
     }
 
     private fun playTurn(cell:Int) {
         if (cell in player2ships) {
-            enemyHasShipsUI[cell] = CellState.SHIP
+            enemyHasShipsUI[cell] = CellState.SHIPFOUND
             //Remove shipcell from state
             player2ships.remove(cell)
-            GameConfiguration.State = GameConfiguration.State + ("Player2Ships" to player2ships)
+            //GameConfiguration.State = GameConfiguration.State + ("Player2Ships" to player2ships)
         }else{
             enemyHasShipsUI[cell] = CellState.WATER
         }
-        player2Grid[cell] = enemyHasShipsUI[cell]
+
     }
 
     private fun endGame(timeRemaining:Int){
@@ -297,5 +302,19 @@ class GameInterface : ComponentActivity() {
             GameConfiguration.State = GameConfiguration.State + ("FinalTime" to timeRemaining)
             startActivity(Intent(this, ResultActivity::class.java))
         }
+    }
+    override fun onDestroy() {
+        //Update gameData
+        for (i in 0 until 100){
+            player2Grid[i] = enemyHasShipsUI[i]
+            player1Grid[i] = playerHasShipsUI[i]
+            cellsShotSave[i] = cellsShot[i]
+        }
+        //Store it
+        SetUpYourShips.Grids = SetUpYourShips.Grids + ("player1Grid" to player1Grid)
+        SetUpYourShips.Grids = SetUpYourShips.Grids + ("player2Grid" to player2Grid)
+        SetUpYourShips.Grids = SetUpYourShips.Grids + ("cellsShot" to cellsShotSave)
+        GameConfiguration.State = GameConfiguration.State + ("Enemy" to enemy)
+        super.onDestroy()
     }
 }
