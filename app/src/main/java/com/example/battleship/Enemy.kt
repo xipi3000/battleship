@@ -32,7 +32,6 @@ class Enemy() {
         }
 
     fun getRandom():Pair<Int,Int>{
-        println(cellsList)
         val cell : Int = cellsList.random()
         return Pair(cell/10,cell%10)
     }

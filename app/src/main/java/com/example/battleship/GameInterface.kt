@@ -52,6 +52,7 @@ class GameInterface : ComponentActivity() {
     private var isInPortraitOrientation: Boolean = true
     private lateinit var enemy: Enemy
     private var isYourTurn:Boolean = true
+    private lateinit var timeRemaining: MutableState<Int>
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -106,13 +107,14 @@ class GameInterface : ComponentActivity() {
     @Preview(showBackground = true)
     @Composable
     fun MainView() {
-        var timeRemaining by remember { mutableStateOf(GameConfiguration.State["ActualTime"] as Int) }
+
+        timeRemaining =  remember { mutableStateOf(GameConfiguration.State["ActualTime"] as Int) }
         val timed = GameConfiguration.State["Timed"]
         LaunchedEffect(Unit) {
-            while(timeRemaining>0) {
-                print(timeRemaining)
+            while(timeRemaining.value>0) {
+                print(timeRemaining.value)
                 delay(1000)
-                timeRemaining--
+                timeRemaining.value--
             }
             //if time=0 -> finish game
             GameConfiguration.State = GameConfiguration.State + ("FinalTime" to timeRemaining)
@@ -135,17 +137,17 @@ class GameInterface : ComponentActivity() {
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxHeight()
         ) {
-            ShowScreenContent(timeRemaining, timed as Boolean)
+            ShowScreenContent(timed as Boolean)
         }
     }
 
     @Composable
-    private fun ShowScreenContent(timeRemaining: Int, timed:Boolean) {
+    private fun ShowScreenContent( timed:Boolean) {
         return Column{
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(if (timeRemaining > 0) Color.Gray else Color.Red)
+                    .background(if (timeRemaining.value > 0) Color.Gray else Color.Red)
                     .height(90.dp),
                 contentAlignment = Alignment.Center,
             )
@@ -162,7 +164,7 @@ class GameInterface : ComponentActivity() {
                     AnimatedVisibility(visible = timed) {
                         Text(
                             text =
-                            "Time remaining: $timeRemaining",
+                            "Time remaining: "+timeRemaining.value,
                             fontSize = 27.sp,
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center,
@@ -177,7 +179,7 @@ class GameInterface : ComponentActivity() {
                         modifier = Modifier
                             .padding(10.dp)
                             .aspectRatio(1f),
-                    ) {ShowBigGrid(timeRemaining)}
+                    ) {BigGridComponent()}
                     Box(
                         modifier = Modifier.padding(40.dp)
                     ) {
@@ -187,7 +189,7 @@ class GameInterface : ComponentActivity() {
                                 modifier = Modifier
                                     .padding(10.dp)
                                     .aspectRatio(1f)
-                            ){ShowSmallGrid()}
+                            ){SmallGridComponent()}
                         }
                     }
                 }
@@ -201,7 +203,7 @@ class GameInterface : ComponentActivity() {
                         modifier = Modifier
                             .padding(10.dp)
                             .aspectRatio(1f),
-                    ) {ShowBigGrid(timeRemaining)}
+                    ) {BigGridComponent()}
                     Box(
                         modifier = Modifier.padding(40.dp)
                     ) {
@@ -211,7 +213,7 @@ class GameInterface : ComponentActivity() {
                                 modifier = Modifier
                                     .padding(10.dp)
                                     .aspectRatio(1f)
-                            ){ShowSmallGrid()}
+                            ){SmallGridComponent()}
                         }
                     }
                 }
@@ -220,7 +222,7 @@ class GameInterface : ComponentActivity() {
     }
 
     @Composable
-    private fun ShowSmallGrid() {
+    private fun SmallGridComponent() {
         return LazyVerticalGrid(
             userScrollEnabled = false,
             columns = GridCells.Fixed(10),
@@ -238,7 +240,7 @@ class GameInterface : ComponentActivity() {
     }
 
     @Composable
-    private fun ShowBigGrid(timeRemaining:Int) {
+    private fun BigGridComponent() {
         return LazyVerticalGrid(
             userScrollEnabled = false,
             columns = GridCells.Fixed(10),
@@ -259,7 +261,7 @@ class GameInterface : ComponentActivity() {
                             isYourTurn = !isYourTurn
 
                             //check if someone won
-                            endGame(timeRemaining)
+                            endGame()
                         },//testing = true; final = isYourTurn
                         isClickable = true
                     )
@@ -297,7 +299,7 @@ class GameInterface : ComponentActivity() {
 
     }
 
-    private fun endGame(timeRemaining:Int){
+    private fun endGame(){
         if (player1ships.isEmpty() || player2ships.isEmpty()){
             GameConfiguration.State = GameConfiguration.State + ("FinalTime" to timeRemaining)
             startActivity(Intent(this, ResultActivity::class.java))
@@ -315,6 +317,7 @@ class GameInterface : ComponentActivity() {
         SetUpYourShips.Grids = SetUpYourShips.Grids + ("player2Grid" to player2Grid)
         SetUpYourShips.Grids = SetUpYourShips.Grids + ("cellsShot" to cellsShotSave)
         GameConfiguration.State = GameConfiguration.State + ("Enemy" to enemy)
+        GameConfiguration.State = GameConfiguration.State + ("ActualTime" to timeRemaining.value)
         super.onDestroy()
     }
 }
