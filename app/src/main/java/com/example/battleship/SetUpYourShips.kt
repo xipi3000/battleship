@@ -19,19 +19,23 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.battleship.ui.theme.BattleshipTheme
+import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import kotlin.random.Random
+
 
 class SetUpYourShips : ComponentActivity() {
     private lateinit var lastShip:Ship
     private lateinit var grid:Unit
     private lateinit var playerGrid: SnapshotStateList<GridType>
     private lateinit var botGrid:SnapshotStateList<GridType>
+
 
     companion object {
         var Grids = mapOf(
@@ -82,11 +86,7 @@ class SetUpYourShips : ComponentActivity() {
     @Composable
     fun MainView() {
         //initialize ships, one of each kind
-        val carrier=Ship(GridType.CARRIER)
-        val battleship=Ship(GridType.BATTLESHIP)
-        val cruiser=Ship(GridType.CRUISER)
-        val destroyer=Ship(GridType.DESTROYER)
-        val submarine=Ship(GridType.SUBMARINE)
+
 
         //initialize both grids (for now) and make them all water
         playerGrid = remember {mutableStateListOf()}
@@ -101,136 +101,172 @@ class SetUpYourShips : ComponentActivity() {
         //Assign player (de moment 1, si volem fer-ne mes ja mirem com ho fem)
         //->Mirar si es contra player o contra bot -> si contra player -> mirar si first time
 
-        val player = Player.PLAYER
-        val versusBot:Boolean = GameConfiguration.State["VersusBot"] as Boolean
+
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxHeight()
         ) {
             //Player grid
             Box(
                 modifier = Modifier
                     .padding(10.dp)
                     .aspectRatio(1f)
+                    .fillMaxWidth()
+                    .weight(1f)
             )
             {
-                grid = LazyVerticalGrid(
-                    userScrollEnabled = false,
-                    columns = GridCells.Fixed(10),
-                    content = {
-                        items(100) {
-                            TableCell(
-                                text= it.toString(),
-                                //playerGrid[it]!=GridType.WATER
-                                hasShip = (when(playerGrid[it]){
-                                    GridType.WATER -> CellState.WATER
-                                    else-> CellState.SHIPFOUND
-                                }),
-                                onCellClicked = {
-                                    if (!::lastShip.isInitialized){
-                                        Toast.makeText(this@SetUpYourShips, "Select a ship to position", Toast.LENGTH_SHORT).show()
-                                    }else{
-                                        /*function that calculates,evaluates the ship's new position
-                                        and, if everything is correct, stores the value*/
-                                        calculateCoords(it, lastShip, player, playerGrid)
-                                    }
-                                }
-                            )
-                        }
-                    }
-                )
+                grid =UsersBoatsGrid()
             }
-            //Buttons for ship positioning
+                shipsButtonsComponenet()
+        }
+    }
+
+    @Composable
+    private fun UsersBoatsGrid(){
+        val player = Player.PLAYER
+        return LazyVerticalGrid(
+            userScrollEnabled = false,
+            columns = GridCells.Fixed(10),
+            content = {
+                items(100) {
+                    TableCell(
+                        text= it.toString(),
+                        //playerGrid[it]!=GridType.WATER
+                        hasShip = (when(playerGrid[it]){
+                            GridType.WATER -> CellState.WATER
+                            else-> CellState.SHIPFOUND
+                        }),
+                        onCellClicked = {
+                            if (!::lastShip.isInitialized){
+                                Toast.makeText(this@SetUpYourShips, "Select a ship to position", Toast.LENGTH_SHORT).show()
+                            }else{
+                                /*function that calculates,evaluates the ship's new position
+                                and, if everything is correct, stores the value*/
+                                calculateCoords(it, lastShip, player, playerGrid)
+                            }
+                        }
+                    )
+                }
+            }
+        )
+    }
+
+    @Composable
+    private fun shipsButtonsComponenet(){
+        //Buttons for ship positioning
+        val carrier=Ship(GridType.CARRIER)
+        val battleship=Ship(GridType.BATTLESHIP)
+        val cruiser=Ship(GridType.CRUISER)
+        val destroyer=Ship(GridType.DESTROYER)
+        val submarine=Ship(GridType.SUBMARINE)
+        val configuration = LocalConfiguration.current
+        var screenHeight = configuration.screenHeightDp
+
+        val versusBot:Boolean = GameConfiguration.State["VersusBot"] as Boolean
+        return Column(verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally,
+
+            ) {
+
             Row(
-                verticalAlignment = Alignment.Bottom,
+                verticalAlignment = Alignment.CenterVertically,
+
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(20.dp)
+                    .padding(10.dp)
             ){
                 Image(painter = painterResource(id = R.drawable.carrier),
                     contentDescription = "Carrier",
-                    contentScale= ContentScale.FillHeight,
+                    contentScale= ContentScale.Fit,
                     modifier= Modifier
                         .clickable { lastShip = carrier }
-                        .fillMaxWidth()
+                        .size((screenHeight*0.06).dp)
                         .weight(1f))
                 Image(painter = painterResource(id = R.drawable.battleship),
                     contentDescription = "Battleship",
-                    contentScale= ContentScale.FillHeight,
+                    contentScale= ContentScale.Fit,
                     modifier= Modifier
                         .clickable { lastShip = battleship }
-                        .fillMaxWidth()
+                        .size((screenHeight*0.06).dp)
                         .weight(1f))
                 Image(painter = painterResource(id = R.drawable.cruiser),
                     contentDescription = "Cruiser",
-                    contentScale= ContentScale.FillHeight,
+                    contentScale= ContentScale.Fit,
                     modifier= Modifier
                         .clickable { lastShip = cruiser }
-                        .fillMaxWidth()
+                        .size((screenHeight*0.06).dp)
                         .weight(1f))
                 Image(painter = painterResource(id = R.drawable.submarine),
                     contentDescription = "Submarine",
-                    contentScale= ContentScale.FillHeight,
+                    contentScale= ContentScale.Fit,
                     modifier= Modifier
                         .clickable { lastShip = submarine }
-                        .fillMaxWidth()
+                        .size((screenHeight*0.06).dp)
                         .weight(1f))
                 Image(painter = painterResource(id = R.drawable.destroyer),
                     contentDescription = "Destroyer",
-                    contentScale= ContentScale.FillHeight,
+                    contentScale= ContentScale.Fit,
                     modifier= Modifier
                         .clickable { lastShip = destroyer }
-                        .fillMaxWidth()
+                        .size((screenHeight*0.06).dp)
                         .weight(1f))
             }
-            //Functionality buttons
-            Button(onClick = {
-                if(lastShip.hasBeenSet) rotateShip()
-                else lastShip.newOrientation(when(lastShip.orientation){
-                    Orientation.Horizontal -> Orientation.Vertical
-                    Orientation.Vertical -> Orientation.Horizontal
-                })
-            }) {
-                Text(text="Rotate Ship")
-            }
-            Button(onClick = {
-                //Ships must be set
-                if (!carrier.hasBeenSet || !battleship.hasBeenSet || !cruiser.hasBeenSet || !destroyer.hasBeenSet || !submarine.hasBeenSet)
-                    Toast.makeText(this@SetUpYourShips, "Please set up all ships", Toast.LENGTH_LONG).show()
-                else {
-                    //Store player grid content to access when playing
-                    val playerGridShips:ArrayList<Int> = arrayListOf()
-                    for((cell, cellType) in playerGrid.withIndex()){
-                        if (cellType!=GridType.WATER)
-                            playerGridShips.add(cell)
-                    }
-                    GameConfiguration.State = GameConfiguration.State + ("Player1Ships" to playerGridShips)
-                    //Store 2nd player grid (bot or human must have different implementations)
-                    if(versusBot){ //bot
-                        randomSetup()
-                        val botGridShips:ArrayList<Int> = arrayListOf()
-                        for((cell, cellType) in botGrid.withIndex()){
-                            if (cellType!=GridType.WATER)
-                                botGridShips.add(cell)
-                        }
-                        GameConfiguration.State = GameConfiguration.State + ("Player2Ships" to botGridShips)
-                        val formatter = SimpleDateFormat("HH:mm yyyy-MM-dd")
-                        GameConfiguration.State = GameConfiguration.State + ("StartTime" to formatter.format(Calendar.getInstance().time))
-                        saveGrids()
-                        startActivity(Intent(baseContext,GameInterface :: class.java))
-                    }else{ //second player
-                        /* TODO: gestionar com ho fem
-                        *  -> Fiquem una foto que es fiqui davant de tot per deixar que es passin el movil
-                        *  -> Boolean "changing" per gestionar que es vegi o no
-                        *  -> Boolean "player1set" per gestionar quina grid montem i guardem
-                        *  -> Un cop guardad grid2 -> start activity*/
-                    }
+            Row(horizontalArrangement = Arrangement.SpaceBetween) {
+                Button(
+                    modifier = Modifier.padding(10.dp),
+                    onClick = {
+                    if(lastShip.hasBeenSet) rotateShip()
+                    else lastShip.newOrientation(when(lastShip.orientation){
+                        Orientation.Horizontal -> Orientation.Vertical
+                        Orientation.Vertical -> Orientation.Horizontal
+                    })
+                }) {
+                    Text(text="Rotate Ship")
                 }
-            }) {
-                Text(text="Start Game")
+                Button(
+                    modifier = Modifier.padding(10.dp),
+                    onClick = {
+                    //Ships must be set
+                    if (!carrier.hasBeenSet || !battleship.hasBeenSet || !cruiser.hasBeenSet || !destroyer.hasBeenSet || !submarine.hasBeenSet)
+                        Toast.makeText(this@SetUpYourShips, "Please set up all ships", Toast.LENGTH_LONG).show()
+                    else {
+                        //Store player grid content to access when playing
+                        val playerGridShips:ArrayList<Int> = arrayListOf()
+                        for((cell, cellType) in playerGrid.withIndex()){
+                            if (cellType!=GridType.WATER)
+                                playerGridShips.add(cell)
+                        }
+                        GameConfiguration.State = GameConfiguration.State + ("Player1Ships" to playerGridShips)
+                        //Store 2nd player grid (bot or human must have different implementations)
+                        if(versusBot){ //bot
+                            randomSetup()
+                            val botGridShips:ArrayList<Int> = arrayListOf()
+                            for((cell, cellType) in botGrid.withIndex()){
+                                if (cellType!=GridType.WATER)
+                                    botGridShips.add(cell)
+                            }
+                            GameConfiguration.State = GameConfiguration.State + ("Player2Ships" to botGridShips)
+                            val formatter = SimpleDateFormat("HH:mm yyyy-MM-dd")
+                            GameConfiguration.State = GameConfiguration.State + ("StartTime" to formatter.format(Calendar.getInstance().time))
+                            saveGrids()
+                            startActivity(Intent(baseContext,GameInterface :: class.java))
+                        }else{ //second player
+                            /* TODO: gestionar com ho fem
+                            *  -> Fiquem una foto que es fiqui davant de tot per deixar que es passin el movil
+                            *  -> Boolean "changing" per gestionar que es vegi o no
+                            *  -> Boolean "player1set" per gestionar quina grid montem i guardem
+                            *  -> Un cop guardad grid2 -> start activity*/
+                        }
+                    }
+                }) {
+                    Text(text="Start Game")
+                }
+
             }
+            //Functionality buttons
+
         }
     }
+
 
     private fun saveGrids() {
         val player1Grid:ArrayList<CellState> = arrayListOf()

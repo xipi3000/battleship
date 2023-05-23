@@ -33,12 +33,24 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.battleship.ui.theme.BattleshipTheme
 import android.content.res.Configuration
+import android.icu.text.ListFormatter.Width
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.*
 import kotlinx.coroutines.delay
+class logText(time:Int,casellaSel:String, tocat:Boolean){
+    val time: Int = time
+    val casellaSel: String = casellaSel
+    val tocat:Boolean = tocat
 
+    fun print() : String{
+        return "Casella selecccionada: $casellaSel\n " +
+                if(tocat) "Vaixell enemic tocat\n" else "Has tocat aigua\n" +
+                        "Temps: $time\n"
+    }
+}
 @Suppress("UNCHECKED_CAST")
 class GameInterface : ComponentActivity() {
     private lateinit var enemyHasShipsUI: SnapshotStateList<CellState>
@@ -117,7 +129,7 @@ class GameInterface : ComponentActivity() {
                 timeRemaining.value--
             }
             //if time=0 -> finish game
-            GameConfiguration.State = GameConfiguration.State + ("FinalTime" to timeRemaining)
+            GameConfiguration.State = GameConfiguration.State + ("FinalTime" to timeRemaining.value)
             startActivity(Intent(this@GameInterface, ResultActivity::class.java))
         }
         if(!::enemyHasShipsUI.isInitialized || !::playerHasShipsUI.isInitialized){
@@ -143,12 +155,14 @@ class GameInterface : ComponentActivity() {
 
     @Composable
     private fun ShowScreenContent( timed:Boolean) {
-        return Column{
+        return Column(verticalArrangement = Arrangement.SpaceEvenly)
+        {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(if (timeRemaining.value > 0) Color.Gray else Color.Red)
-                    .height(90.dp),
+                    .height(60.dp),
+
                 contentAlignment = Alignment.Center,
             )
             {
@@ -172,13 +186,17 @@ class GameInterface : ComponentActivity() {
                     }
                 }
             }
-            when (isInPortraitOrientation){
+            val configuration = LocalConfiguration.current
+            var screenWidth = configuration.screenWidthDp.dp
+            when (screenWidth<=640.dp){
                 true ->
                 Column{
                     Box(
                         modifier = Modifier
                             .padding(10.dp)
-                            .aspectRatio(1f),
+                            .aspectRatio(1f)
+
+                        ,
                     ) {BigGridComponent()}
                     Box(
                         modifier = Modifier.padding(40.dp)
@@ -195,17 +213,23 @@ class GameInterface : ComponentActivity() {
                 }
                 false ->
                 Row(
-                    verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
+                    verticalAlignment = Alignment.CenterVertically,
+
+                    horizontalArrangement = Arrangement.SpaceEvenly,
                 ){
+
                     Box(
                         modifier = Modifier
                             .padding(10.dp)
-                            .aspectRatio(1f),
+                            .aspectRatio(1f)
+
+                           ,
                     ) {BigGridComponent()}
                     Box(
-                        modifier = Modifier.padding(40.dp)
+                        modifier = Modifier
+                            .padding(40.dp)
+
                     ) {
                         Column {
                             Text(text ="Your table")
