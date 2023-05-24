@@ -36,18 +36,25 @@ import android.content.res.Configuration
 import android.icu.text.ListFormatter.Width
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.*
 import kotlinx.coroutines.delay
-class logText(time:Int,casellaSel:String, tocat:Boolean){
-    val time: Int = time
-    val casellaSel: String = casellaSel
-    val tocat:Boolean = tocat
+class LogText(time: Int,casellaSel: String, isTocat:Boolean){
+    var time: Int = time
+
+    var casellaSel: String = casellaSel
+
+    var isTocat:Boolean = isTocat
 
     fun print() : String{
         return "Casella selecccionada: $casellaSel\n " +
-                if(tocat) "Vaixell enemic tocat\n" else "Has tocat aigua\n" +
+                if(isTocat) "Vaixell enemic tocat\n" else "Has tocat aigua\n" +
                         "Temps: $time\n"
     }
 }
@@ -65,7 +72,7 @@ class GameInterface : ComponentActivity() {
     private lateinit var enemy: Enemy
     private var isYourTurn:Boolean = true
     private lateinit var timeRemaining: MutableState<Int>
-
+    private var logPartida = mutableListOf<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -213,32 +220,43 @@ class GameInterface : ComponentActivity() {
                 }
                 false ->
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxSize(),
                     verticalAlignment = Alignment.CenterVertically,
-
-                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    horizontalArrangement = Arrangement.Center,
                 ){
 
                     Box(
                         modifier = Modifier
                             .padding(10.dp)
                             .aspectRatio(1f)
+                            .weight(1f)
 
                            ,
                     ) {BigGridComponent()}
                     Box(
                         modifier = Modifier
-                            .padding(40.dp)
-
+                            .padding(60.dp)
+                            .weight(1f)
                     ) {
-                        Column {
-                            Text(text ="Your table")
-                            Box(
+                        Column() {
+                            Column {
+                                Text(text ="Your table")
+                                Box(
+                                    modifier = Modifier
+                                        .padding(10.dp)
+                                        .aspectRatio(1f)
+                                ){SmallGridComponent()}
+                            }
+                            Text(text = logPartida.toString(),
                                 modifier = Modifier
-                                    .padding(10.dp)
-                                    .aspectRatio(1f)
-                            ){SmallGridComponent()}
+                                    .height(200.dp)
+                                    .verticalScroll(state = rememberScrollState())
+
+                                ,
+
+                                )
                         }
+
                     }
                 }
             }
@@ -275,10 +293,13 @@ class GameInterface : ComponentActivity() {
                         hasShip = enemyHasShipsUI[it],
                         onCellClicked = {
                             //player's shot
-                            playTurn(it)
+                            val logPlay = playTurn(it)
+
+                            logPartida.add(logPlay.print())
                             isYourTurn = !isYourTurn
                             //hauriem de mirar de fer que, d'alguna manera, s'actualitzés la grid
                             //abans del bot shot
+
 
                             //bot's shot
                             botTurn()
@@ -311,16 +332,24 @@ class GameInterface : ComponentActivity() {
 
     }
 
-    private fun playTurn(cell:Int) {
+    private fun playTurn(cell:Int) : LogText {
+        var cela= ""
+        var isTocat  = false
         if (cell in player2ships) {
             enemyHasShipsUI[cell] = CellState.SHIPFOUND
             //Remove shipcell from state
             player2ships.remove(cell)
+            val row = cell/10
+            val col = cell%10
+            cela="($row-$col)"
+            isTocat  = true
             //GameConfiguration.State = GameConfiguration.State + ("Player2Ships" to player2ships)
         }else{
             enemyHasShipsUI[cell] = CellState.WATER
+            isTocat  = false
         }
 
+        return LogText(time= timeRemaining.value, casellaSel=cela,isTocat= isTocat)
     }
 
     private fun endGame(){
