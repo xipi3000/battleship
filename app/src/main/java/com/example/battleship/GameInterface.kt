@@ -36,15 +36,25 @@ import android.content.res.Configuration
 import android.icu.text.ListFormatter.Width
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+
 class LogText(time: Int,casellaSel: String, isTocat:Boolean){
     var time: Int = time
 
@@ -73,7 +83,7 @@ class GameInterface : ComponentActivity() {
     private var isYourTurn:Boolean = true
     private lateinit var timeRemaining: MutableState<Int>
     private var logPartida = mutableListOf<String>()
-
+    private lateinit var logListState: LazyListState
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -82,6 +92,7 @@ class GameInterface : ComponentActivity() {
                     Configuration.ORIENTATION_LANDSCAPE -> {false}
                     else -> {true}
                 }
+                logListState = rememberLazyListState()
                 MainView()
             }
         }
@@ -118,7 +129,7 @@ class GameInterface : ComponentActivity() {
             modifier = Modifier
                 .padding(1.dp)
                 .aspectRatio(1f)
-                .fillMaxWidth()
+                //.fillMaxWidth()
                 .clickable(enabled = isClickable) { onClick() }
         )
     }
@@ -194,8 +205,8 @@ class GameInterface : ComponentActivity() {
                 }
             }
             val configuration = LocalConfiguration.current
-            var screenWidth = configuration.screenWidthDp.dp
-            when (screenWidth<=640.dp){
+            var screenWidth = configuration.screenWidthDp
+            when (screenWidth.dp<=640.dp){
                 true ->
                 Column{
                     Box(
@@ -229,16 +240,17 @@ class GameInterface : ComponentActivity() {
                         modifier = Modifier
                             .padding(10.dp)
                             .aspectRatio(1f)
-                            .weight(1f)
+                            .width(30.dp)
 
                            ,
                     ) {BigGridComponent()}
                     Box(
                         modifier = Modifier
                             .padding(60.dp)
-                            .weight(1f)
+
                     ) {
-                        Column() {
+
+                        Row() {
                             Column {
                                 Text(text ="Your table")
                                 Box(
@@ -247,14 +259,24 @@ class GameInterface : ComponentActivity() {
                                         .aspectRatio(1f)
                                 ){SmallGridComponent()}
                             }
-                            Text(text = logPartida.toString(),
+
+                            LazyColumn(
                                 modifier = Modifier
-                                    .height(200.dp)
-                                    .verticalScroll(state = rememberScrollState())
+                                    .height(100.dp)
+                                    .padding(10.dp),
+                                state = logListState,
+                            )
+                            {
+                                itemsIndexed(logPartida) {
+                                        _, log ->
+                                        Text(
+                                            text = log,
+                                        )
 
-                                ,
+                                }
 
-                                )
+                            }
+
                         }
 
                     }
@@ -283,7 +305,11 @@ class GameInterface : ComponentActivity() {
 
     @Composable
     private fun BigGridComponent() {
+        LaunchedEffect(logPartida.size){
+            if(logPartida.size!=0) logListState.animateScrollToItem(logPartida.size-1)
+        }
         return LazyVerticalGrid(
+            modifier = Modifier.size(500.dp),
             userScrollEnabled = false,
             columns = GridCells.Fixed(10),
             content = {
@@ -293,9 +319,11 @@ class GameInterface : ComponentActivity() {
                         hasShip = enemyHasShipsUI[it],
                         onCellClicked = {
                             //player's shot
-                            val logPlay = playTurn(it)
+                            val res = playTurn(it)
+                            logPartida.add(res.print())
 
-                            logPartida.add(logPlay.print())
+
+
                             isYourTurn = !isYourTurn
                             //hauriem de mirar de fer que, d'alguna manera, s'actualitzés la grid
                             //abans del bot shot
@@ -305,8 +333,9 @@ class GameInterface : ComponentActivity() {
                             botTurn()
                             isYourTurn = !isYourTurn
 
-                            //check if someone won
+
                             endGame()
+
                         },//testing = true; final = isYourTurn
                         isClickable = true
                     )
