@@ -45,6 +45,11 @@
             android:exported="true"
             android:theme="@style/Theme.Battleship" >
         </activity>
+        <activity
+            android:name=".GameHistory"
+            android:exported="true"
+            android:theme="@style/Theme.Battleship" >
+        </activity>
     </application>
 
 </manifest>

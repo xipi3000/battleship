@@ -51,6 +51,9 @@ fun MainView() {
             Button(onClick = { context.startActivity(Intent(context,HelpActivity::class.java)) }) {
                 Text(text = "Help")
             }
+            Button(onClick = { context.startActivity(Intent(context,GameHistory::class.java)) }) {
+                Text(text = "Game History")
+            }
             Button(onClick = {activity.finish(); exitProcess(0) }) {
                 Text(text = "Quit")
             }
