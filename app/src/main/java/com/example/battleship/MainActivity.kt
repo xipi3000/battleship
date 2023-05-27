@@ -19,6 +19,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.battleship.ddbb.GameHistory
 import com.example.battleship.ui.theme.BattleshipTheme
 import kotlin.system.exitProcess
 
@@ -51,7 +52,7 @@ fun MainView() {
             Button(onClick = { context.startActivity(Intent(context,HelpActivity::class.java)) }) {
                 Text(text = "Help")
             }
-            Button(onClick = { context.startActivity(Intent(context,GameHistory::class.java)) }) {
+            Button(onClick = { context.startActivity(Intent(context, GameHistory::class.java)) }) {
                 Text(text = "Game History")
             }
             Button(onClick = {activity.finish(); exitProcess(0) }) {

@@ -33,25 +33,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.battleship.ui.theme.BattleshipTheme
 import android.content.res.Configuration
-import android.icu.text.ListFormatter.Width
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.*
 import kotlinx.coroutines.delay
-class LogText(time: Int,casellaSel: String, isTocat:Boolean){
-    var time: Int = time
-
-    var casellaSel: String = casellaSel
-
-    var isTocat:Boolean = isTocat
-
+class LogText(var time: Int, var casellaSel: String, var isTocat:Boolean){
     fun print() : String{
         return "Casella selecccionada: $casellaSel\n " +
                 if(isTocat) "Vaixell enemic tocat\n" else "Has tocat aigua\n" +
@@ -137,6 +127,7 @@ class GameInterface : ComponentActivity() {
             }
             //if time=0 -> finish game
             GameConfiguration.State = GameConfiguration.State + ("FinalTime" to timeRemaining.value)
+            saveData()
             startActivity(Intent(this@GameInterface, ResultActivity::class.java))
         }
         if(!::enemyHasShipsUI.isInitialized || !::playerHasShipsUI.isInitialized){
@@ -334,7 +325,7 @@ class GameInterface : ComponentActivity() {
 
     private fun playTurn(cell:Int) : LogText {
         var cela= ""
-        var isTocat  = false
+        val isTocat:Boolean
         if (cell in player2ships) {
             enemyHasShipsUI[cell] = CellState.SHIPFOUND
             //Remove shipcell from state
@@ -354,11 +345,13 @@ class GameInterface : ComponentActivity() {
 
     private fun endGame(){
         if (player1ships.isEmpty() || player2ships.isEmpty()){
-            GameConfiguration.State = GameConfiguration.State + ("FinalTime" to timeRemaining)
+            GameConfiguration.State = GameConfiguration.State + ("FinalTime" to timeRemaining.value)
+            saveData()
             startActivity(Intent(this, ResultActivity::class.java))
         }
     }
-    override fun onDestroy() {
+
+    private fun saveData(){
         //Update gameData
         for (i in 0 until 100){
             player2Grid[i] = enemyHasShipsUI[i]
@@ -371,6 +364,9 @@ class GameInterface : ComponentActivity() {
         SetUpYourShips.Grids = SetUpYourShips.Grids + ("cellsShot" to cellsShotSave)
         GameConfiguration.State = GameConfiguration.State + ("Enemy" to enemy)
         GameConfiguration.State = GameConfiguration.State + ("ActualTime" to timeRemaining.value)
+    }
+    override fun onDestroy() {
+        saveData()
         super.onDestroy()
     }
 }

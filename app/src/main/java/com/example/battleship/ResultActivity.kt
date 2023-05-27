@@ -2,9 +2,11 @@ package com.example.battleship
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -20,13 +22,33 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.battleship.ddbb.GameInfo
+import com.example.battleship.ddbb.GameInfoApplication
+import com.example.battleship.ddbb.GameInfoListAdapter
+import com.example.battleship.ddbb.GameInfoViewModel
+import com.example.battleship.ddbb.GameInfoViewModelFactory
 import com.example.battleship.ui.theme.BattleshipTheme
 import kotlin.system.exitProcess
 
 class ResultActivity : ComponentActivity(){
+    private val gameViewModel: GameInfoViewModel by viewModels {
+        GameInfoViewModelFactory((application as GameInfoApplication).repository)
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         GameConfiguration.State = GameConfiguration.State + ("Enemy" to Enemy())
+        val recyclerView = RecyclerView(this)
+        val adapter = GameInfoListAdapter()
+        recyclerView.adapter = adapter
+        recyclerView.layoutManager = LinearLayoutManager(this)
+
+        gameViewModel.allGames.observe(this) { games ->
+            // Update the cached copy of the words in the adapter.
+            games.let { adapter.submitList(it) }
+        }
+
         setContent {
             BattleshipTheme {
                 MainView()
@@ -87,6 +109,13 @@ class ResultActivity : ComponentActivity(){
             }) {
                 Text(text = "Nueva partida")
             }
+            Button(onClick = {
+                val intent = Intent(context,MainActivity::class.java)
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                context.startActivity(intent)
+            }) {
+                Text(text = "Menú principal")
+            }
             Button(onClick = { moveTaskToBack(true);activity.finish(); exitProcess(1) }) {
                 Text(text = "Salir")
             }
@@ -97,11 +126,52 @@ class ResultActivity : ComponentActivity(){
     private fun parseGameResult(): String {
         val player1ships = GameConfiguration.State["Player1Ships"] as ArrayList<Int>
         val player2ships = GameConfiguration.State["Player2Ships"] as ArrayList<Int>
+        val alias = GameConfiguration.State["Alias"].toString()
+        val player2grid = SetUpYourShips.Grids["player2Grid"] as ArrayList<CellState>
+        var fired = 0; var hit = 0; var miss = 0
+
+        for (i in 0 until 100){
+            if (player2grid[i] != CellState.UNKNOWN){
+                if (player2grid[i] == CellState.WATER) miss +=1
+                else hit +=1
+                fired+=1
+            }
+        }
+
         return if (player2ships.isEmpty()){
+            val game= GameInfo(alias, "Winner", fired, hit, miss, ((hit.toFloat()/fired.toFloat())*100))
+            Log.i("GameInfo", "Alias: "+game.alias+System.lineSeparator()+
+                    "Result: "+game.result+System.lineSeparator()+
+                    "Fired: "+game.shots.toString()+System.lineSeparator()+
+                    "Hit: "+game.hit.toString()+System.lineSeparator()+
+                    "Miss: "+game.miss.toString()+System.lineSeparator()+
+                    game.hit.toString()+"/"+game.shots.toString()+"="+game.accuracy.toString())
+            gameViewModel.insert(game)
+            Log.i("GameInfo","There are currently ${gameViewModel.allGames.value?.size} elements on ddbb")
+
             "Enhorabona! Has guanyat la partida :D"
         }else if(player1ships.isEmpty()){
+            val game= GameInfo(alias, "Loser", fired, hit, miss, ((hit.toFloat()/fired.toFloat())*100))
+            Log.i("GameInfo", "Alias: "+game.alias+System.lineSeparator()+
+                    "Result: "+game.result+System.lineSeparator()+
+                    "Fired: "+game.shots.toString()+System.lineSeparator()+
+                    "Hit: "+game.hit.toString()+System.lineSeparator()+
+                    "Miss: "+game.miss.toString()+System.lineSeparator()+
+                    game.hit.toString()+"/"+game.shots.toString()+"="+game.accuracy.toString())
+            gameViewModel.insert(game)
+            Log.i("GameInfo","There are currently ${gameViewModel.allGames.value?.size} elements on ddbb")
             "Una llàstima, sembla que has perdut :("
         }else{
+            val game= GameInfo(alias, "Draw", fired, hit, miss, ((hit.toFloat()/fired.toFloat())*100))
+            Log.i("GameInfo", "Alias: "+game.alias+System.lineSeparator()+
+                    "Result: "+game.result+System.lineSeparator()+
+                    "Fired: "+game.shots.toString()+System.lineSeparator()+
+                    "Hit: "+game.hit.toString()+System.lineSeparator()+
+                    "Miss: "+game.miss.toString()+System.lineSeparator()+
+                    game.hit.toString()+"/"+game.shots.toString()+"="+game.accuracy.toString())
+            gameViewModel.insert(game)
+            Log.i("GameInfo","There are currently ${gameViewModel.allGames.value?.size} elements on ddbb")
+
             "Ep! Sembla que necessitaves més temps..."
         }
     }
