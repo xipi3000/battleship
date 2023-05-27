@@ -56,6 +56,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.graphics.RectangleShape
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -96,6 +98,17 @@ class GameInterface : ComponentActivity() {
     private lateinit var timeRemaining: MutableState<Int>
     private var logPartida = mutableListOf<String>()
     private lateinit var logListState: LazyListState
+
+    val logSaver = Saver<SnapshotStateList<String>,List<String>>(
+        save = {
+            it.toList()
+        },
+        restore = {
+            it.toMutableStateList()
+        }
+    )
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -109,6 +122,13 @@ class GameInterface : ComponentActivity() {
                         true
                     }
                 }
+                val firstLog: String =
+                    "Alias: " + GameConfiguration.State["Alias"] + "\n" + "Num cells: 100\n" + "Num ships: 5\n" + "Total time: " + GameConfiguration.State["MaxTime"] + "\n"
+
+                logPartida = rememberSaveable(saver= logSaver) {
+                    mutableStateListOf(firstLog)
+                }
+
                 logListState = rememberLazyListState()
                 MainView()
             }
@@ -444,12 +464,7 @@ class GameInterface : ComponentActivity() {
     ) {
         LaunchedEffect(logPartida.size) {
             if (logPartida.size != 0) logListState.animateScrollToItem(logPartida.size - 1)
-            else {
-                val firstLog: String =
-                    "Alias: " + GameConfiguration.State["Alias"] + "\n" + "Num cells: 100\n" + "Num ships: 5\n" + "Total time: " + GameConfiguration.State["MaxTime"] + "\n"
 
-                logPartida.add(firstLog)
-            }
         }
         val configuration = LocalConfiguration.current
         val screenWidth = configuration.screenWidthDp
