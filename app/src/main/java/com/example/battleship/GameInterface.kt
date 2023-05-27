@@ -228,7 +228,7 @@ class GameInterface : ComponentActivity() {
             val configuration = LocalConfiguration.current
             var screenWidth = configuration.screenWidthDp
             when (screenWidth.dp < 600.dp) {
-                true ->
+                true -> {
                     Column {
                         Box(
                             modifier = Modifier
@@ -248,69 +248,135 @@ class GameInterface : ComponentActivity() {
                             }
                         }
                     }
+                }
 
-                false ->
-
-
-                    Row(
-                        modifier = Modifier,
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceEvenly,
-                    ) {
-                        BoxWithConstraints(
-
-                            modifier = Modifier
-                                .padding(10.dp)
-                                .width((screenWidth / 2).dp)
-                                .fillMaxHeight()
-                                .wrapContentSize(
-                                    Alignment.Center
-                                )
-                        ) {
-
-                            BigGridComponent(
-                                modifier = Modifier
-                                    .heightIn(0.dp, maxHeight)
-                                    .widthIn(0.dp, maxWidth)
-                                    .aspectRatio(1f)
-                                    .fillMaxSize(),
-                            )
-                        }
-                        BoxWithConstraints(
-
-                            modifier = Modifier
-                                .width((screenWidth / 2 - 1).dp)
-                                .fillMaxHeight()
-                                .wrapContentSize(
-                                    Alignment.Center
-                                )
-
-                        ) {
-                            val maxHeight = maxHeight
-                            val maxWidth = maxWidth
-                            Row(
-                                modifier = Modifier.fillMaxSize(),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceEvenly
+                false -> {
+                    val configuration = LocalConfiguration.current
+                    when (configuration.orientation) {
+                        Configuration.ORIENTATION_PORTRAIT -> {
+                            Column(
+                                modifier = Modifier,
+                                verticalArrangement = Arrangement.SpaceEvenly,
+                                horizontalAlignment = Alignment.CenterHorizontally,
                             ) {
-                                Column {
+                                BoxWithConstraints(
 
-                                    Text(text = "Your table")
-                                    SmallGridComponent(
+                                    modifier = Modifier
+                                        .padding(10.dp)
+                                        .fillMaxHeight(fraction = 0.5f)
+                                        .fillMaxWidth()
+                                        .wrapContentSize(
+                                            Alignment.Center
+                                        )
+                                ) {
+
+                                    BigGridComponent(
                                         modifier = Modifier
                                             .heightIn(0.dp, maxHeight)
-                                            .widthIn(0.dp, maxWidth - 250.dp)
+                                            .widthIn(0.dp, maxWidth)
                                             .aspectRatio(1f)
                                             .fillMaxSize(),
                                     )
                                 }
-                                GameLogComponent()
+                                BoxWithConstraints(
+
+                                    modifier = Modifier
+                                        .fillMaxHeight(fraction = 1f)
+                                        .fillMaxWidth()
+                                        .wrapContentSize(
+                                            Alignment.Center
+                                        )
+
+                                ) {
+                                    val maxHeight = maxHeight
+                                    val maxWidth = maxWidth
+                                    Row(
+                                        modifier = Modifier.fillMaxSize(),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceEvenly
+                                    ) {
+                                        Column(modifier = Modifier.padding(40.dp)) {
+
+                                            Text(text = "Your table")
+                                            SmallGridComponent(
+                                                modifier = Modifier
+                                                    .heightIn(0.dp, maxHeight)
+                                                    .widthIn(0.dp, maxWidth - 250.dp)
+                                                    .aspectRatio(1f)
+                                                    .fillMaxSize(),
+                                            )
+                                        }
+                                        GameLogComponent()
 
 
+                                    }
+                                }
                             }
                         }
 
+
+                        else -> {
+                            Row(
+                                modifier = Modifier,
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceEvenly,
+                            ) {
+                                BoxWithConstraints(
+
+                                    modifier = Modifier
+                                        .padding(10.dp)
+                                        .fillMaxWidth(0.5f)
+                                        .fillMaxHeight()
+                                        .wrapContentSize(
+                                            Alignment.Center
+                                        )
+                                ) {
+
+                                    BigGridComponent(
+                                        modifier = Modifier
+                                            .heightIn(0.dp, maxHeight)
+                                            .widthIn(0.dp, maxWidth)
+                                            .aspectRatio(1f)
+                                            .fillMaxSize(),
+                                    )
+                                }
+                                BoxWithConstraints(
+
+                                    modifier = Modifier
+                                        .fillMaxWidth(1f)
+                                        .fillMaxHeight()
+                                        .wrapContentSize(
+                                            Alignment.Center
+                                        )
+
+                                ) {
+                                    val maxHeight = maxHeight
+                                    val maxWidth = maxWidth
+                                    Row(
+                                        modifier = Modifier.fillMaxSize(),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceEvenly
+                                    ) {
+                                        Column(modifier = Modifier.padding(20.dp)) {
+
+                                            Text(text = "Your table")
+                                            SmallGridComponent(
+                                                modifier = Modifier
+                                                    .heightIn(0.dp, maxHeight)
+                                                    .widthIn(0.dp, maxWidth - 250.dp)
+                                                    .aspectRatio(1f)
+                                                    .fillMaxSize(),
+                                            )
+                                        }
+                                        GameLogComponent()
+
+
+                                    }
+                                }
+                            }
+                        }
                     }
+                }
             }
         }
     }
@@ -355,11 +421,7 @@ class GameInterface : ComponentActivity() {
 
     @Composable
     private fun SmallGridComponent(modifier: Modifier = Modifier) {
-        val configuration = LocalConfiguration.current
-        val screenWidth = configuration.screenWidthDp
-        val screenHeight = configuration.screenHeightDp
         return LazyVerticalGrid(
-            //modifier = Modifier.size(if (screenWidth > screenHeight) (screenHeight * 0.5).dp else (screenWidth * 0.8).dp),
             modifier = modifier,
             userScrollEnabled = false,
             columns = GridCells.Fixed(10),
