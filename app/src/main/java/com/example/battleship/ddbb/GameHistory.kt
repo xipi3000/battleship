@@ -26,6 +26,11 @@ class GameHistory  : ComponentActivity(){
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val adapter = GameInfoListAdapter()
+        gameInfoViewModel.allGames.observe(this) { games ->
+            // Update the cached copy of the words in the adapter.
+            games.let { adapter.submitList(it) }
+        }
         setContent {
             BattleshipTheme {
                 MainView()
@@ -38,7 +43,6 @@ class GameHistory  : ComponentActivity(){
         val elements = gameInfoViewModel.allGames
         if (elements.value== null)Log.i("DDBB_Log", "Database was null")
         else Log.i("DDBB_Log", "database had "+ elements.value!!.size)
-        Log.i("DDBB_Log", "Hauries de tindre un missatge sobre la size just abans")
 
         val size = elements.value?.size ?: 0
         var count = 0

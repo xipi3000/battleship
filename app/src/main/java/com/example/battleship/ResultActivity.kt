@@ -22,8 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.battleship.ddbb.GameInfo
 import com.example.battleship.ddbb.GameInfoApplication
 import com.example.battleship.ddbb.GameInfoListAdapter
@@ -39,11 +37,8 @@ class ResultActivity : ComponentActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         GameConfiguration.State = GameConfiguration.State + ("Enemy" to Enemy())
-        val recyclerView = RecyclerView(this)
-        val adapter = GameInfoListAdapter()
-        recyclerView.adapter = adapter
-        recyclerView.layoutManager = LinearLayoutManager(this)
 
+        val adapter = GameInfoListAdapter()
         gameViewModel.allGames.observe(this) { games ->
             // Update the cached copy of the words in the adapter.
             games.let { adapter.submitList(it) }
@@ -128,7 +123,7 @@ class ResultActivity : ComponentActivity(){
         val player2ships = GameConfiguration.State["Player2Ships"] as ArrayList<Int>
         val alias = GameConfiguration.State["Alias"].toString()
         val player2grid = SetUpYourShips.Grids["player2Grid"] as ArrayList<CellState>
-        var fired = 0; var hit = 0; var miss = 0
+        var fired = 0; var hit = 0; var miss = 0; var accuracy = 0.0f
 
         for (i in 0 until 100){
             if (player2grid[i] != CellState.UNKNOWN){
@@ -137,10 +132,11 @@ class ResultActivity : ComponentActivity(){
                 fired+=1
             }
         }
+        if (fired !=0)accuracy = (((hit.toFloat()/fired.toFloat())*100))
 
         /** He ficat el 0 assumint que se autogenerarà i se sobreescriurà. Potser no funciona així **/
         return if (player2ships.isEmpty()){
-            val game= GameInfo(0, alias, "Winner", fired, hit, miss, ((hit.toFloat()/fired.toFloat())*100))
+            val game= GameInfo(0, alias, "Winner", fired, hit, miss, accuracy)
             Log.i("GameInfo", "Alias: "+game.alias+System.lineSeparator()+
                     "Result: "+game.result+System.lineSeparator()+
                     "Fired: "+game.shots.toString()+System.lineSeparator()+
@@ -152,7 +148,7 @@ class ResultActivity : ComponentActivity(){
 
             "Enhorabona! Has guanyat la partida :D"
         }else if(player1ships.isEmpty()){
-            val game= GameInfo(0, alias, "Loser", fired, hit, miss, ((hit.toFloat()/fired.toFloat())*100))
+            val game= GameInfo(0, alias, "Loser", fired, hit, miss, accuracy)
             Log.i("GameInfo", "Alias: "+game.alias+System.lineSeparator()+
                     "Result: "+game.result+System.lineSeparator()+
                     "Fired: "+game.shots.toString()+System.lineSeparator()+
@@ -163,8 +159,9 @@ class ResultActivity : ComponentActivity(){
             Log.i("GameInfo","There are currently ${gameViewModel.allGames.value?.size} elements on ddbb")
             "Una llàstima, sembla que has perdut :("
         }else{
-            val game= GameInfo(0, alias, "Draw", fired, hit, miss, ((hit.toFloat()/fired.toFloat())*100))
-            Log.i("GameInfo", "Alias: "+game.alias+System.lineSeparator()+
+            val game= GameInfo(0, alias, "Draw", fired, hit, miss, accuracy)
+            Log.i("GameInfo", "ID: "+game.id+System.lineSeparator()+
+                    "Alias: "+game.alias+System.lineSeparator()+
                     "Result: "+game.result+System.lineSeparator()+
                     "Fired: "+game.shots.toString()+System.lineSeparator()+
                     "Hit: "+game.hit.toString()+System.lineSeparator()+
