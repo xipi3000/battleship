@@ -33,18 +33,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.battleship.ui.theme.BattleshipTheme
 import android.content.res.Configuration
-import android.icu.text.ListFormatter.Width
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.border
-import androidx.compose.foundation.gestures.animateScrollBy
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -53,26 +47,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.graphics.RectangleShape
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import java.util.StringTokenizer
 
-class LogText(time: Int, casellaSel: String, isTocat: Boolean) {
-    var time: Int = time
-
-    var casellaSel: String = casellaSel
-
-    var isTocat: Boolean = isTocat
-
+class LogText(var time: Int, var casellaSel: String, var isTocat: Boolean) {
     fun print(): String {
         return "Casella selecccionada: $casellaSel\n " +
                 if (isTocat) "Vaixell enemic tocat\n" else "Has tocat aigua\n" +
@@ -114,13 +94,8 @@ class GameInterface : ComponentActivity() {
         setContent {
             BattleshipTheme {
                 isInPortraitOrientation = when (LocalConfiguration.current.orientation) {
-                    Configuration.ORIENTATION_LANDSCAPE -> {
-                        false
-                    }
-
-                    else -> {
-                        true
-                    }
+                    Configuration.ORIENTATION_LANDSCAPE -> {false}
+                    else -> {true}
                 }
                 val firstLog: String =
                     "Alias: " + GameConfiguration.State["Alias"] + "\n" + "Num cells: 100\n" + "Num ships: 5\n" + "Total time: " + GameConfiguration.State["MaxTime"] + "\n"
@@ -150,7 +125,6 @@ class GameInterface : ComponentActivity() {
             ).show()
             else {
                 cellsShot[text.toInt()] = true
-
                 onCellClicked()
             }
         }
@@ -178,7 +152,6 @@ class GameInterface : ComponentActivity() {
     @Preview(showBackground = true)
     @Composable
     fun MainView() {
-
         timeRemaining = remember { mutableStateOf(GameConfiguration.State["ActualTime"] as Int) }
         val timed = GameConfiguration.State["Timed"]
         LaunchedEffect(Unit) {
@@ -189,6 +162,7 @@ class GameInterface : ComponentActivity() {
             }
             //if time=0 -> finish game
             GameConfiguration.State = GameConfiguration.State + ("FinalTime" to timeRemaining.value)
+            saveData()
             startActivity(Intent(this@GameInterface, ResultActivity::class.java))
         }
         if (!::enemyHasShipsUI.isInitialized || !::playerHasShipsUI.isInitialized) {
@@ -280,7 +254,6 @@ class GameInterface : ComponentActivity() {
                                 horizontalAlignment = Alignment.CenterHorizontally,
                             ) {
                                 BoxWithConstraints(
-
                                     modifier = Modifier
                                         .padding(10.dp)
                                         .fillMaxHeight(fraction = 0.5f)
@@ -289,7 +262,6 @@ class GameInterface : ComponentActivity() {
                                             Alignment.Center
                                         )
                                 ) {
-
                                     BigGridComponent(
                                         modifier = Modifier
                                             .heightIn(0.dp, maxHeight)
@@ -299,14 +271,12 @@ class GameInterface : ComponentActivity() {
                                     )
                                 }
                                 BoxWithConstraints(
-
                                     modifier = Modifier
                                         .fillMaxHeight(fraction = 1f)
                                         .fillMaxWidth()
                                         .wrapContentSize(
                                             Alignment.Center
                                         )
-
                                 ) {
                                     val maxHeight = maxHeight
                                     val maxWidth = maxWidth
@@ -316,7 +286,6 @@ class GameInterface : ComponentActivity() {
                                         horizontalArrangement = Arrangement.SpaceEvenly
                                     ) {
                                         Column(modifier = Modifier.padding(40.dp)) {
-
                                             Text(text = "Your table")
                                             SmallGridComponent(
                                                 modifier = Modifier
@@ -327,14 +296,10 @@ class GameInterface : ComponentActivity() {
                                             )
                                         }
                                         GameLogComponent()
-
-
                                     }
                                 }
                             }
                         }
-
-
                         else -> {
                             Row(
                                 modifier = Modifier,
@@ -342,7 +307,6 @@ class GameInterface : ComponentActivity() {
                                 horizontalArrangement = Arrangement.SpaceEvenly,
                             ) {
                                 BoxWithConstraints(
-
                                     modifier = Modifier
                                         .padding(10.dp)
                                         .fillMaxWidth(0.5f)
@@ -351,7 +315,6 @@ class GameInterface : ComponentActivity() {
                                             Alignment.Center
                                         )
                                 ) {
-
                                     BigGridComponent(
                                         modifier = Modifier
                                             .heightIn(0.dp, maxHeight)
@@ -361,14 +324,12 @@ class GameInterface : ComponentActivity() {
                                     )
                                 }
                                 BoxWithConstraints(
-
                                     modifier = Modifier
                                         .fillMaxWidth(1f)
                                         .fillMaxHeight()
                                         .wrapContentSize(
                                             Alignment.Center
                                         )
-
                                 ) {
                                     val maxHeight = maxHeight
                                     val maxWidth = maxWidth
@@ -378,7 +339,6 @@ class GameInterface : ComponentActivity() {
                                         horizontalArrangement = Arrangement.SpaceEvenly
                                     ) {
                                         Column(modifier = Modifier.padding(20.dp)) {
-
                                             Text(text = "Your table")
                                             SmallGridComponent(
                                                 modifier = Modifier
@@ -389,8 +349,6 @@ class GameInterface : ComponentActivity() {
                                             )
                                         }
                                         GameLogComponent()
-
-
                                     }
                                 }
                             }
@@ -403,9 +361,7 @@ class GameInterface : ComponentActivity() {
 
 
     @Composable
-    private fun GameLogComponent(
-
-    ) {
+    private fun GameLogComponent() {
         Column(
             modifier = Modifier
                 .padding(10.dp)
@@ -418,23 +374,19 @@ class GameInterface : ComponentActivity() {
                     .background(Color.Gray)
                     .fillMaxWidth()
             )
-
             LazyColumn(
                 modifier = Modifier
                     .background(Color.LightGray)
                     .height(150.dp)
                     .width(250.dp),
                 state = logListState
-
             )
             {
                 itemsIndexed(logPartida) { _, log ->
                     Text(
                         text = log,
                     )
-
                 }
-
             }
         }
     }
@@ -464,7 +416,6 @@ class GameInterface : ComponentActivity() {
     ) {
         LaunchedEffect(logPartida.size) {
             if (logPartida.size != 0) logListState.animateScrollToItem(logPartida.size - 1)
-
         }
         val configuration = LocalConfiguration.current
         val screenWidth = configuration.screenWidthDp
@@ -550,12 +501,17 @@ class GameInterface : ComponentActivity() {
 
     private fun endGame() {
         if (player1ships.isEmpty() || player2ships.isEmpty()) {
-            GameConfiguration.State = GameConfiguration.State + ("FinalTime" to timeRemaining)
+            GameConfiguration.State = GameConfiguration.State + ("FinalTime" to timeRemaining.value)
+            saveData()
             startActivity(Intent(this, ResultActivity::class.java))
         }
     }
 
     override fun onDestroy() {
+        saveData()
+        super.onDestroy()
+    }
+    fun saveData(){
         //Update gameData
         for (i in 0 until 100) {
             player2Grid[i] = enemyHasShipsUI[i]
@@ -568,6 +524,5 @@ class GameInterface : ComponentActivity() {
         SetUpYourShips.Grids = SetUpYourShips.Grids + ("cellsShot" to cellsShotSave)
         GameConfiguration.State = GameConfiguration.State + ("Enemy" to enemy)
         GameConfiguration.State = GameConfiguration.State + ("ActualTime" to timeRemaining.value)
-        super.onDestroy()
     }
 }

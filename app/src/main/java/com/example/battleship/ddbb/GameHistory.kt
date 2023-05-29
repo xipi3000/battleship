@@ -1,6 +1,7 @@
 package com.example.battleship.ddbb
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -17,8 +18,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.battleship.ui.theme.BattleshipTheme
 
 class GameHistory  : ComponentActivity(){
@@ -27,18 +26,6 @@ class GameHistory  : ComponentActivity(){
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        /*1 me sembla que això no ho utilitzo, no se com d'important es fer-ho */
-        val recyclerView = RecyclerView(this)
-        val adapter = GameInfoListAdapter()
-        recyclerView.adapter = adapter
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        /*1 */
-        /*2 potser lo de que només s'actualitzi sota x condicions te a veure amb això? */
-        gameInfoViewModel.allGames.observe(this) { games ->
-            // Update the cached copy of the words in the adapter.
-            games.let { adapter.submitList(it) }
-        }
-        /*2 */
         setContent {
             BattleshipTheme {
                 MainView()
@@ -49,6 +36,10 @@ class GameHistory  : ComponentActivity(){
     @Composable
     fun MainView(){
         val elements = gameInfoViewModel.allGames
+        if (elements.value== null)Log.i("DDBB_Log", "Database was null")
+        else Log.i("DDBB_Log", "database had "+ elements.value!!.size)
+        Log.i("DDBB_Log", "Hauries de tindre un missatge sobre la size just abans")
+
         val size = elements.value?.size ?: 0
         var count = 0
         LazyColumn {

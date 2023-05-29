@@ -138,8 +138,9 @@ class ResultActivity : ComponentActivity(){
             }
         }
 
+        /** He ficat el 0 assumint que se autogenerarà i se sobreescriurà. Potser no funciona així **/
         return if (player2ships.isEmpty()){
-            val game= GameInfo(alias, "Winner", fired, hit, miss, ((hit.toFloat()/fired.toFloat())*100))
+            val game= GameInfo(0, alias, "Winner", fired, hit, miss, ((hit.toFloat()/fired.toFloat())*100))
             Log.i("GameInfo", "Alias: "+game.alias+System.lineSeparator()+
                     "Result: "+game.result+System.lineSeparator()+
                     "Fired: "+game.shots.toString()+System.lineSeparator()+
@@ -151,7 +152,7 @@ class ResultActivity : ComponentActivity(){
 
             "Enhorabona! Has guanyat la partida :D"
         }else if(player1ships.isEmpty()){
-            val game= GameInfo(alias, "Loser", fired, hit, miss, ((hit.toFloat()/fired.toFloat())*100))
+            val game= GameInfo(0, alias, "Loser", fired, hit, miss, ((hit.toFloat()/fired.toFloat())*100))
             Log.i("GameInfo", "Alias: "+game.alias+System.lineSeparator()+
                     "Result: "+game.result+System.lineSeparator()+
                     "Fired: "+game.shots.toString()+System.lineSeparator()+
@@ -162,7 +163,7 @@ class ResultActivity : ComponentActivity(){
             Log.i("GameInfo","There are currently ${gameViewModel.allGames.value?.size} elements on ddbb")
             "Una llàstima, sembla que has perdut :("
         }else{
-            val game= GameInfo(alias, "Draw", fired, hit, miss, ((hit.toFloat()/fired.toFloat())*100))
+            val game= GameInfo(0, alias, "Draw", fired, hit, miss, ((hit.toFloat()/fired.toFloat())*100))
             Log.i("GameInfo", "Alias: "+game.alias+System.lineSeparator()+
                     "Result: "+game.result+System.lineSeparator()+
                     "Fired: "+game.shots.toString()+System.lineSeparator()+

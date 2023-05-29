@@ -47,7 +47,7 @@ abstract class GameInfoRoomDatabase : RoomDatabase() {
         }
 
         suspend fun populateDatabase(gameDao: GameInfoDao) {
-            gameDao.insert(GameInfo("test", "test", 1, 1,1,1f))
+            gameDao.insert(GameInfo(24, "test", "test", 1, 1,1,1f))
             Log.i("GameInfo", "Added test entry")
         }
     }

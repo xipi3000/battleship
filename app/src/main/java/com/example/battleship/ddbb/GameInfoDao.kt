@@ -12,7 +12,7 @@ interface GameInfoDao {
     @Query("SELECT * FROM previous_games")
     fun getGames(): Flow<List<GameInfo>>
 
-    @Insert //li trec el onConflict perque com tenim PrimareyKey el nom pos
+    @Insert
     suspend fun insert(shot: GameInfo)
 
     @Query("DELETE FROM previous_games")
