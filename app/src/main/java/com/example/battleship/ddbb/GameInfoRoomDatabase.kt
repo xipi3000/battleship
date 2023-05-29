@@ -20,6 +20,7 @@ abstract class GameInfoRoomDatabase : RoomDatabase() {
         private var INSTANCE: GameInfoRoomDatabase? = null
 
         fun getDatabase(context: Context, scope: CoroutineScope): GameInfoRoomDatabase {
+            Log.i("DDBB_Log", "Retrieveing database")
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,

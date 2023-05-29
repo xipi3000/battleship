@@ -13,7 +13,7 @@ interface GameInfoDao {
     fun getGames(): Flow<List<GameInfo>>
 
     @Insert
-    suspend fun insert(shot: GameInfo)
+    suspend fun insert(game: GameInfo)
 
     @Query("DELETE FROM previous_games")
     suspend fun deleteAll()
