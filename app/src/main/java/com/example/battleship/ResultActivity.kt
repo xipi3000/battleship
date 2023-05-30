@@ -134,41 +134,26 @@ class ResultActivity : ComponentActivity(){
         }
         if (fired !=0)accuracy = (((hit.toFloat()/fired.toFloat())*100))
 
-        /** He ficat el 0 assumint que se autogenerarà i se sobreescriurà. Potser no funciona així **/
         return if (player2ships.isEmpty()){
             val game= GameInfo(0, alias, "Winner", fired, hit, miss, accuracy)
-            Log.i("GameInfo", "Alias: "+game.alias+System.lineSeparator()+
-                    "Result: "+game.result+System.lineSeparator()+
-                    "Fired: "+game.shots.toString()+System.lineSeparator()+
-                    "Hit: "+game.hit.toString()+System.lineSeparator()+
-                    "Miss: "+game.miss.toString()+System.lineSeparator()+
-                    game.hit.toString()+"/"+game.shots.toString()+"="+game.accuracy.toString())
+
+            //Log.i("GameInfo","[PreInsert]There are currently ${gameViewModel.allGames.value} elements on ddbb")
             gameViewModel.insert(game)
-            Log.i("GameInfo","There are currently ${gameViewModel.allGames.value?.size} elements on ddbb")
+            //Log.i("GameInfo","[Post]There are currently ${gameViewModel.allGames.value} elements on ddbb")
 
             "Enhorabona! Has guanyat la partida :D"
         }else if(player1ships.isEmpty()){
             val game= GameInfo(0, alias, "Loser", fired, hit, miss, accuracy)
-            Log.i("GameInfo", "Alias: "+game.alias+System.lineSeparator()+
-                    "Result: "+game.result+System.lineSeparator()+
-                    "Fired: "+game.shots.toString()+System.lineSeparator()+
-                    "Hit: "+game.hit.toString()+System.lineSeparator()+
-                    "Miss: "+game.miss.toString()+System.lineSeparator()+
-                    game.hit.toString()+"/"+game.shots.toString()+"="+game.accuracy.toString())
+
+            //Log.i("GameInfo","[PreInsert]There are currently ${gameViewModel.allGames.value.isNullOrEmpty()} elements on ddbb")
             gameViewModel.insert(game)
-            Log.i("GameInfo","There are currently ${gameViewModel.allGames.value?.size} elements on ddbb")
+            //Log.i("GameInfo","[Post]There are currently ${gameViewModel.allGames.value.isNullOrEmpty()} elements on ddbb")
             "Una llàstima, sembla que has perdut :("
         }else{
             val game= GameInfo(0, alias, "Draw", fired, hit, miss, accuracy)
-            Log.i("GameInfo", "ID: "+game.id+System.lineSeparator()+
-                    "Alias: "+game.alias+System.lineSeparator()+
-                    "Result: "+game.result+System.lineSeparator()+
-                    "Fired: "+game.shots.toString()+System.lineSeparator()+
-                    "Hit: "+game.hit.toString()+System.lineSeparator()+
-                    "Miss: "+game.miss.toString()+System.lineSeparator()+
-                    game.hit.toString()+"/"+game.shots.toString()+"="+game.accuracy.toString())
+            Log.i("GameInfo","[PreInsert]There are currently ${gameViewModel.allGames.value} elements on ddbb")
             gameViewModel.insert(game)
-            Log.i("GameInfo","There are currently ${gameViewModel.allGames.value?.size} elements on ddbb")
+            Log.i("GameInfo","[Post]There are currently ${gameViewModel.allGames.value} elements on ddbb")
 
             "Ep! Sembla que necessitaves més temps..."
         }

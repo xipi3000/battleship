@@ -51,6 +51,11 @@
             android:exported="true"
             android:theme="@style/Theme.Battleship" >
         </activity>
+        <activity
+            android:name=".ddbb.GameDetail"
+            android:exported="true"
+            android:theme="@style/Theme.Battleship" >
+        </activity>
     </application>
 
 </manifest>

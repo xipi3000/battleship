@@ -1,6 +1,5 @@
 package com.example.battleship.ddbb
 
-import android.util.Log
 import androidx.room.Dao
 import androidx.room.Insert
 

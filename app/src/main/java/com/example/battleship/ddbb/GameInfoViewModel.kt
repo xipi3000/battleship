@@ -1,6 +1,5 @@
 package com.example.battleship.ddbb
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
@@ -9,7 +8,8 @@ import kotlinx.coroutines.launch
 
 /*Tal qual del tutorial*/
 class GameInfoViewModel (private val repository: GameInfoRepository) : ViewModel() {
-    val allGames: LiveData<List<GameInfo>> = repository.allGames.asLiveData()
+    var allGames = repository.allGames.asLiveData()
+
     fun insert(game: GameInfo) = viewModelScope.launch {
         repository.insert(game)
     }

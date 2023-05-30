@@ -18,6 +18,8 @@ class GameInfoListAdapter : ListAdapter<GameInfo, GameInfoListAdapter.GameInfoVi
 
     class GameInfoViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         //aqui no se que ficar perque ells ho fan per actualitzar un TextView :/
+        //potser si ells el que actualitzen son TextViews, naltres ho hauriem
+        //d'actualitzar aqui?
         lateinit var message: String
         fun bind(text: String?) {
             if (text != null) {
