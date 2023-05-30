@@ -44,7 +44,6 @@ fun MainView() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             val context = LocalContext.current
-            val activity = MainActivity()
             Text(text = "Battleship", fontWeight = FontWeight.Bold, color = Color.Gray)
             Button(onClick = { context.startActivity(Intent(context,GameConfiguration::class.java)) }) {
                 Text(text = "Configuration")
@@ -55,7 +54,7 @@ fun MainView() {
             Button(onClick = { context.startActivity(Intent(context, GameHistory::class.java)) }) {
                 Text(text = "Game History")
             }
-            Button(onClick = {activity.finish(); exitProcess(0) }) {
+            Button(onClick = {MainActivity().finish(); exitProcess(0) }) {
                 Text(text = "Quit")
             }
         }

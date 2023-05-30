@@ -1,7 +1,6 @@
 package com.example.battleship.ddbb
 
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -30,11 +29,7 @@ class GameDetail: ComponentActivity() {
         val game = getData(intent.getBundleExtra("bund")!!)
         Scaffold(
             floatingActionButton = {
-                FloatingActionButton(onClick = {
-                    val intent = Intent (this, GameHistory::class.java)
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                    this.startActivity(intent)
-                }){
+                FloatingActionButton(onClick = {this.finish()}){
                     Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Go Back")
                 }
             }) {

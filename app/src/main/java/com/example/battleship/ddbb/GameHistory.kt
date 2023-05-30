@@ -31,7 +31,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Observer
-import com.example.battleship.MainActivity
 import com.example.battleship.ui.theme.BattleshipTheme
 
 class GameHistory  : ComponentActivity(){
@@ -74,11 +73,7 @@ class GameHistory  : ComponentActivity(){
     fun MainView(gamesState: List<GameInfo>){
         Scaffold(
             floatingActionButton = {
-                FloatingActionButton(onClick = {
-                    val intent = Intent (this, MainActivity::class.java)
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                    this.startActivity(intent)
-                }){
+                FloatingActionButton(onClick = {this.finish()}){
                     Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Go Back")
                 }
             }) {
