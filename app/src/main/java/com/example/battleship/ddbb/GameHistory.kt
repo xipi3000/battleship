@@ -65,7 +65,11 @@ class GameHistory  : ComponentActivity(){
             // Show a loading indicator
             Text(text = "Loading...")
         } else {
-            MainView(gamesState)
+            if (gamesState.isEmpty()){
+                Text(text = "Vaja, sembla que encara no has fet cap partida")
+            }else{
+                MainView(gamesState)
+            }
         }
     }
     @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
@@ -100,6 +104,8 @@ class GameHistory  : ComponentActivity(){
                     bund.putInt("hit", game.hit)
                     bund.putInt("miss", game.miss)
                     bund.putFloat("accuracy", game.accuracy)
+                    bund.putString("time", game.time)
+                    bund.putInt("timeSpent", game.timeSpent)
                     intent.putExtra("bund", bund)
                     this.startActivity(intent)
                 },

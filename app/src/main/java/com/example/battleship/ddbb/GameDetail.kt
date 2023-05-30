@@ -27,6 +27,7 @@ class GameDetail: ComponentActivity() {
     @Composable
     fun MainView(){
         val game = getData(intent.getBundleExtra("bund")!!)
+        val parsedTime = parseTime(game.timeSpent)
         Scaffold(
             floatingActionButton = {
                 FloatingActionButton(onClick = {this.finish()}){
@@ -40,8 +41,16 @@ class GameDetail: ComponentActivity() {
                 Text(text="Hit: ${game.hit}")
                 Text(text="Miss: ${game.miss}")
                 Text(text="Accuracy: ${game.accuracy}")
+                Text(text="Time: ${game.time}")
+                Text(text="TimeSpent: $parsedTime")
             }
         }
+    }
+
+    private fun parseTime(timeSpent: Int): Any {
+        val secs = timeSpent%60
+        val mins = (timeSpent-secs)/60
+        return "You spent $mins:$secs"
     }
 
     private fun getData(bund: Bundle): GameInfo {
@@ -51,8 +60,10 @@ class GameDetail: ComponentActivity() {
         val hit = bund.getInt("hit")
         val miss = bund.getInt("miss")
         val acc = bund.getFloat("accuracy")
-        if (name!=null && res!=null)return GameInfo(0, name, res, shots, hit, miss, acc)
-        return GameInfo(-1, "Error", "Error", 0,0,0,0.0f)
+        val time = bund.getString("time")
+        val timeSpent = bund.getInt("timeSpent")
+        if (name!=null && res!=null)return GameInfo(0, name, res, shots, hit, miss, acc, time!!, timeSpent)
+        return GameInfo(-1, "Error", "Error", 0,0,0,0.0f, "Error", 0)
 
     }
 }

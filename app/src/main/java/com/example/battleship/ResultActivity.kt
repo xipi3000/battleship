@@ -2,7 +2,6 @@ package com.example.battleship
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -31,6 +30,7 @@ import com.example.battleship.ui.theme.BattleshipTheme
 import kotlin.system.exitProcess
 
 class ResultActivity : ComponentActivity(){
+    private val totalTime = (GameConfiguration.State["MaxTime"] as Int)-(GameConfiguration.State["FinalTime"] as Int)
     private val gameViewModel: GameInfoViewModel by viewModels {
         GameInfoViewModelFactory((application as GameInfoApplication).repository)
     }
@@ -61,12 +61,13 @@ class ResultActivity : ComponentActivity(){
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
+
             val context = LocalContext.current
             val correu = remember { mutableStateOf(TextFieldValue()) }
             val activity = ResultActivity()
             val logMessage = "Player: "+GameConfiguration.State["Alias"]+"."+System.getProperty("line.separator")+
-                    "La partida ha durat: "+((GameConfiguration.State["MaxTime"] as Int)-(GameConfiguration.State["FinalTime"] as Int))+
-                    " segons."+System.getProperty("line.separator")+ parseGameResult()
+                    "La partida ha durat: "+totalTime.toString()+ " segons."+System.getProperty("line.separator")+
+                    parseGame()
             Text(text = "Dia y Hora")
             TextField(
                 value = GameConfiguration.State["StartTime"].toString(),
@@ -121,41 +122,40 @@ class ResultActivity : ComponentActivity(){
     private fun parseGameResult(): String {
         val player1ships = GameConfiguration.State["Player1Ships"] as ArrayList<Int>
         val player2ships = GameConfiguration.State["Player2Ships"] as ArrayList<Int>
-        val alias = GameConfiguration.State["Alias"].toString()
-        val player2grid = SetUpYourShips.Grids["player2Grid"] as ArrayList<CellState>
-        var fired = 0; var hit = 0; var miss = 0; var accuracy = 0.0f
 
+        return if (player2ships.isEmpty()){
+            "Enhorabona! Has guanyat la partida :D"
+        }else if(player1ships.isEmpty()){
+            "Una llàstima, sembla que has perdut :("
+        }else{
+            "Ep! Sembla que necessitaves més temps..."
+        }
+    }
+
+    fun parseGame() : String{
+        //variables needed
+        val player2grid = SetUpYourShips.Grids["player2Grid"] as ArrayList<CellState>
+        val alias = GameConfiguration.State["Alias"].toString()
+        var fired = 0; var hit = 0; var miss = 0; var unShot = 0; var accuracy = 0.0f
+
+        //calculate results
         for (i in 0 until 100){
             if (player2grid[i] != CellState.UNKNOWN){
                 if (player2grid[i] == CellState.WATER) miss +=1
-                else hit +=1
+                else hit+=1
                 fired+=1
-            }
+            }else unShot+=1
         }
         if (fired !=0)accuracy = (((hit.toFloat()/fired.toFloat())*100))
+        val message = parseGameResult()
 
-        return if (player2ships.isEmpty()){
-            val game= GameInfo(0, alias, "Winner", fired, hit, miss, accuracy)
+        //insert into database
+        val game= GameInfo(0, alias, message, fired, hit, miss, accuracy,
+            time = GameConfiguration.State["StartTime"].toString(),
+            timeSpent = totalTime)
+        gameViewModel.insert(game)
 
-            //Log.i("GameInfo","[PreInsert]There are currently ${gameViewModel.allGames.value} elements on ddbb")
-            gameViewModel.insert(game)
-            //Log.i("GameInfo","[Post]There are currently ${gameViewModel.allGames.value} elements on ddbb")
-
-            "Enhorabona! Has guanyat la partida :D"
-        }else if(player1ships.isEmpty()){
-            val game= GameInfo(0, alias, "Loser", fired, hit, miss, accuracy)
-
-            //Log.i("GameInfo","[PreInsert]There are currently ${gameViewModel.allGames.value.isNullOrEmpty()} elements on ddbb")
-            gameViewModel.insert(game)
-            //Log.i("GameInfo","[Post]There are currently ${gameViewModel.allGames.value.isNullOrEmpty()} elements on ddbb")
-            "Una llàstima, sembla que has perdut :("
-        }else{
-            val game= GameInfo(0, alias, "Draw", fired, hit, miss, accuracy)
-            Log.i("GameInfo","[PreInsert]There are currently ${gameViewModel.allGames.value} elements on ddbb")
-            gameViewModel.insert(game)
-            Log.i("GameInfo","[Post]There are currently ${gameViewModel.allGames.value} elements on ddbb")
-
-            "Ep! Sembla que necessitaves més temps..."
-        }
+        //previous functionality
+        return message
     }
 }
