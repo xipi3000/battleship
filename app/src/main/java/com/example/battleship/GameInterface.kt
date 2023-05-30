@@ -196,8 +196,11 @@ class GameInterface : ComponentActivity() {
     private fun ShowScreenContent(timed: Boolean) {
         return Column(verticalArrangement = Arrangement.SpaceEvenly)
         {
+            val modifier : Modifier
+            if(timed) modifier =Modifier.height(90.dp)
+            else modifier =Modifier.height(60.dp)
             Box(
-                modifier = Modifier
+                modifier = modifier
                     .fillMaxWidth()
                     .background(if (timeRemaining.value > 0) Color.Gray else Color.Red)
                     .height(60.dp),
