@@ -11,6 +11,6 @@ enum class CellState(var resource: Int) {
     //shipDiscovered -> explosió
     //shipUndiscovered -> sprite gris pero diferent?
 }
-public class CellStateInter(cellState: CellState,resource :Int =-1,pos:Orientation = Orientation.Vertical){
+class CellStateInter(var cellState: CellState,var resource :Int =-1,var orientation: Orientation = Orientation.Vertical){
 
 }

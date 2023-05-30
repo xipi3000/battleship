@@ -16,9 +16,9 @@ class GridType(var type: CellType,var pos: Int = -1,var orientation: Orientation
 
 }
 
-enum class Orientation{
-    Horizontal,
-    Vertical
+enum class Orientation(val degrees : Float){
+    Horizontal(0.0f),
+    Vertical(90.0f)
 }
 
 class Ship(val type:GridType) {
