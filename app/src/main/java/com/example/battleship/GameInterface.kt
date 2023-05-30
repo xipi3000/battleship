@@ -163,6 +163,7 @@ class GameInterface : ComponentActivity() {
                     CellState.SHIPFOUND -> R.drawable.explosion
                     CellState.SHIPHIDDEN -> R.drawable.isship
                     CellState.OUTOFBOUNDS -> R.drawable.water //no s'utilitza pero es necessita per el when
+                    CellState.BATTLESHIP -> R.drawable.water
                 }
             ),
             contentDescription = text,
@@ -216,11 +217,14 @@ class GameInterface : ComponentActivity() {
     private fun ShowScreenContent(timed: Boolean) {
         return Column(verticalArrangement = Arrangement.SpaceEvenly)
         {
+            val modifier : Modifier
+            if(timed) modifier =Modifier.height(90.dp)
+            else modifier =Modifier.height(60.dp)
             Box(
-                modifier = Modifier
+                modifier = modifier
                     .fillMaxWidth()
                     .background(if (timeRemaining.value > 0) Color.Gray else Color.Red)
-                    .height(60.dp),
+                    ,
 
                 contentAlignment = Alignment.Center,
             )

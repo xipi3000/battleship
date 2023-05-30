@@ -6,6 +6,7 @@ enum class CellState {
     SHIPFOUND,
     SHIPHIDDEN,
     OUTOFBOUNDS,
+    BATTLESHIP,
 
     //shipDiscovered -> explosió
     //shipUndiscovered -> sprite gris pero diferent?
