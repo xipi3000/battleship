@@ -45,7 +45,7 @@ class SetUpYourShips : ComponentActivity() {
 
     companion object {
         var Grids = mapOf(
-            "player1Grid" to ArrayList<CellState>(),
+            "player1Grid" to ArrayList<CellStateInter>(),
             "player2Grid" to ArrayList<CellState>(),
             "cellsShot" to ArrayList<Boolean>()
         )
@@ -277,14 +277,14 @@ class SetUpYourShips : ComponentActivity() {
 
 
     private fun saveGrids() {
-        val player1Grid:ArrayList<CellState> = arrayListOf()
+        val player1Grid:ArrayList<CellStateInter> = arrayListOf()
         val player2Grid:ArrayList<CellState> = arrayListOf()
         val cellsShot = arrayListOf<Boolean>()
         for (item in playerGrid){
             if (item.type != CellType.WATER){
-                player1Grid.add(CellState.SHIPHIDDEN)
+                player1Grid.add(CellStateInter(CellState.SHIPHIDDEN,item.type.ress[item.pos],item.orientation))
             }else{
-                player1Grid.add(CellState.UNKNOWN)
+                player1Grid.add(CellStateInter(CellState.UNKNOWN))
             }
             player2Grid.add(CellState.UNKNOWN)
             cellsShot.add(false)

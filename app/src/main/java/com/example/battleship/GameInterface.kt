@@ -83,13 +83,13 @@ class LogText(time: Int, casellaSel: String, isTocat: Boolean) {
 @Suppress("UNCHECKED_CAST")
 class GameInterface : ComponentActivity() {
     private lateinit var enemyHasShipsUI: SnapshotStateList<CellState>
-    private lateinit var playerHasShipsUI: SnapshotStateList<CellState>
+    private lateinit var playerHasShipsUI: SnapshotStateList<CellStateInter>
     private lateinit var cellsShot: SnapshotStateList<Boolean>
     private var player1ships =
         GameConfiguration.State["Player1Ships"] as ArrayList<Int> //Player's ship setup
     private var player2ships =
         GameConfiguration.State["Player2Ships"] as ArrayList<Int> //Bot/2nd Player's ship setup
-    private var player1Grid = SetUpYourShips.Grids["player1Grid"] as ArrayList<CellState>
+    private var player1Grid = SetUpYourShips.Grids["player1Grid"] as ArrayList<CellStateInter>
     private var player2Grid = SetUpYourShips.Grids["player2Grid"] as ArrayList<CellState>
     private var cellsShotSave = SetUpYourShips.Grids["cellsShot"] as ArrayList<Boolean>
     private var isInPortraitOrientation: Boolean = true
@@ -161,7 +161,7 @@ class GameInterface : ComponentActivity() {
                     CellState.WATER -> R.drawable.water
                     CellState.UNKNOWN -> R.drawable.undiscovered
                     CellState.SHIPFOUND -> R.drawable.explosion
-                    CellState.SHIPHIDDEN -> R.drawable.isship
+                    CellState.SHIPHIDDEN -> hasShip.resource
                     CellState.OUTOFBOUNDS -> R.drawable.water //no s'utilitza pero es necessita per el when
                     CellState.BATTLESHIP -> R.drawable.water
                 }
