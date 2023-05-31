@@ -23,7 +23,7 @@ class ThemeSongService : Service(){
         Log.i("service","creation")
         themeSong = MediaPlayer.create(this, R.raw.call_of_dutty_theme)
         themeSong?.isLooping = true
-        transitionSound = MediaPlayer.create(this, R.raw.sea_wave2)
+        transitionSound = MediaPlayer.create(this, R.raw.sea_wave)
         transitionSound?.setOnCompletionListener {
             stopSelf()
         }

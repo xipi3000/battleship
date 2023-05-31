@@ -1,5 +1,6 @@
 package com.example.battleship
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
@@ -48,11 +49,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.Button
+import androidx.compose.material.Icon
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.draw.paint
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.platform.LocalContext
+import com.example.battleship.services.ThemeSongService
 import kotlinx.coroutines.delay
 import kotlin.math.exp
 
@@ -66,6 +71,7 @@ class LogText(var time: Int, var casellaSel: String, var isTocat: Boolean) {
 
 @Suppress("UNCHECKED_CAST")
 class GameInterface : ComponentActivity() {
+    private var isVolumeOn = mutableStateOf(true)
     private var waterSound : MediaPlayer? = null
     private var explosionSound : MediaPlayer? = null
     private lateinit var enemyHasShipsUI: SnapshotStateList<CellState>
@@ -97,8 +103,8 @@ class GameInterface : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        waterSound = MediaPlayer.create(this, R.raw.water_sound2)
-        explosionSound = MediaPlayer.create(this, R.raw.explosion2)
+        waterSound = MediaPlayer.create(this, R.raw.water_sound)
+        explosionSound = MediaPlayer.create(this, R.raw.explosion)
         setContent {
             BattleshipTheme {
                 isInPortraitOrientation = when (LocalConfiguration.current.orientation) {
@@ -168,6 +174,9 @@ class GameInterface : ComponentActivity() {
     @Preview(showBackground = true)
     @Composable
     fun MainView() {
+        isVolumeOn = rememberSaveable {
+            mutableStateOf(true)
+        }
         timeRemaining = remember { mutableStateOf(GameConfiguration.State["ActualTime"] as Int) }
         val timed = GameConfiguration.State["Timed"]
         LaunchedEffect(Unit) {
@@ -203,6 +212,58 @@ class GameInterface : ComponentActivity() {
     }
 
     @Composable
+    private fun VolumeButtonComponent(context: Context){
+        var volButtonRes : Int
+        if (isVolumeOn.value) {
+            volButtonRes = R.drawable.baseline_volume_up_24
+
+        }
+        else volButtonRes = R.drawable.baseline_volume_off_24
+        Button(onClick = {
+            isVolumeOn.value = !isVolumeOn.value
+            val intentMusicService = Intent(context, ThemeSongService::class.java)
+            if(isVolumeOn.value){
+
+                context.startService(intentMusicService.putExtra("musicState", "play"))
+            }
+            else context.startService(intentMusicService.putExtra("musicState", "pause"))
+
+
+        }) {
+            Icon(
+                painterResource(id = volButtonRes),
+                contentDescription = "Volume",
+
+                )
+        }
+    }
+    @Composable
+    private fun TopBarComponent(timed : Boolean){
+        Column {
+            Text(
+                text =
+                if (isYourTurn) "Your turn to fire"
+                else "Enemy's turn",
+                fontSize = 27.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+            )
+            AnimatedVisibility(visible = timed) {
+                Text(
+                    text =
+                    "Time remaining: " + timeRemaining.value,
+                    fontSize = 27.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                )
+            }
+        }
+
+        VolumeButtonComponent(LocalContext.current)
+
+    }
+
+    @Composable
     private fun ShowScreenContent(timed: Boolean) {
         return Column(verticalArrangement = Arrangement.SpaceEvenly)
         {
@@ -218,25 +279,7 @@ class GameInterface : ComponentActivity() {
                 contentAlignment = Alignment.Center,
             )
             {
-                Column {
-                    Text(
-                        text =
-                        if (isYourTurn) "Your turn to fire"
-                        else "Enemy's turn",
-                        fontSize = 27.sp,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center,
-                    )
-                    AnimatedVisibility(visible = timed) {
-                        Text(
-                            text =
-                            "Time remaining: " + timeRemaining.value,
-                            fontSize = 27.sp,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center,
-                        )
-                    }
-                }
+                TopBarComponent(timed)
             }
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
@@ -451,8 +494,10 @@ class GameInterface : ComponentActivity() {
                             //player's shot
                             val res = playTurn(it)
                             logPartida.add(res.print())
-                            if(res.isTocat) explosionSound?.start()
-                            else waterSound?.start()
+                            if(isVolumeOn.value) {
+                                if (res.isTocat) explosionSound?.start()
+                                else waterSound?.start()
+                            }
 
 
 
