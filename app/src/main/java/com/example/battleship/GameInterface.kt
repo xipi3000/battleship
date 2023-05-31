@@ -39,8 +39,10 @@ import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -219,6 +221,8 @@ class GameInterface : ComponentActivity() {
 
         }
         else volButtonRes = R.drawable.baseline_volume_off_24
+
+
         Button(onClick = {
             isVolumeOn.value = !isVolumeOn.value
             val intentMusicService = Intent(context, ThemeSongService::class.java)
@@ -239,27 +243,30 @@ class GameInterface : ComponentActivity() {
     }
     @Composable
     private fun TopBarComponent(timed : Boolean){
-        Column {
-            Text(
-                text =
-                if (isYourTurn) "Your turn to fire"
-                else "Enemy's turn",
-                fontSize = 27.sp,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-            )
-            AnimatedVisibility(visible = timed) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column {
                 Text(
                     text =
-                    "Time remaining: " + timeRemaining.value,
+                    if (isYourTurn) "Your turn to fire"
+                    else "Enemy's turn",
                     fontSize = 27.sp,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
                 )
+                AnimatedVisibility(visible = timed) {
+                    Text(
+                        text =
+                        "Time remaining: " + timeRemaining.value,
+                        fontSize = 27.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                    )
+                }
             }
+            Spacer(modifier = Modifier.size(30.dp))
+            VolumeButtonComponent(LocalContext.current)
         }
 
-        VolumeButtonComponent(LocalContext.current)
 
     }
 
