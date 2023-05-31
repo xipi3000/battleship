@@ -11,14 +11,15 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
@@ -26,10 +27,12 @@ import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,6 +41,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Observer
 import com.example.battleship.ui.theme.BattleshipTheme
 
@@ -54,6 +58,7 @@ class GameHistory  : ComponentActivity(){
         GameInfoViewModelFactory((application as GameInfoApplication).repository)
     }
     private lateinit var observer : Observer<List<GameInfo>>
+    private lateinit var clickedGame : MutableState<GameInfo>
     @SuppressLint("NotConstructor")
     @Composable
     fun GameHistoryScreen(){
@@ -90,7 +95,7 @@ class GameHistory  : ComponentActivity(){
                         when (configuration.orientation) {
                             Configuration.ORIENTATION_PORTRAIT -> {
                                 //tablet en portrait
-                                MainView(gamesState)
+                                TabletView(gamesState)
                                 Log.i("Layout", "I'm a tablet in portrait mode")
                             }
                             else -> {
@@ -103,7 +108,7 @@ class GameHistory  : ComponentActivity(){
                                     }
                                     false -> {
                                         //tablet landscape
-                                        MainView(gamesState)
+                                        TabletView(gamesState)
                                         Log.i("Layout", "I'm a tablet in landscape mode")
                                     }
                                 }
@@ -116,6 +121,58 @@ class GameHistory  : ComponentActivity(){
             }
         }
     }
+
+    @Composable
+    @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
+    fun TabletView(gamesState: List<GameInfo>) {
+        clickedGame = remember { mutableStateOf(gamesState[0])}
+        val state = rememberLazyListState()
+        Scaffold(
+            floatingActionButton = {
+                FloatingActionButton(onClick = {this.finish()}){
+                    Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Go Back")
+                }
+            },
+            topBar = {
+                TopAppBar (
+                    title = {
+                        Text("Game history")
+                    }
+                )
+            }) {
+            when(LocalConfiguration.current.orientation){
+                Configuration.ORIENTATION_PORTRAIT->{
+                    Column(horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxWidth()){
+                        TabletInfo(gamesState, state)
+                    }
+                }
+                else->{
+                    Row(modifier = Modifier.fillMaxHeight(),
+                        verticalAlignment = Alignment.Top){
+                        TabletInfo(gamesState, state)
+                    }
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun TabletInfo(gamesState:List<GameInfo>, state:LazyListState) {
+        LazyColumn (modifier = when (LocalConfiguration.current.orientation) {
+            Configuration.ORIENTATION_LANDSCAPE -> {
+                Modifier.fillMaxWidth(0.75f).fillMaxHeight()
+            }
+            else ->{Modifier.fillMaxWidth(0.85f).fillMaxHeight(0.75f)}
+        })
+        {
+            items(gamesState.size) { game ->
+                Sumary(gamesState[game], false)
+            }
+        }
+        GameLogComponent(clickedGame)
+    }
+
     @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
     @Composable
     fun MainView(gamesState: List<GameInfo>){
@@ -133,30 +190,34 @@ class GameHistory  : ComponentActivity(){
             })
             {
                 items(gamesState.size) {game ->
-                    Sumary(gamesState[game])
+                    Sumary(gamesState[game], true)
                 }
             }
         }
     }
     @Composable
-    fun Sumary(game: GameInfo){
+    fun Sumary(game: GameInfo, newActivity:Boolean){
         Card(
             modifier = Modifier
                 .padding(horizontal = 8.dp, vertical = 8.dp)
                 .fillMaxWidth()
                 .clickable {
-                    val intent = Intent(this, GameDetail::class.java)
-                    val bund = Bundle()
-                    bund.putString("name", game.alias)
-                    bund.putString("result", game.result)
-                    bund.putInt("fired", game.shots)
-                    bund.putInt("hit", game.hit)
-                    bund.putInt("miss", game.miss)
-                    bund.putFloat("accuracy", game.accuracy)
-                    bund.putString("time", game.time)
-                    bund.putInt("timeSpent", game.timeSpent)
-                    intent.putExtra("bund", bund)
-                    this.startActivity(intent)
+                    if (newActivity) {
+                        val intent = Intent(this, GameDetail::class.java)
+                        val bund = Bundle()
+                        bund.putString("name", game.alias)
+                        bund.putString("result", game.result)
+                        bund.putInt("fired", game.shots)
+                        bund.putInt("hit", game.hit)
+                        bund.putInt("miss", game.miss)
+                        bund.putFloat("accuracy", game.accuracy)
+                        bund.putString("time", game.time)
+                        bund.putInt("timeSpent", game.timeSpent)
+                        intent.putExtra("bund", bund)
+                        this.startActivity(intent)
+                    } else {
+                        clickedGame.value = game
+                    }
                 },
             elevation = 2.dp,
             backgroundColor = Color.White,
@@ -165,48 +226,59 @@ class GameHistory  : ComponentActivity(){
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
             ){
-                Text(text = game.alias)
+                Row{
+                    Text(text = game.alias)
+                    Text(text = game.time)
+                }
                 Text(text = game.result)
             }
         }
     }
 
-    //modificar per aquest cas d'ús
-    private var logPartida = mutableListOf<String>()
-    private lateinit var logListState: LazyListState
+
     @Composable
-    private fun GameLogComponent() {
+    private fun GameLogComponent(game:MutableState<GameInfo>) {
         Column(
             modifier = Modifier
                 .padding(10.dp)
                 .width(250.dp)
-                .wrapContentHeight()
+                .wrapContentHeight(),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Log:",
+                text = "Game info: ",
                 Modifier
                     .background(Color.Gray)
                     .fillMaxWidth()
             )
-            LazyColumn(
+            Column(
                 modifier = Modifier
                     .background(Color.LightGray)
-                    .height(150.dp)
+                    .wrapContentHeight()
                     .width(250.dp),
-                state = logListState
+                horizontalAlignment = Alignment.CenterHorizontally,
             )
             {
-                itemsIndexed(logPartida) { _, log ->
-                    Text(
-                        text = log,
-                    )
-                }
+                Text(text = "Name: ${game.value.alias}",
+                    fontSize = (LocalConfiguration.current.screenHeightDp/50).sp)
+                Text(text = "Result: ${game.value.result}",
+                    fontSize = (LocalConfiguration.current.screenHeightDp/50).sp)
+                Text(text = "Shots: ${game.value.shots}",
+                    fontSize = (LocalConfiguration.current.screenHeightDp/50).sp)
+                Text(text = "Hit: ${game.value.hit}",
+                    fontSize = (LocalConfiguration.current.screenHeightDp/50).sp)
+                Text(text = "Miss: ${game.value.miss}",
+                    fontSize = (LocalConfiguration.current.screenHeightDp/50).sp)
+                Text(text = "Accuracy: ${game.value.accuracy}",
+                    fontSize = (LocalConfiguration.current.screenHeightDp/50).sp)
+                Text(text = "Time: ${game.value.time}",
+                    fontSize = (LocalConfiguration.current.screenHeightDp/50).sp)
             }
         }
     }
 
     override fun onDestroy() {
-        super.onDestroy()
         gameInfoViewModel.allGames.removeObserver(observer)
+        super.onDestroy()
     }
 }
