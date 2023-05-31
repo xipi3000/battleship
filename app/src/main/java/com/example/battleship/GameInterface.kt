@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.battleship.ui.theme.BattleshipTheme
 import android.content.res.Configuration
+import android.media.MediaPlayer
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
@@ -53,6 +54,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.draw.paint
 import androidx.compose.ui.draw.rotate
 import kotlinx.coroutines.delay
+import kotlin.math.exp
 
 class LogText(var time: Int, var casellaSel: String, var isTocat: Boolean) {
     fun print(): String {
@@ -64,6 +66,8 @@ class LogText(var time: Int, var casellaSel: String, var isTocat: Boolean) {
 
 @Suppress("UNCHECKED_CAST")
 class GameInterface : ComponentActivity() {
+    private var waterSound : MediaPlayer? = null
+    private var explosionSound : MediaPlayer? = null
     private lateinit var enemyHasShipsUI: SnapshotStateList<CellState>
     private lateinit var playerHasShipsUI: SnapshotStateList<CellStateInter>
     private lateinit var cellsShot: SnapshotStateList<Boolean>
@@ -93,6 +97,8 @@ class GameInterface : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        waterSound = MediaPlayer.create(this, R.raw.water_sound2)
+        explosionSound = MediaPlayer.create(this, R.raw.explosion2)
         setContent {
             BattleshipTheme {
                 isInPortraitOrientation = when (LocalConfiguration.current.orientation) {
@@ -445,6 +451,8 @@ class GameInterface : ComponentActivity() {
                             //player's shot
                             val res = playTurn(it)
                             logPartida.add(res.print())
+                            if(res.isTocat) explosionSound?.start()
+                            else waterSound?.start()
 
 
 
@@ -527,6 +535,8 @@ class GameInterface : ComponentActivity() {
     override fun onDestroy() {
         saveData()
         super.onDestroy()
+        explosionSound?.release()
+        waterSound?.release()
     }
     fun saveData(){
         //Update gameData
