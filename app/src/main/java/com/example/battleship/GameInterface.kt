@@ -50,7 +50,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.draw.paint
 import androidx.compose.ui.draw.rotate
 import kotlinx.coroutines.delay
 
@@ -81,7 +80,7 @@ class GameInterface : ComponentActivity() {
     private var logPartida = mutableListOf<String>()
     private lateinit var logListState: LazyListState
 
-    val logSaver = Saver<SnapshotStateList<String>,List<String>>(
+    private val logSaver = Saver<SnapshotStateList<String>,List<String>>(
         save = {
             it.toList()
         },
