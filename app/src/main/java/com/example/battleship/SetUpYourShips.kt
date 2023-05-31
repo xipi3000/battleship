@@ -22,15 +22,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.paint
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.battleship.ui.theme.BattleshipTheme
-import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import kotlin.random.Random
@@ -295,6 +292,7 @@ class SetUpYourShips : ComponentActivity() {
                 player1Grid.add(CellStateInter(CellState.WATER))
             }
             player2Grid.add(CellState.UNKNOWN)
+            Log.i("bug", "added item to player2Grid")
             cellsShot.add(false)
         }
         Grids = Grids + ("player1Grid" to player1Grid)

@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
@@ -18,19 +17,16 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.battleship.ddbb.GameInfo
 import com.example.battleship.ddbb.GameInfoApplication
 import com.example.battleship.ddbb.GameInfoViewModel
 import com.example.battleship.ddbb.GameInfoViewModelFactory
 import com.example.battleship.ui.theme.BattleshipTheme
-import kotlin.system.exitProcess
 
 class ResultActivity : ComponentActivity() {
     private val totalTime =
@@ -41,9 +37,6 @@ class ResultActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         GameConfiguration.State = GameConfiguration.State + ("Enemy" to Enemy())
-        SetUpYourShips.Grids = SetUpYourShips.Grids + ("player1Grid" to ArrayList<CellStateInter>())
-        SetUpYourShips.Grids = SetUpYourShips.Grids + ("player2Grid" to ArrayList<CellStateInter>())
-        SetUpYourShips.Grids = SetUpYourShips.Grids + ("ships" to ArrayList<Ship>())
         gameViewModel.allGames.observe(this) {}
 
         setContent {
@@ -67,7 +60,6 @@ class ResultActivity : ComponentActivity() {
 
             val context = LocalContext.current
             val correu = rememberSaveable { mutableStateOf("") }
-            val activity = ResultActivity()
             val logMessage =
                 "Player: " + GameConfiguration.State["Alias"] + "." + System.getProperty("line.separator") +
                         "La partida ha durat: " + totalTime.toString() + " segons." + System.getProperty(
@@ -152,7 +144,7 @@ class ResultActivity : ComponentActivity() {
         }
     }
 
-    fun parseGame() : String{
+    private fun parseGame() : String{
         //variables needed
         val player2grid = SetUpYourShips.Grids["player2Grid"] as ArrayList<CellState>
         val alias = GameConfiguration.State["Alias"].toString()
@@ -180,5 +172,12 @@ class ResultActivity : ComponentActivity() {
 
         //previous functionality
         return parsedMessage[0]
+    }
+
+    override fun onDestroy() {
+        SetUpYourShips.Grids = SetUpYourShips.Grids + ("player1Grid" to ArrayList<CellStateInter>())
+        SetUpYourShips.Grids = SetUpYourShips.Grids + ("player2Grid" to ArrayList<CellStateInter>())
+        SetUpYourShips.Grids = SetUpYourShips.Grids + ("ships" to ArrayList<Ship>())
+        super.onDestroy()
     }
 }

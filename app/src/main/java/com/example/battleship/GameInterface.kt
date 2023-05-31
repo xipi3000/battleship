@@ -61,11 +61,8 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.LocalContext
 import com.example.battleship.services.ThemeSongService
 import kotlinx.coroutines.delay
-import kotlin.properties.Delegates
 
 val timed = GameConfiguration.State["Timed"] as Boolean
-import kotlin.math.exp
-
 class LogText(var time: Int, var casellaSel: String, var isTocat: Boolean) {
     fun print(): String {
         return "Casella selecccionada: $casellaSel\n " +
@@ -219,7 +216,7 @@ class GameInterface : ComponentActivity() {
 
     @Composable
     private fun VolumeButtonComponent(context: Context){
-        var volButtonRes : Int
+        val volButtonRes : Int
         if (isVolumeOn.value) {
             volButtonRes = R.drawable.baseline_volume_up_24
 
