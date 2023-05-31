@@ -54,7 +54,6 @@ class GameDetail: ComponentActivity() {
             }) {
             Column(horizontalAlignment = Alignment.CenterHorizontally){
                 Column(
-                    //horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
                         .wrapContentSize()
                         .fillMaxWidth(),
@@ -66,7 +65,9 @@ class GameDetail: ComponentActivity() {
                     InfoElement("Hit: ${game.hit}")
                     InfoElement("Miss: ${game.miss}")
                     InfoElement("Accuracy: ${game.accuracy}")
-                    InfoElement(parsedTime)
+                    if(game.timedGame){
+                        InfoElement(parsedTime)
+                    }
                 }
             }
         }
@@ -98,9 +99,10 @@ class GameDetail: ComponentActivity() {
         val miss = bund.getInt("miss")
         val acc = bund.getFloat("accuracy")
         val time = bund.getString("time")
+        val timedGame = bund.getBoolean("timedGame")
         val timeSpent = bund.getInt("timeSpent")
-        if (name!=null && res!=null)return GameInfo(0, name, res, shots, hit, miss, acc, time!!, timeSpent)
-        return GameInfo(-1, "Error", "Error", 0,0,0,0.0f, "Error", 0)
+        if (name!=null && res!=null)return GameInfo(0, name, res, shots, hit, miss, acc, time!!, timedGame, timeSpent)
+        return GameInfo(-1, "Error", "Error", 0,0,0,0.0f, "Error", timedGame, 0)
 
     }
 }

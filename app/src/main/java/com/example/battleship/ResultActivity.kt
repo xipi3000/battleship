@@ -36,6 +36,9 @@ class ResultActivity : ComponentActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         GameConfiguration.State = GameConfiguration.State + ("Enemy" to Enemy())
+        SetUpYourShips.Grids = SetUpYourShips.Grids + ("player1Grid" to ArrayList<CellStateInter>())
+        SetUpYourShips.Grids = SetUpYourShips.Grids + ("player2Grid" to ArrayList<CellStateInter>())
+        SetUpYourShips.Grids = SetUpYourShips.Grids + ("ships" to ArrayList<Ship>())
         gameViewModel.allGames.observe(this) {}
 
         setContent {
@@ -148,7 +151,8 @@ class ResultActivity : ComponentActivity(){
         //insert into database
         val game= GameInfo(0, alias, parsedMessage[1], fired, hit, miss, accuracy,
             time = GameConfiguration.State["StartTime"].toString(),
-            timeSpent = totalTime)
+            timeSpent = totalTime,
+            timedGame = GameConfiguration.State["Timed"] as Boolean)
         gameViewModel.insert(game)
 
         //previous functionality

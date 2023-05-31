@@ -14,5 +14,6 @@ class GameInfo(
     @ColumnInfo(name="miss") val miss: Int,
     @ColumnInfo(name="accuracy") val accuracy: Float,
     @ColumnInfo(name="time") val time: String,
+    @ColumnInfo(name="timedGame") val timedGame: Boolean,
     @ColumnInfo(name="timeSpent") val timeSpent: Int,
     )

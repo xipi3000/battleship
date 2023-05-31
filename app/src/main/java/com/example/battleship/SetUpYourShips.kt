@@ -40,14 +40,20 @@ class SetUpYourShips : ComponentActivity() {
     private lateinit var lastShip:Ship
     private lateinit var grid:Unit
     private lateinit var playerGrid: SnapshotStateList<GridType>
-    private lateinit var botGrid:SnapshotStateList<GridType>
+    private lateinit var botGrid: SnapshotStateList<GridType>
+    private lateinit var carrier:Ship
+    private lateinit var battleship:Ship
+    private lateinit var cruiser:Ship
+    private lateinit var destroyer:Ship
+    private lateinit var submarine:Ship
 
 
     companion object {
         var Grids = mapOf(
             "player1Grid" to ArrayList<CellStateInter>(),
             "player2Grid" to ArrayList<CellState>(),
-            "cellsShot" to ArrayList<Boolean>()
+            "cellsShot" to ArrayList<Boolean>(),
+            "ships" to ArrayList<Ship>(),
         )
     }
 
@@ -77,7 +83,7 @@ class SetUpYourShips : ComponentActivity() {
                 }else{
                     Log.i("TAG", "TableCell: "+cell.pos)
                     cell.type.ress[cell.pos]
-                }) as Int
+                })
             ),
             contentDescription = text,
             contentScale= ContentScale.FillBounds,
@@ -95,22 +101,18 @@ class SetUpYourShips : ComponentActivity() {
     @Preview(showBackground = true)
     @Composable
     fun MainView() {
-        //initialize ships, one of each kind
-
-
         //initialize both grids (for now) and make them all water
         playerGrid = remember {mutableStateListOf()}
         botGrid = remember{mutableStateListOf()}
-        for (i in 0 until 100) {
-            playerGrid.add(GridType(CellType.WATER))
-        }
-        for (i in 0 until 100) {
+        val player1G = Grids["player1Grid"] as ArrayList<GridType>
+        for (i in 0 until 100){
+            if (Grids["player1Grid"]?.isEmpty() == true){
+                playerGrid.add(GridType(CellType.WATER))
+            }else{
+                playerGrid.add(player1G[i])
+            }
             botGrid.add(GridType(CellType.WATER))
         }
-
-        //Assign player (de moment 1, si volem fer-ne mes ja mirem com ho fem)
-        //->Mirar si es contra player o contra bot -> si contra player -> mirar si first time
-
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -126,7 +128,7 @@ class SetUpYourShips : ComponentActivity() {
             {
                 grid =UsersBoatsGrid()
             }
-                shipsButtonsComponenet()
+                ShipsButtonsComponent()
         }
     }
 
@@ -140,9 +142,7 @@ class SetUpYourShips : ComponentActivity() {
                 items(100) {
                     TableCell(
                         text= it.toString(),
-                        //playerGrid[it]!=GridType.WATER
-                        cell = (playerGrid[it]
-                        ),
+                        cell = (playerGrid[it]),
                         onCellClicked = {
                             if (!::lastShip.isInitialized){
                                 Toast.makeText(this@SetUpYourShips, "Select a ship to position", Toast.LENGTH_SHORT).show()
@@ -158,23 +158,34 @@ class SetUpYourShips : ComponentActivity() {
         )
     }
 
+    @SuppressLint("SimpleDateFormat")
     @Composable
-    private fun shipsButtonsComponenet(){
+    private fun ShipsButtonsComponent(){
         //Buttons for ship positioning
-        val carrier=Ship(GridType(CellType.CARRIER))
-        val battleship=Ship(GridType(CellType.BATTLESHIP))
-        val cruiser=Ship(GridType(CellType.CRUISER))
-        val destroyer=Ship(GridType(CellType.DESTROYER))
-        val submarine=Ship(GridType(CellType.SUBMARINE))
+        if (Grids["ships"]?.isEmpty() == true){
+            carrier=Ship(GridType(CellType.CARRIER))
+            battleship=Ship(GridType(CellType.BATTLESHIP))
+            cruiser=Ship(GridType(CellType.CRUISER))
+            destroyer=Ship(GridType(CellType.DESTROYER))
+            submarine=Ship(GridType(CellType.SUBMARINE))
+        }else{
+            val ships = Grids["ships"] as ArrayList<Ship>
+            carrier = ships[0]
+            battleship = ships[1]
+            cruiser = ships[2]
+            destroyer = ships[3]
+            submarine = ships[4]
+            lastShip = if(ships[5].type == GridType(CellType.WATER)){carrier}
+            else {ships[5]}
+        }
+
         val configuration = LocalConfiguration.current
-        var screenHeight = configuration.screenHeightDp
+        val screenHeight = configuration.screenHeightDp
 
         val versusBot:Boolean = GameConfiguration.State["VersusBot"] as Boolean
         return Column(verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally,
-
-            ) {
-
+                        horizontalAlignment = Alignment.CenterHorizontally,)
+        {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
 
@@ -268,10 +279,7 @@ class SetUpYourShips : ComponentActivity() {
                 }) {
                     Text(text="Start Game")
                 }
-
             }
-            //Functionality buttons
-
         }
     }
 
@@ -292,6 +300,17 @@ class SetUpYourShips : ComponentActivity() {
         Grids = Grids + ("player1Grid" to player1Grid)
         Grids = Grids + ("player2Grid" to player2Grid)
         Grids = Grids + ("cellsShot" to cellsShot)
+    }
+    private fun midSaveGrids() {
+        val player1Grid:ArrayList<GridType> = arrayListOf()
+        for (item in playerGrid){
+            player1Grid.add(item)
+        }
+        Grids = Grids + ("player1Grid" to player1Grid)
+        Grids = if(::lastShip.isInitialized) Grids + ("ships" to arrayListOf(carrier, battleship, cruiser, destroyer, submarine, lastShip))
+        else Grids + ("ships" to arrayListOf(carrier, battleship, cruiser, destroyer, submarine, Ship(
+            GridType(CellType.WATER)
+        )))
     }
 
     /* CALCULATE AND STORE VALUES FOR THE NEW POSSIBLE POSITION OF A SHIP */
@@ -331,23 +350,16 @@ class SetUpYourShips : ComponentActivity() {
     private fun placeOnBoard(newPos:ArrayList<Int>, ship: Ship, grid: SnapshotStateList<GridType>) {
         if (!ship.hasBeenSet){ //first time positioning -> storeCoords and positionOnGrid
             ship.position(newPos)
-            var count=0
-            for (item in newPos){
+            for ((count, item) in newPos.withIndex()){
                 grid[item] = GridType(ship.type.type,count,ship.orientation)
-                count++
-            }
-            for(item in newPos){
-                //Log.i("pos", grid[item].pos.toString())
             }
         }else{//not first time -> removeOldPositioning, storeCoords and positionNewOnGrid
             for (item in ship.coords){
                 grid[item] = GridType(CellType.WATER)
             }
             ship.position(newPos)
-            var count=0
-            for (item in ship.coords){
+            for ((count, item) in ship.coords.withIndex()){
                 grid[item] = GridType(ship.type.type,count,ship.orientation)
-                count++
             }
         }
     }
@@ -423,5 +435,10 @@ class SetUpYourShips : ComponentActivity() {
         }
         Toast.makeText(this, "Board created, starting game", Toast.LENGTH_SHORT).show()
         return botGrid
+    }
+
+    override fun onDestroy() {
+        midSaveGrids()
+        super.onDestroy()
     }
 }

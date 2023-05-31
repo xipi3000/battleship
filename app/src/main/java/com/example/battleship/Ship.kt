@@ -1,14 +1,12 @@
 package com.example.battleship
 
-enum class CellType(val size:Int, val resource:Int,val ress: List<Int>){
-    CARRIER(5, R.drawable.carrier, listOf(R.drawable.carrier_0,R.drawable.carrier_1,R.drawable.carrier_2,R.drawable.carrier_3,R.drawable.carrier_4)),
-    BATTLESHIP(4, R.drawable.battleship,listOf(R.drawable.battleship_0,R.drawable.battleship_1,R.drawable.battleship_2,R.drawable.battleship_3)),
-    CRUISER(3, R.drawable.cruiser,listOf(R.drawable.cruiser_0,R.drawable.cruiser_1,R.drawable.cruiser_2)),
-    SUBMARINE(3, R.drawable.submarine,listOf(R.drawable.submarine_0,R.drawable.submarine_1,R.drawable.submarine_2)),
-    DESTROYER(2, R.drawable.destroyer,listOf(R.drawable.destroyer_0,R.drawable.destroyer_1)),
-    WATER(0, R.drawable.water,listOf()),
-    SHOT(0, R.drawable.isship,listOf()),
-    UNDISCOVERED(0, R.drawable.undiscovered,listOf()),;
+enum class CellType(val size:Int, val ress: List<Int>){
+    CARRIER(5, listOf(R.drawable.carrier_0,R.drawable.carrier_1,R.drawable.carrier_2,R.drawable.carrier_3,R.drawable.carrier_4)),
+    BATTLESHIP(4, listOf(R.drawable.battleship_0,R.drawable.battleship_1,R.drawable.battleship_2,R.drawable.battleship_3)),
+    CRUISER(3, listOf(R.drawable.cruiser_0,R.drawable.cruiser_1,R.drawable.cruiser_2)),
+    SUBMARINE(3, listOf(R.drawable.submarine_0,R.drawable.submarine_1,R.drawable.submarine_2)),
+    DESTROYER(2, listOf(R.drawable.destroyer_0,R.drawable.destroyer_1)),
+    WATER(0, listOf()),
 }
 
 

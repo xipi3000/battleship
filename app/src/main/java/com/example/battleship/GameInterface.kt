@@ -53,12 +53,15 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.draw.paint
 import androidx.compose.ui.draw.rotate
 import kotlinx.coroutines.delay
+import kotlin.properties.Delegates
+
+val timed = GameConfiguration.State["Timed"] as Boolean
 
 class LogText(var time: Int, var casellaSel: String, var isTocat: Boolean) {
     fun print(): String {
         return "Casella selecccionada: $casellaSel\n " +
                 if (isTocat) "Vaixell enemic tocat\n" else "Has tocat aigua\n" +
-                        "Temps: $time\n"
+                        if(timed)"Temps: $time\n" else ""
     }
 }
 
@@ -100,7 +103,9 @@ class GameInterface : ComponentActivity() {
                     else -> {true}
                 }
                 val firstLog: String =
-                    "Alias: " + GameConfiguration.State["Alias"] + "\n" + "Num cells: 100\n" + "Num ships: 5\n" + "Total time: " + GameConfiguration.State["MaxTime"] + "\n"
+                    "Alias: " + GameConfiguration.State["Alias"] + "\n" + "Num cells: 100\n" + "Num ships: 5\n" +
+                            if (timed){"Total time: " + GameConfiguration.State["MaxTime"] + "\n"}
+                            else{""}
 
                 logPartida = rememberSaveable(saver = logSaver) {
                     mutableStateListOf(firstLog)
@@ -163,7 +168,6 @@ class GameInterface : ComponentActivity() {
     @Composable
     fun MainView() {
         timeRemaining = remember { mutableStateOf(GameConfiguration.State["ActualTime"] as Int) }
-        val timed = GameConfiguration.State["Timed"]
         LaunchedEffect(Unit) {
             while (timeRemaining.value > 0) {
                 print(timeRemaining.value)
@@ -192,7 +196,7 @@ class GameInterface : ComponentActivity() {
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxHeight()
         ) {
-            ShowScreenContent(timed as Boolean)
+            ShowScreenContent(timed)
         }
     }
 
@@ -314,7 +318,6 @@ class GameInterface : ComponentActivity() {
                             }
                         }
                         else -> {
-                            //COMprobació 600dp
                             Row(
                                 modifier = Modifier,
                                 verticalAlignment = Alignment.CenterVertically,
@@ -446,27 +449,12 @@ class GameInterface : ComponentActivity() {
                             val res = playTurn(it)
                             logPartida.add(res.print())
 
-
-
                             isYourTurn = false
-                            //hauriem de mirar de fer que, d'alguna manera, s'actualitzés la grid
-                            //abans del bot shot
 
-
-
-                                //delay(1000) // Delay for 1 second
                             botTurn()
                             endGame()
                             isYourTurn = true
-                                // Perform some other action after the delay
-
-                            //bot's shot
-
-
-
-
-
-                        },//testing = true; final = isYourTurn
+                        },
                         isClickable = isYourTurn
                     )
                 }
@@ -528,7 +516,7 @@ class GameInterface : ComponentActivity() {
         saveData()
         super.onDestroy()
     }
-    fun saveData(){
+    private fun saveData(){
         //Update gameData
         for (i in 0 until 100) {
             player2Grid[i] = enemyHasShipsUI[i]
