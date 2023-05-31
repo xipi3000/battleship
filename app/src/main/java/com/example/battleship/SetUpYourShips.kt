@@ -284,7 +284,7 @@ class SetUpYourShips : ComponentActivity() {
             if (item.type != CellType.WATER){
                 player1Grid.add(CellStateInter(CellState.SHIPHIDDEN,item.type.ress[item.pos],item.orientation))
             }else{
-                player1Grid.add(CellStateInter(CellState.UNKNOWN))
+                player1Grid.add(CellStateInter(CellState.WATER))
             }
             player2Grid.add(CellState.UNKNOWN)
             cellsShot.add(false)

@@ -1,12 +1,13 @@
 package com.example.battleship
 
-enum class CellState(var resource: Int) {
-    UNKNOWN(-1),
-    WATER(-1),
-    SHIPFOUND(-1),
-    SHIPHIDDEN(-1),
-    OUTOFBOUNDS(-1),
-    BATTLESHIP(-1),
+enum class CellState() {
+    UNKNOWN,
+    WATER,
+    SHIPFOUND,
+    SHIPHIDDEN,
+    OUTOFBOUNDS,
+    BATTLESHIP,
+    FALLO,
 
     //shipDiscovered -> explosió
     //shipUndiscovered -> sprite gris pero diferent?
