@@ -20,6 +20,7 @@ import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -66,10 +67,10 @@ class GameConfiguration : ComponentActivity() {
         ) {
             val context = LocalContext.current
             //Values we need to check the state of
-            val alias = remember { mutableStateOf(TextFieldValue()) }
-            val temps = remember { mutableStateOf(TextFieldValue()) }
-            val checked = remember { mutableStateOf(false) }
-            val versus = remember { mutableStateOf(true) }
+            val alias = rememberSaveable{ mutableStateOf("") }
+            val temps = rememberSaveable { mutableStateOf("") }
+            val checked = rememberSaveable { mutableStateOf(false) }
+            val versus = rememberSaveable { mutableStateOf(true) }
             //Player name (needed)
             Text(text = "Alias")
             TextField(
@@ -128,25 +129,25 @@ class GameConfiguration : ComponentActivity() {
             }
             Button(onClick = {
                 //We need an alias
-                if (alias.value.text == "") {
+                if (alias.value == "") {
                     Toast.makeText(context, "Provide an alias", Toast.LENGTH_SHORT)
                         .show()
                 } //If we want time, we need a time
-                else if(checked.value && temps.value.text == ""){
+                else if(checked.value && temps.value == ""){
                     Toast.makeText(context, "Provide a time", Toast.LENGTH_SHORT)
                         .show()
                 }
                 else {
                     //Store config values and start ship setup
-                    State = State + ("Alias" to alias.value.text)
+                    State = State + ("Alias" to alias.value)
                     State = State + ("Timed" to checked.value)
                     State = State + ("MaxTime" to when(checked.value){
                         false-> Int.MAX_VALUE
-                        true -> temps.value.text.toInt()
+                        true -> temps.value.toInt()
                     })//if not specified, not used
                     State = State + ("ActualTime" to when(checked.value){
                         false-> Int.MAX_VALUE
-                        true -> temps.value.text.toInt()
+                        true -> temps.value.toInt()
                     })
                     State = State + ("VersusBot" to versus.value)
                     val intent = Intent(context, SetUpYourShips::class.java)
