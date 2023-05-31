@@ -87,7 +87,8 @@ class HelpActivity : ComponentActivity() {
                                 modifier = Modifier.padding(
                                     top = 5.dp,
                                     start = 10.dp,
-                                    end = 10.dp
+                                    end = 10.dp,
+                                    bottom= 10.dp,
                                 ),
                                 textAlign = TextAlign.Justify,
                             )
@@ -109,7 +110,8 @@ class HelpActivity : ComponentActivity() {
                                 modifier = Modifier.padding(
                                     top = 5.dp,
                                     start = 10.dp,
-                                    end = 10.dp
+                                    end = 10.dp,
+                                    bottom= 10.dp,
                                 ),
                                 textAlign = TextAlign.Justify,
                             )
@@ -131,7 +133,8 @@ class HelpActivity : ComponentActivity() {
                                 modifier = Modifier.padding(
                                     top = 5.dp,
                                     start = 10.dp,
-                                    end = 10.dp
+                                    end = 10.dp,
+                                    bottom= 10.dp,
                                 ),
                                 textAlign = TextAlign.Justify,
 
