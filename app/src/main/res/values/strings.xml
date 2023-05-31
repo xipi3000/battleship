@@ -1,3 +1,12 @@
 <resources>
-    <string name="app_name">battleship</string>
+    <string name="app_name">Battleship</string>
+    <string name="sett_game">
+        First choose your nickname. This will be displayed in the games ranking, choose wisely!!! You can also choose if you want to play with limited time or not, for a more difficult game and exciting experience.
+Sadly we are still developing the multiplayer mode, so you can only choose to play against the bot.
+</string>
+    <string name="sett_ships">
+        First, tap the ship you want to put on the board. Once it is taped, you can select any cell and it will be set in the grid. By default, it’s oriented horizontally, and it will be drawn to the right of your selected cell. You can also rotate 90 degrees to the right if you tap the rotate ship button (in which case it will be drawn downwards from your selected cell). If you want to modify an already set ship, select it in the list of ships below the grid and place it again or rotate it.
+    </string>
+    <string name="playing">
+        Select the cell you want to shoot, this will reveal if you missed the shot or hitted a target. The enemy will then immediately take his turn and shoot your grid, so be prepared, and try not to lose!</string>
 </resources>

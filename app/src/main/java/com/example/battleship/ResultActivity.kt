@@ -10,12 +10,16 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -28,8 +32,9 @@ import com.example.battleship.ddbb.GameInfoViewModelFactory
 import com.example.battleship.ui.theme.BattleshipTheme
 import kotlin.system.exitProcess
 
-class ResultActivity : ComponentActivity(){
-    private val totalTime = (GameConfiguration.State["MaxTime"] as Int)-(GameConfiguration.State["FinalTime"] as Int)
+class ResultActivity : ComponentActivity() {
+    private val totalTime =
+        (GameConfiguration.State["MaxTime"] as Int) - (GameConfiguration.State["FinalTime"] as Int)
     private val gameViewModel: GameInfoViewModel by viewModels {
         GameInfoViewModelFactory((application as GameInfoApplication).repository)
     }
@@ -54,17 +59,21 @@ class ResultActivity : ComponentActivity(){
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .fillMaxHeight(),
+                .fillMaxHeight()
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
 
             val context = LocalContext.current
-            val correu = remember { mutableStateOf(TextFieldValue()) }
+            val correu = rememberSaveable { mutableStateOf("") }
             val activity = ResultActivity()
-            val logMessage = "Player: "+GameConfiguration.State["Alias"]+"."+System.getProperty("line.separator")+
-                    "La partida ha durat: "+totalTime.toString()+ " segons."+System.getProperty("line.separator")+
-                    parseGame()
+            val logMessage =
+                "Player: " + GameConfiguration.State["Alias"] + "." + System.getProperty("line.separator") +
+                        "La partida ha durat: " + totalTime.toString() + " segons." + System.getProperty(
+                    "line.separator"
+                ) +
+                        parseGame()
             Text(text = "Dia y Hora")
             TextField(
                 value = GameConfiguration.State["StartTime"].toString(),
@@ -80,36 +89,50 @@ class ResultActivity : ComponentActivity(){
             Text(text = "E-mail")
             TextField(
                 value = correu.value,
-                onValueChange = {correu.value = it},
+                onValueChange = { correu.value = it },
             )
             Button(onClick = {
-                if(correu.value.text == "")Toast.makeText(this@ResultActivity, "Introdueixi un correu", Toast.LENGTH_SHORT).show()
-                else{
+                if (correu.value == "") Toast.makeText(
+                    this@ResultActivity,
+                    "Introdueixi un correu",
+                    Toast.LENGTH_SHORT
+                ).show()
+                else {
                     val intent = Intent(Intent.ACTION_SEND).apply {
                         type = "message/rfc822"
-                        putExtra(Intent.EXTRA_EMAIL, arrayOf(correu.value.text))
-                        putExtra(Intent.EXTRA_SUBJECT, GameConfiguration.State["StartTime"].toString())
+                        putExtra(Intent.EXTRA_EMAIL, arrayOf(correu.value))
+                        putExtra(
+                            Intent.EXTRA_SUBJECT,
+                            GameConfiguration.State["StartTime"].toString()
+                        )
                         putExtra(Intent.EXTRA_TEXT, logMessage)
                     }
-                    context.startActivity(Intent.createChooser(intent,"Choose an Email client : "))
+                    context.startActivity(Intent.createChooser(intent, "Choose an Email client : "))
                 }
             }) {
-                Text(text = "Enviar resultados") }
+                Text(text = "Enviar resultados")
+            }
             Button(onClick = {
-                val intent = Intent(context,GameConfiguration::class.java)
+                val intent = Intent(context, GameConfiguration::class.java)
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                 context.startActivity(intent)
             }) {
                 Text(text = "Nueva partida")
             }
             Button(onClick = {
-                val intent = Intent(context,MainActivity::class.java)
+                val intent = Intent(context, MainActivity::class.java)
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                 context.startActivity(intent)
             }) {
                 Text(text = "Menú principal")
             }
-            Button(onClick = { moveTaskToBack(true);activity.finish(); exitProcess(1) }) {
+            Button(onClick = {
+                finishAffinity()
+                //moveTaskToBack(true)
+                //activity.finish()
+                //exitProcess(1)
+
+            }) {
                 Text(text = "Salir")
             }
         }
@@ -129,7 +152,7 @@ class ResultActivity : ComponentActivity(){
         }
     }
 
-    private fun parseGame() : String{
+    fun parseGame() : String{
         //variables needed
         val player2grid = SetUpYourShips.Grids["player2Grid"] as ArrayList<CellState>
         val alias = GameConfiguration.State["Alias"].toString()
