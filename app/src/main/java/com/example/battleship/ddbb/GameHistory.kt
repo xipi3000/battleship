@@ -228,6 +228,7 @@ class GameHistory  : ComponentActivity(){
             ){
                 Row{
                     Text(text = game.alias)
+                    Text(text = " - ")
                     Text(text = game.time)
                 }
                 Text(text = game.result)
