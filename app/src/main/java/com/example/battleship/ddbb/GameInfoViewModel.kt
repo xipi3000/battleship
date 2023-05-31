@@ -6,7 +6,6 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 
-/*Tal qual del tutorial*/
 class GameInfoViewModel (private val repository: GameInfoRepository) : ViewModel() {
     var allGames = repository.allGames.asLiveData()
 

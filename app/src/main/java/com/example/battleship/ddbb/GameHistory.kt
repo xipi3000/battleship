@@ -18,8 +18,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
@@ -88,10 +86,10 @@ class GameHistory  : ComponentActivity(){
 
                 when (screenWidth.dp < 600.dp) {
                     true -> {
+                        //mòvil en portrait
                         MainView(gamesState)
                     }
                     false -> {
-                        //movil en landscape || tablet
                         when (configuration.orientation) {
                             Configuration.ORIENTATION_PORTRAIT -> {
                                 //tablet en portrait
@@ -99,15 +97,14 @@ class GameHistory  : ComponentActivity(){
                                 Log.i("Layout", "I'm a tablet in portrait mode")
                             }
                             else -> {
-                                //landscape els dos
                                 when (configuration.screenHeightDp.dp < 600.dp){
                                     true -> {
-                                        //movil landscape
+                                        //mòvil en landscape
                                         MainView(gamesState)
                                         Log.i("Layout", "I'm a phone in landscape mode")
                                     }
                                     false -> {
-                                        //tablet landscape
+                                        //tablet en landscape
                                         TabletView(gamesState)
                                         Log.i("Layout", "I'm a tablet in landscape mode")
                                     }
@@ -117,7 +114,6 @@ class GameHistory  : ComponentActivity(){
                         }
                     }
                 }
-
             }
         }
     }
@@ -126,7 +122,6 @@ class GameHistory  : ComponentActivity(){
     @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
     fun TabletView(gamesState: List<GameInfo>) {
         clickedGame = remember { mutableStateOf(gamesState[0])}
-        val state = rememberLazyListState()
         Scaffold(
             floatingActionButton = {
                 FloatingActionButton(onClick = {this.finish()}){
@@ -144,13 +139,13 @@ class GameHistory  : ComponentActivity(){
                 Configuration.ORIENTATION_PORTRAIT->{
                     Column(horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.fillMaxWidth()){
-                        TabletInfo(gamesState, state)
+                        TabletInfo(gamesState)
                     }
                 }
                 else->{
                     Row(modifier = Modifier.fillMaxHeight(),
                         verticalAlignment = Alignment.Top){
-                        TabletInfo(gamesState, state)
+                        TabletInfo(gamesState)
                     }
                 }
             }
@@ -158,7 +153,7 @@ class GameHistory  : ComponentActivity(){
     }
 
     @Composable
-    private fun TabletInfo(gamesState:List<GameInfo>, state:LazyListState) {
+    private fun TabletInfo(gamesState:List<GameInfo>) {
         LazyColumn (modifier = when (LocalConfiguration.current.orientation) {
             Configuration.ORIENTATION_LANDSCAPE -> {
                 Modifier.fillMaxWidth(0.75f).fillMaxHeight()
@@ -236,7 +231,6 @@ class GameHistory  : ComponentActivity(){
         }
     }
 
-
     @Composable
     private fun GameLogComponent(game:MutableState<GameInfo>) {
         Column(
@@ -247,7 +241,7 @@ class GameHistory  : ComponentActivity(){
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Game info: ",
+                text = "Game detail: ",
                 Modifier
                     .background(Color.Gray)
                     .fillMaxWidth()
@@ -260,22 +254,21 @@ class GameHistory  : ComponentActivity(){
                 horizontalAlignment = Alignment.CenterHorizontally,
             )
             {
-                Text(text = "Name: ${game.value.alias}",
-                    fontSize = (LocalConfiguration.current.screenHeightDp/50).sp)
-                Text(text = "Result: ${game.value.result}",
-                    fontSize = (LocalConfiguration.current.screenHeightDp/50).sp)
-                Text(text = "Shots: ${game.value.shots}",
-                    fontSize = (LocalConfiguration.current.screenHeightDp/50).sp)
-                Text(text = "Hit: ${game.value.hit}",
-                    fontSize = (LocalConfiguration.current.screenHeightDp/50).sp)
-                Text(text = "Miss: ${game.value.miss}",
-                    fontSize = (LocalConfiguration.current.screenHeightDp/50).sp)
-                Text(text = "Accuracy: ${game.value.accuracy}",
-                    fontSize = (LocalConfiguration.current.screenHeightDp/50).sp)
-                Text(text = "Time: ${game.value.time}",
-                    fontSize = (LocalConfiguration.current.screenHeightDp/50).sp)
+                InfoPiece("Name: ${game.value.alias}")
+                InfoPiece("Result: ${game.value.result}")
+                InfoPiece("Shots: ${game.value.shots}")
+                InfoPiece("Hit: ${game.value.hit}")
+                InfoPiece("Miss: ${game.value.miss}")
+                InfoPiece("Accuracy: ${game.value.accuracy}")
+                InfoPiece("Name: ${game.value.alias}")
+                InfoPiece("Time: ${game.value.time}")
             }
         }
+    }
+
+    @Composable
+    fun InfoPiece(text:String){
+        Text(text = text, fontSize = (LocalConfiguration.current.screenHeightDp/50).sp)
     }
 
     override fun onDestroy() {
