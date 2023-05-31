@@ -34,7 +34,6 @@ import androidx.compose.ui.unit.sp
 import com.example.battleship.ui.theme.BattleshipTheme
 import android.content.res.Configuration
 import android.util.Log
-import android.util.MutableBoolean
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -54,7 +53,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.draw.paint
 import androidx.compose.ui.draw.rotate
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 class LogText(var time: Int, var casellaSel: String, var isTocat: Boolean) {
     fun print(): String {
@@ -235,17 +233,17 @@ class GameInterface : ComponentActivity() {
                 }
             }
             val configuration = LocalConfiguration.current
-            var screenWidth = configuration.screenWidthDp
+            val screenWidth = configuration.screenWidthDp
             when (screenWidth.dp < 600.dp) {
                 true -> {
-                    Column {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Box(
                             modifier = Modifier
                                 .padding(10.dp)
                                 .aspectRatio(1f),
                         ) { BigGridComponent() }
                         Box(
-                            modifier = Modifier.padding(40.dp)
+                            modifier = Modifier.padding(10.dp)
                         ) {
                             Column {
                                 Text(text = "Your table")
@@ -347,8 +345,6 @@ class GameInterface : ComponentActivity() {
                                             Alignment.Center
                                         )
                                 ) {
-                                    val maxHeight = maxHeight
-                                    val maxWidth = maxWidth
                                     Row(
                                         modifier = Modifier.fillMaxSize(),
                                         verticalAlignment = Alignment.CenterVertically,
@@ -358,8 +354,9 @@ class GameInterface : ComponentActivity() {
                                             Text(text = "Your table")
                                             SmallGridComponent(
                                                 modifier = Modifier
-                                                    .heightIn(0.dp, maxHeight)
-                                                    .widthIn(0.dp, maxWidth - 250.dp)
+                                                    //.heightIn(0.dp, maxHeight)
+                                                    //.widthIn(0.dp, maxWidth - 200.dp)
+                                                    .fillMaxWidth(0.5f)
                                                     .aspectRatio(1f)
                                                     .fillMaxSize(),
                                             )
@@ -433,10 +430,6 @@ class GameInterface : ComponentActivity() {
         LaunchedEffect(logPartida.size) {
             if (logPartida.size != 0) logListState.animateScrollToItem(logPartida.size - 1)
         }
-        val coroutineScope = rememberCoroutineScope()
-
-        // Perform some action with a delay
-
 
         LazyVerticalGrid(
             // modifier = Modifier.size(if (screenWidth > screenHeight) (screenHeight * 0.8).dp else screenWidth.dp),

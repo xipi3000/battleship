@@ -7,11 +7,17 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
@@ -68,6 +74,7 @@ class GameHistory  : ComponentActivity(){
             if (gamesState.isEmpty()){
                 Text(text = "Vaja, sembla que encara no has fet cap partida")
             }else{
+
                 MainView(gamesState)
             }
         }
@@ -90,7 +97,6 @@ class GameHistory  : ComponentActivity(){
     }
     @Composable
     fun Sumary(game: GameInfo){
-        //Versió turbo goofy dels resums dels logs, faltarà fer clickable i que t'obri el log sencer
         Card(
             modifier = Modifier
                 .padding(horizontal = 8.dp, vertical = 8.dp)
@@ -118,6 +124,40 @@ class GameHistory  : ComponentActivity(){
             ){
                 Text(text = game.alias)
                 Text(text = "${game.accuracy}%")
+            }
+        }
+    }
+
+    //modificar per aquest cas d'ús
+    private var logPartida = mutableListOf<String>()
+    private lateinit var logListState: LazyListState
+    @Composable
+    private fun GameLogComponent() {
+        Column(
+            modifier = Modifier
+                .padding(10.dp)
+                .width(250.dp)
+                .wrapContentHeight()
+        ) {
+            Text(
+                text = "Log:",
+                Modifier
+                    .background(Color.Gray)
+                    .fillMaxWidth()
+            )
+            LazyColumn(
+                modifier = Modifier
+                    .background(Color.LightGray)
+                    .height(150.dp)
+                    .width(250.dp),
+                state = logListState
+            )
+            {
+                itemsIndexed(logPartida) { _, log ->
+                    Text(
+                        text = log,
+                    )
+                }
             }
         }
     }
