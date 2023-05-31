@@ -50,6 +50,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.draw.paint
+import androidx.compose.ui.draw.rotate
 import kotlinx.coroutines.delay
 
 class LogText(var time: Int, var casellaSel: String, var isTocat: Boolean) {
@@ -63,13 +65,13 @@ class LogText(var time: Int, var casellaSel: String, var isTocat: Boolean) {
 @Suppress("UNCHECKED_CAST")
 class GameInterface : ComponentActivity() {
     private lateinit var enemyHasShipsUI: SnapshotStateList<CellState>
-    private lateinit var playerHasShipsUI: SnapshotStateList<CellState>
+    private lateinit var playerHasShipsUI: SnapshotStateList<CellStateInter>
     private lateinit var cellsShot: SnapshotStateList<Boolean>
     private var player1ships =
         GameConfiguration.State["Player1Ships"] as ArrayList<Int> //Player's ship setup
     private var player2ships =
         GameConfiguration.State["Player2Ships"] as ArrayList<Int> //Bot/2nd Player's ship setup
-    private var player1Grid = SetUpYourShips.Grids["player1Grid"] as ArrayList<CellState>
+    private var player1Grid = SetUpYourShips.Grids["player1Grid"] as ArrayList<CellStateInter>
     private var player2Grid = SetUpYourShips.Grids["player2Grid"] as ArrayList<CellState>
     private var cellsShotSave = SetUpYourShips.Grids["cellsShot"] as ArrayList<Boolean>
     private var isInPortraitOrientation: Boolean = true
@@ -113,7 +115,7 @@ class GameInterface : ComponentActivity() {
     @Composable
     fun TableCell(
         text: String,
-        hasShip: CellState,
+        hasShip: CellStateInter,
         onCellClicked: () -> Unit,
         isClickable: Boolean = true,
     ) {
@@ -131,12 +133,13 @@ class GameInterface : ComponentActivity() {
 
         Image(
             painter = painterResource(
-                id = when (hasShip) {
+                id = when (hasShip.cellState) {
                     CellState.WATER -> R.drawable.water
                     CellState.UNKNOWN -> R.drawable.undiscovered
                     CellState.SHIPFOUND -> R.drawable.explosion
-                    CellState.SHIPHIDDEN -> R.drawable.isship
+                    CellState.SHIPHIDDEN -> hasShip.resource
                     CellState.OUTOFBOUNDS -> R.drawable.water //no s'utilitza pero es necessita per el when
+                    CellState.BATTLESHIP ->  R.drawable.water
                 }
             ),
             contentDescription = text,
@@ -144,6 +147,9 @@ class GameInterface : ComponentActivity() {
             modifier = Modifier
                 .padding(1.dp)
                 .aspectRatio(1f)
+                .rotate(hasShip.orientation.degrees)
+                .background(Color.Gray)
+                //.paint(painterResource(id = R.drawable.water), contentScale = ContentScale.FillWidth)
                 //.fillMaxWidth()
                 .clickable(enabled = isClickable) { onClick() }
         )
@@ -190,8 +196,11 @@ class GameInterface : ComponentActivity() {
     private fun ShowScreenContent(timed: Boolean) {
         return Column(verticalArrangement = Arrangement.SpaceEvenly)
         {
+            val modifier : Modifier
+            if(timed) modifier =Modifier.height(90.dp)
+            else modifier =Modifier.height(60.dp)
             Box(
-                modifier = Modifier
+                modifier = modifier
                     .fillMaxWidth()
                     .background(if (timeRemaining.value > 0) Color.Gray else Color.Red)
                     .height(60.dp),
@@ -429,7 +438,7 @@ class GameInterface : ComponentActivity() {
                 items(100) {
                     TableCell(
                         text = it.toString(),
-                        hasShip = enemyHasShipsUI[it],
+                        hasShip = CellStateInter(enemyHasShipsUI[it]),
                         onCellClicked = {
                             //player's shot
                             val res = playTurn(it)
@@ -470,10 +479,10 @@ class GameInterface : ComponentActivity() {
         enemy.checkCell(cell, infoCell)
 
         if (infoCell == CellState.SHIPFOUND) {
-            playerHasShipsUI[parsedCell] = CellState.SHIPFOUND
+            playerHasShipsUI[parsedCell] = CellStateInter(CellState.SHIPFOUND)
             player1ships.remove(parsedCell)
         } else {
-            playerHasShipsUI[parsedCell] = CellState.WATER
+            playerHasShipsUI[parsedCell] = CellStateInter(CellState.WATER)
         }
 
     }
