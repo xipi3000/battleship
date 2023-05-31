@@ -2,6 +2,7 @@ package com.example.battleship.ddbb
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -35,6 +36,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Observer
 import com.example.battleship.ui.theme.BattleshipTheme
@@ -68,14 +70,49 @@ class GameHistory  : ComponentActivity(){
             games.observe(this@GameHistory, observer)
         }
         if (isLoading.value) {
-            // Show a loading indicator
+            // Retrieving database
             Text(text = "Loading...")
         } else {
+            // Got database, but could be empty
             if (gamesState.isEmpty()){
                 Text(text = "Vaja, sembla que encara no has fet cap partida")
             }else{
+                // Main screen creation
+                val configuration = LocalConfiguration.current
+                val screenWidth = configuration.screenWidthDp
 
-                MainView(gamesState)
+                when (screenWidth.dp < 600.dp) {
+                    true -> {
+                        MainView(gamesState)
+                    }
+                    false -> {
+                        //movil en landscape || tablet
+                        when (configuration.orientation) {
+                            Configuration.ORIENTATION_PORTRAIT -> {
+                                //tablet en portrait
+                                MainView(gamesState)
+                                Log.i("Layout", "I'm a tablet in portrait mode")
+                            }
+                            else -> {
+                                //landscape els dos
+                                when (configuration.screenHeightDp.dp < 600.dp){
+                                    true -> {
+                                        //movil landscape
+                                        MainView(gamesState)
+                                        Log.i("Layout", "I'm a phone in landscape mode")
+                                    }
+                                    false -> {
+                                        //tablet landscape
+                                        MainView(gamesState)
+                                        Log.i("Layout", "I'm a tablet in landscape mode")
+                                    }
+                                }
+
+                            }
+                        }
+                    }
+                }
+
             }
         }
     }
@@ -88,7 +125,13 @@ class GameHistory  : ComponentActivity(){
                     Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Go Back")
                 }
             }) {
-            LazyColumn {
+            LazyColumn (modifier = when (LocalConfiguration.current.orientation) {
+                Configuration.ORIENTATION_LANDSCAPE -> {
+                        Modifier.width(LocalConfiguration.current.screenWidthDp.dp/1.5f)
+                }
+                else ->{Modifier.width(LocalConfiguration.current.screenWidthDp.dp/1.2f)}
+            })
+            {
                 items(gamesState.size) {game ->
                     Sumary(gamesState[game])
                 }
@@ -123,7 +166,7 @@ class GameHistory  : ComponentActivity(){
                 horizontalAlignment = Alignment.CenterHorizontally
             ){
                 Text(text = game.alias)
-                Text(text = "${game.accuracy}%")
+                Text(text = game.result)
             }
         }
     }

@@ -23,7 +23,6 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.battleship.ddbb.GameInfo
 import com.example.battleship.ddbb.GameInfoApplication
-import com.example.battleship.ddbb.GameInfoListAdapter
 import com.example.battleship.ddbb.GameInfoViewModel
 import com.example.battleship.ddbb.GameInfoViewModelFactory
 import com.example.battleship.ui.theme.BattleshipTheme
@@ -37,12 +36,7 @@ class ResultActivity : ComponentActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         GameConfiguration.State = GameConfiguration.State + ("Enemy" to Enemy())
-
-        val adapter = GameInfoListAdapter()
-        gameViewModel.allGames.observe(this) { games ->
-            // Update the cached copy of the words in the adapter.
-            games.let { adapter.submitList(it) }
-        }
+        gameViewModel.allGames.observe(this) {}
 
         setContent {
             BattleshipTheme {
@@ -124,15 +118,15 @@ class ResultActivity : ComponentActivity(){
         val player2ships = GameConfiguration.State["Player2Ships"] as ArrayList<Int>
 
         return if (player2ships.isEmpty()){
-            "Enhorabona! Has guanyat la partida :D"
+            "Enhorabona! Has guanyat la partida :D//Won"
         }else if(player1ships.isEmpty()){
-            "Una llàstima, sembla que has perdut :("
+            "Una llàstima, sembla que has perdut :(//Lost"
         }else{
-            "Ep! Sembla que necessitaves més temps..."
+            "Ep! Sembla que necessitaves més temps...//Draw"
         }
     }
 
-    fun parseGame() : String{
+    private fun parseGame() : String{
         //variables needed
         val player2grid = SetUpYourShips.Grids["player2Grid"] as ArrayList<CellState>
         val alias = GameConfiguration.State["Alias"].toString()
@@ -149,13 +143,15 @@ class ResultActivity : ComponentActivity(){
         if (fired !=0)accuracy = (((hit.toFloat()/fired.toFloat())*100))
         val message = parseGameResult()
 
+        val parsedMessage = message.split("//")
+
         //insert into database
-        val game= GameInfo(0, alias, message, fired, hit, miss, accuracy,
+        val game= GameInfo(0, alias, parsedMessage[1], fired, hit, miss, accuracy,
             time = GameConfiguration.State["StartTime"].toString(),
             timeSpent = totalTime)
         gameViewModel.insert(game)
 
         //previous functionality
-        return message
+        return parsedMessage[0]
     }
 }
