@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.sp
 import com.example.battleship.ui.theme.BattleshipTheme
 import android.content.res.Configuration
 import android.util.Log
+import android.util.MutableBoolean
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -53,6 +54,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.draw.paint
 import androidx.compose.ui.draw.rotate
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class LogText(var time: Int, var casellaSel: String, var isTocat: Boolean) {
     fun print(): String {
@@ -76,12 +78,12 @@ class GameInterface : ComponentActivity() {
     private var cellsShotSave = SetUpYourShips.Grids["cellsShot"] as ArrayList<Boolean>
     private var isInPortraitOrientation: Boolean = true
     private lateinit var enemy: Enemy
-    private var isYourTurn: Boolean = true
+    private var isYourTurn : Boolean = true
     private lateinit var timeRemaining: MutableState<Int>
     private var logPartida = mutableListOf<String>()
     private lateinit var logListState: LazyListState
 
-    val logSaver = Saver<SnapshotStateList<String>,List<String>>(
+    val logSaver = Saver<SnapshotStateList<String>, List<String>>(
         save = {
             it.toList()
         },
@@ -95,14 +97,19 @@ class GameInterface : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             BattleshipTheme {
+
                 isInPortraitOrientation = when (LocalConfiguration.current.orientation) {
-                    Configuration.ORIENTATION_LANDSCAPE -> {false}
-                    else -> {true}
+                    Configuration.ORIENTATION_LANDSCAPE -> {
+                        false
+                    }
+                    else -> {
+                        true
+                    }
                 }
                 val firstLog: String =
                     "Alias: " + GameConfiguration.State["Alias"] + "\n" + "Num cells: 100\n" + "Num ships: 5\n" + "Total time: " + GameConfiguration.State["MaxTime"] + "\n"
 
-                logPartida = rememberSaveable(saver= logSaver) {
+                logPartida = rememberSaveable(saver = logSaver) {
                     mutableStateListOf(firstLog)
                 }
 
@@ -139,7 +146,8 @@ class GameInterface : ComponentActivity() {
                     CellState.SHIPFOUND -> R.drawable.explosion
                     CellState.SHIPHIDDEN -> hasShip.resource
                     CellState.OUTOFBOUNDS -> R.drawable.water //no s'utilitza pero es necessita per el when
-                    CellState.BATTLESHIP ->  R.drawable.water
+                    CellState.BATTLESHIP -> R.drawable.water
+                    CellState.FALLO -> R.drawable.flotador
                 }
             ),
             contentDescription = text,
@@ -148,8 +156,11 @@ class GameInterface : ComponentActivity() {
                 .padding(1.dp)
                 .aspectRatio(1f)
                 .rotate(hasShip.orientation.degrees)
-                .background(Color.Gray)
-                //.paint(painterResource(id = R.drawable.water), contentScale = ContentScale.FillWidth)
+                //.background(Color.Gray)
+                .paint(
+                    painterResource(id = R.drawable.water),
+                    contentScale = ContentScale.FillWidth
+                )
                 //.fillMaxWidth()
                 .clickable(enabled = isClickable) { onClick() }
         )
@@ -158,6 +169,7 @@ class GameInterface : ComponentActivity() {
     @Preview(showBackground = true)
     @Composable
     fun MainView() {
+
         timeRemaining = remember { mutableStateOf(GameConfiguration.State["ActualTime"] as Int) }
         val timed = GameConfiguration.State["Timed"]
         LaunchedEffect(Unit) {
@@ -196,9 +208,9 @@ class GameInterface : ComponentActivity() {
     private fun ShowScreenContent(timed: Boolean) {
         return Column(verticalArrangement = Arrangement.SpaceEvenly)
         {
-            val modifier : Modifier
-            if(timed) modifier =Modifier.height(90.dp)
-            else modifier =Modifier.height(60.dp)
+            val modifier: Modifier
+            if (timed) modifier = Modifier.height(90.dp)
+            else modifier = Modifier.height(60.dp)
             Box(
                 modifier = modifier
                     .fillMaxWidth()
@@ -230,6 +242,7 @@ class GameInterface : ComponentActivity() {
             }
             val configuration = LocalConfiguration.current
             var screenWidth = configuration.screenWidthDp
+
             when (screenWidth.dp < 600.dp) {
                 true -> {
                     Column {
@@ -309,7 +322,9 @@ class GameInterface : ComponentActivity() {
                                 }
                             }
                         }
+
                         else -> {
+                            //COMprobació 600dp
                             Row(
                                 modifier = Modifier,
                                 verticalAlignment = Alignment.CenterVertically,
@@ -425,10 +440,13 @@ class GameInterface : ComponentActivity() {
     ) {
         LaunchedEffect(logPartida.size) {
             if (logPartida.size != 0) logListState.animateScrollToItem(logPartida.size - 1)
+
         }
-        val configuration = LocalConfiguration.current
-        val screenWidth = configuration.screenWidthDp
-        val screenHeight = configuration.screenHeightDp
+        val coroutineScope = rememberCoroutineScope()
+
+        // Perform some action with a delay
+
+
         LazyVerticalGrid(
             // modifier = Modifier.size(if (screenWidth > screenHeight) (screenHeight * 0.8).dp else screenWidth.dp),
             modifier = modifier,
@@ -446,20 +464,26 @@ class GameInterface : ComponentActivity() {
 
 
 
-                            isYourTurn = !isYourTurn
+                            isYourTurn = false
                             //hauriem de mirar de fer que, d'alguna manera, s'actualitzés la grid
                             //abans del bot shot
 
 
-                            //bot's shot
+
+                                //delay(1000) // Delay for 1 second
                             botTurn()
-                            isYourTurn = !isYourTurn
-
-
                             endGame()
+                            isYourTurn = true
+                                // Perform some other action after the delay
+
+                            //bot's shot
+
+
+
+
 
                         },//testing = true; final = isYourTurn
-                        isClickable = true
+                        isClickable = isYourTurn
                     )
                 }
             }
@@ -482,7 +506,7 @@ class GameInterface : ComponentActivity() {
             playerHasShipsUI[parsedCell] = CellStateInter(CellState.SHIPFOUND)
             player1ships.remove(parsedCell)
         } else {
-            playerHasShipsUI[parsedCell] = CellStateInter(CellState.WATER)
+            playerHasShipsUI[parsedCell] = CellStateInter(CellState.FALLO)
         }
 
     }
@@ -520,7 +544,8 @@ class GameInterface : ComponentActivity() {
         saveData()
         super.onDestroy()
     }
-    fun saveData(){
+
+    fun saveData() {
         //Update gameData
         for (i in 0 until 100) {
             player2Grid[i] = enemyHasShipsUI[i]
